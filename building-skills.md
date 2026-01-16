@@ -1449,15 +1449,14 @@ fi
 echo "All tests passed!"
 ```
 
-Then document in SKILL.md:
+Then document in SKILL.md (example content):
+
 ```markdown
 ## Validate this skill
 
 Run the validation script to verify the skill works in your environment:
 
-```bash
-bash validate-team-skill.sh
-```
+`bash validate-team-skill.sh`
 
 Should output all tests passed before using in production.
 ```

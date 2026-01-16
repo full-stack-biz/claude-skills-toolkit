@@ -50,7 +50,9 @@ For detailed configuration, see `references/complete-guide.md`
 
 ### Production/Team Skills Template
 
-For Skills used by teams or in production, add optional fields:
+For Skills used by teams or in production, add optional fields.
+
+**Frontmatter:**
 
 ```yaml
 ---
@@ -61,7 +63,11 @@ description: >-
 version: 1.0.0
 allowed-tools: Read,Write,Bash(python:*)
 ---
+```
 
+**Body:**
+
+```markdown
 # Skill Name
 
 ## Overview
