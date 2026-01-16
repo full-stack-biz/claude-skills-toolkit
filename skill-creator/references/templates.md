@@ -15,7 +15,7 @@ Use this template as your starting point. Customize the sections based on your s
 
 ### Basic Template (Minimal)
 
-```yaml
+````markdown
 ---
 name: skill-name
 description: >-
@@ -46,7 +46,7 @@ command example here
 
 ## Full Reference
 For detailed configuration, see `references/complete-guide.md`
-```
+````
 
 ### Production/Team Skills Template
 

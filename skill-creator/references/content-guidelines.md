@@ -162,7 +162,7 @@ imperative mood...
 ```
 
 **GOOD (~50 tokens):**
-```markdown
+````markdown
 ## Commit message format
 
 **Example 1:**
@@ -182,7 +182,7 @@ fix(reports): correct date formatting in timezone conversion
 ```
 
 Follow this style: type(scope): brief description, then details.
-```
+````
 
 **Key principles:**
 - Concrete examples compress better than abstract rules
