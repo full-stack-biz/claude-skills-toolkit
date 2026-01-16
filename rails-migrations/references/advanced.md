@@ -1,5 +1,17 @@
 # Advanced Migration Patterns
 
+## Table of Contents
+- [Bulk Changes with `change_table`](#bulk-changes-with-change_table)
+- [Granular Column Modification](#granular-column-modification)
+- [Optimized Join Tables](#optimized-join-tables)
+- [Database Constraints](#database-constraints)
+- [Raw SQL Execution](#raw-sql-execution)
+- [Reversible Blocks](#reversible-blocks)
+- [Foreign Key Constraints](#foreign-key-constraints)
+- [Transactional Migrations](#transactional-migrations)
+- [Reversible Operations](#reversible-operations)
+- [Feedback and Messages](#feedback-and-messages)
+
 ## Bulk Changes with `change_table`
 Perform multiple operations on a single table efficiently.
 

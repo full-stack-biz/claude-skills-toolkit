@@ -1,11 +1,13 @@
 ---
 name: rails-migrations
 description: >-
-  Manage Ruby on Rails Active Record migrations. Use when generating migrations,
-  running db:migrate, rolling back changes, or modifying database schema.
-  Triggers on: "add column", "create table", "db:migrate", "rails g migration",
-  "change column", "add reference".
-version: 1.1.0
+  Manage Ruby on Rails Active Record migrations. Use when generating, running,
+  rolling back, or debugging migrations; modifying database schema; adding/removing
+  columns or tables; or testing migrations in team/production environments.
+  Triggers on: "create table", "add column", "remove column", "db:migrate",
+  "migration generator", "rollback", "undo migration", "data migration", "add reference",
+  "zero-downtime", "migration failed".
+version: 1.2.0
 allowed-tools: Read,Write,Bash(rails:*,bundle:*)
 ---
 
@@ -95,6 +97,27 @@ For complex edits (SQL, bulk changes, constraints), see `references/advanced.md`
   RAILS_ENV=test bin/rails db:migrate
   ```
 
+## Common Production Patterns
+
+### Rollback Safety
+```bash
+# Check status before rolling back
+bin/rails db:migrate:status
+
+# Rollback to specific version (safer than STEP)
+bin/rails db:migrate VERSION=20240101000000
+
+# Redo last migration (dev only)
+bin/rails db:migrate:redo
+```
+
+### Zero-Downtime Migrations (Large Tables)
+For operations on large tables that might lock in production:
+1. Add new column with `null: true`
+2. Backfill data in batches (via separate task, not migration)
+3. Add `null: false` constraint in separate migration
+4. For indexes: use `algorithm: :concurrently` (PostgreSQL) + `disable_ddl_transaction!`
+
 ## Key Notes
 
 - **Database Independence:** These commands work for PostgreSQL, MySQL, SQLite, etc.
@@ -102,6 +125,7 @@ For complex edits (SQL, bulk changes, constraints), see `references/advanced.md`
 - **Reversibility:** Always check if your change is reversible. If not, write explicit `up`/`down`.
 - **Existing Data:** Adding `NOT NULL` to an existing column with nulls will fail. Add column -> Fill data -> Add constraint.
 - **Performance:** Use `disable_ddl_transaction!` for concurrent index creation (PostgreSQL).
+- **Shared Repos:** Never edit committed migrations. Create new ones to fix issues.
 
 ## References
 - **Generators:** Syntax for columns, modifiers, and shortcuts -> [references/generators.md](references/generators.md)
@@ -110,3 +134,4 @@ For complex edits (SQL, bulk changes, constraints), see `references/advanced.md`
 - **Advanced:** Raw SQL, constraints, bulk changes -> [references/advanced.md](references/advanced.md)
 - **Schema:** Schema management (`schema.rb` vs `structure.sql`) -> [references/schema-management.md](references/schema-management.md)
 - **Best Practices:** Reversibility, `up`/`down`, and workflow -> [references/best-practices.md](references/best-practices.md)
+- **Troubleshooting:** Debugging failed migrations, testing, production patterns -> [references/troubleshooting.md](references/troubleshooting.md)
