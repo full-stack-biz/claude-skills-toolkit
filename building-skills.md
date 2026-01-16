@@ -113,7 +113,7 @@ Context window = public good. Every token competes with conversation history, ot
 
 **Default assumption: Claude is already intelligent.** Only add what Claude doesn't know.
 
-```markdown
+````markdown
 # BAD (~150 tokens) - explains obvious things
 PDF (Portable Document Format) files are a common file format that contains
 text, images, and other content. To extract text from a PDF, you'll need to
@@ -127,8 +127,7 @@ import pdfplumber
 with pdfplumber.open("file.pdf") as pdf:
     text = pdf.pages[0].extract_text()
 ```
-```
-```
+````
 
 **Challenge each line:** "Does Claude need this? Does this justify its token cost?"
 
@@ -151,7 +150,7 @@ Use these benchmarks to optimize your Skills:
 5. **Defer detail** — Put edge cases and advanced options in references/, not SKILL.md
 
 **Real example:** PDF skill Quick Start
-```markdown
+````markdown
 # GOOD (~80 tokens) - actionable, code-first
 Extract text from PDF using pdfplumber:
 ```python
@@ -161,6 +160,7 @@ with pdfplumber.open("file.pdf") as pdf:
 ```
 
 For form filling and advanced operations, see references/FORMS.md
+````
 ```
 
 ### 4.2 Progressive Disclosure
@@ -415,7 +415,7 @@ references/
 ```
 
 **Design pattern for multi-domain:**
-```markdown
+````markdown
 # In SKILL.md
 ## Available datasets
 - **Finance**: Revenue, ARR → See [references/finance.md](references/finance.md)
@@ -425,7 +425,7 @@ references/
 ```bash
 grep -i "revenue" references/finance.md
 ```
-```
+````
 
 **Large files (>10k words):** Include grep patterns in SKILL.md for targeted access.
 
@@ -499,7 +499,7 @@ Run: `python scripts/analyze_form.py input.pdf`
 
 ### Template Pattern
 
-```markdown
+````markdown
 ## Report structure
 
 ALWAYS use this template:
@@ -517,7 +517,7 @@ ALWAYS use this template:
 ## Recommendations
 1. Actionable recommendation
 ```
-```
+````
 
 ### Don't/Do Format Pattern (Simple Rules)
 
@@ -956,14 +956,14 @@ Learnings from real-world skill collections (Dicklesworthstone's Agent Flywheel 
 
 Encode reproducible prompts in all-caps sections for agent-to-agent handoff:
 
-```markdown
+````markdown
 ## THE EXACT PROMPT — Plan Review
 
 ```
 Carefully review this entire plan for me and come up with your best
 revisions in terms of better architecture, new features...
 ```
-```
+````
 
 **Why it works:**
 - Prompts are copy-paste ready
@@ -1020,7 +1020,7 @@ For safety/security skills, use explicit tier classifications:
 
 For orchestration tools, document JSON/NDJSON APIs:
 
-```markdown
+````markdown
 ## Robot Mode (AI Automation)
 
 ```bash
@@ -1032,7 +1032,7 @@ Output format:
 ```json
 {"type":"request_pending","request_id":"abc123","tier":"dangerous"}
 ```
-```
+````
 
 ### 17.6 Exit Code Standardization
 
@@ -1451,15 +1451,17 @@ echo "All tests passed!"
 
 Then document in SKILL.md (example content):
 
-```markdown
+````markdown
 ## Validate this skill
 
 Run the validation script to verify the skill works in your environment:
 
-`bash validate-team-skill.sh`
+```bash
+bash validate-team-skill.sh
+```
 
 Should output all tests passed before using in production.
-```
+````
 
 ### Security Review Checklist for Team Skills
 

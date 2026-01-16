@@ -15,14 +15,14 @@ These patterns emerge from real-world skill collections and production systems.
 
 Encode reproducible prompts in all-caps sections for agent-to-agent handoff:
 
-```markdown
+````markdown
 ## THE EXACT PROMPT — Plan Review
 
 ```
 Carefully review this entire plan for me and come up with your best
 revisions in terms of better architecture, new features...
 ```
-```
+````
 
 **Why it works:**
 - Prompts are copy-paste ready
@@ -78,7 +78,7 @@ For safety/security skills, use explicit tier classifications:
 
 For orchestration tools, document JSON/NDJSON APIs:
 
-```markdown
+````markdown
 ## Robot Mode (AI Automation)
 
 ```bash
@@ -90,7 +90,7 @@ Output format:
 ```json
 {"type":"request_pending","request_id":"abc123","tier":"dangerous"}
 ```
-```
+````
 
 ### Pattern 6: Exit Code Standardization
 
@@ -111,7 +111,7 @@ Output format:
 
 Visualize complex flows:
 
-```markdown
+````markdown
 ### Processing Pipeline
 
 ```
@@ -129,7 +129,7 @@ Visualize complex flows:
          │
          ▼ stdout: JSON (deny) or empty (allow)
 ```
-```
+````
 
 ### Pattern 8: Hierarchical Configuration Documentation
 

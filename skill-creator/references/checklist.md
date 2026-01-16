@@ -151,7 +151,7 @@ Context window is a shared resource—optimize ruthlessly.
 - [ ] Each line challenged: "Does Claude need this?"
 
 **Example: Bloat vs Efficiency**
-```markdown
+````markdown
 # BLOATED (~150 tokens)
 PDFs are documents with text and images. To extract text, you need a library.
 Libraries available include pdfplumber, PyPDF2, and others. Each has
@@ -165,7 +165,7 @@ with pdfplumber.open("file.pdf") as pdf:
     text = pdf.pages[0].extract_text()
 ```
 For form filling, see references/FORMS.md
-```
+````
 
 ## Design Principles
 

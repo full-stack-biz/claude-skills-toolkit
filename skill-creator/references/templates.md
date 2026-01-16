@@ -67,7 +67,7 @@ allowed-tools: Read,Write,Bash(python:*)
 
 **Body:**
 
-```markdown
+````markdown
 # Skill Name
 
 ## Overview
@@ -87,6 +87,7 @@ allowed-tools: Read,Write,Bash(python:*)
 
 ## Validation
 Run the validation script to test the skill:
+
 ```bash
 bash validate-team-skill.sh
 ```
@@ -102,7 +103,7 @@ Contact: [Team lead / owner]
 
 ## Version History
 See [VERSION_HISTORY.md](../VERSION_HISTORY.md)
-```
+````
 
 ### SKILL.md Body Structure Examples
 
