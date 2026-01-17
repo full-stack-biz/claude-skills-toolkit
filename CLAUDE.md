@@ -131,6 +131,26 @@ Example: `skill-creator` itself uses this approach—it's developed in `skill-cr
 - Don't: "This reads better with an explanation"
 - DO: "Will Claude understand this without the explanation?"
 
+## Markdown Code Fence Escaping
+
+When authoring skill examples that show code blocks within code blocks, use these techniques:
+
+**One level of nesting** (code block containing code fence):
+- Wrap with 4 backticks (`````) instead of 3
+- Example: document JSON that contains a Markdown code block
+
+**Two levels of nesting** (show code fence examples showing code fences):
+- Alternate between backticks and tildes
+- Outer: 4 backticks (````)
+- Inner: 3 backticks (```)
+- Wrap inner in tildes: `~~~`
+
+**Arbitrary nesting** (3+ levels):
+- Append invisible markers (Left-To-Right Mark, U+200E) to closing fences to differentiate them
+- Or use increasing numbers of backticks/tildes
+
+**Practical**: Most skill examples won't need deep nesting. Use 4 backticks for simple nested blocks and reference documentation in separate files for complex examples.
+
 ## Design Principles
 
 1. **Conciseness** - Assume Claude's baseline intelligence; only document domain-specific knowledge
