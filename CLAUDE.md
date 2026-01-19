@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Purpose
 
-This is a personal/shared collection of reusable Claude Code skills. Skills are **modular instruction packages that Claude follows when executing domain-specific tasks**. This repository serves as the central source—skills are manually deployed to target projects or global skill directories (`~/.claude/skills/`).
+This repository is a **Claude Code plugin** that bundles reusable skills for creating skills and plugins. The plugin is named **skills-toolkit** and provides Agent Skills (auto-activated) and slash commands for managing Claude Code skills and plugins.
 
 **CRITICAL MINDSET:** Skills are instructions FOR CLAUDE, not documentation FOR PEOPLE. When evaluating or improving a skill, the question is always: "Will this help Claude understand and execute the task?" not "Will people find this easy to read?"
+
+**Plugin structure:** This project is organized as a Claude Code plugin with `.claude-plugin/plugin.json` manifest, `skills/` directory for Agent Skills, and `commands/` directory for slash commands.
 
 ## Skill Structure
 
@@ -47,10 +49,15 @@ allowed-tools: Read,Write,Bash(*)   # Optional: principle of least privilege
 
 **Key principle:** Every word in SKILL.md body is loaded when the skill triggers. Keep it focused on what Claude needs to execute the task correctly.
 
-## Current Skills
+## Plugin Components
 
-- **skill-creator** - Create and refine Claude Code skills following best practices. Added as skill in this project itself via symlink in `.claude/skills/` (points to `skill-creator/` in project root).
-- **testing-test-running** - Run PHPUnit tests in Laravel projects via Docker. Includes test suite selection, JUnit reporting, and code coverage generation.
+### Agent Skills (in `skills/`)
+- **skill-creator** - Create and refine Claude Code skills following best practices. Invoked via `/skills-toolkit:create-skill` or auto-activated by Claude when skill-related tasks are detected.
+- **plugin-creator** - Create, convert, and validate Claude Code plugins. Invoked via `/skills-toolkit:create-plugin` or auto-activated when plugin-related tasks are detected.
+
+### Slash Commands (in `commands/`)
+- `/skills-toolkit:create-skill` - Shortcut to invoke skill-creator skill
+- `/skills-toolkit:create-plugin` - Shortcut to invoke plugin-creator skill
 
 ## Development Workflow
 
@@ -74,27 +81,26 @@ Consult **building-skills.md** for comprehensive guidance on:
 
 Key principle: **Context window = public good**. Every token must justify its cost through genuine value to Claude's task execution.
 
-### Deployment
+### Plugin Installation
 
-Copy skill directories to:
-- **Global**: `~/.claude/skills/` (available in all projects)
-- **Project-local**: `.claude/skills/` (project-specific)
-
-Both use the same directory structure.
-
-**Symlink Strategy:** For skills in this repository that are also used as project-local skills, use symlinks instead of copying:
+This repository is a Claude Code plugin. Install it with:
 
 ```bash
-# From project root:
-ln -s ../skill-creator .claude/skills/skill-creator
+claude plugin install . --scope project
+# or
+claude plugin install /Users/sergeymoiseev/full-stack.biz/claude-skills --scope project
 ```
 
-This ensures:
-- **Single source of truth** - edit `skill-creator/SKILL.md`, changes reflect immediately in `.claude/skills/skill-creator/SKILL.md`
-- **No sync issues** - don't waste time copying between two locations
-- **Always up-to-date** - as you improve the skill, both locations stay synchronized
+**Testing locally before installation:**
+```bash
+claude --plugin-dir /Users/sergeymoiseev/full-stack.biz/claude-skills
+```
 
-Example: `skill-creator` itself uses this approach—it's developed in `skill-creator/` and added as skill via symlink in `.claude/skills/skill-creator/`.
+**Plugin structure:**
+- **Manifest**: `.claude-plugin/plugin.json` - metadata (name, description, version)
+- **Skills**: `skills/` - Agent Skills bundled in plugin (auto-discoverable)
+- **Commands**: `commands/` - slash commands that invoke skills
+- **Standalone**: `rails-migrations/` - not part of plugin; deploy separately if needed
 
 ## Skill Anatomy (Quick Reference)
 
@@ -159,8 +165,17 @@ When authoring skill examples that show code blocks within code blocks, use thes
 4. **Clear triggers** - Description determines if skill activates; be specific about when to use it
 5. **Token accountability** - Every word in SKILL.md body must justify its presence for Claude's task execution
 
+## Workflow: Adding a New Skill to the Plugin
+
+1. Create skill in `skills/skill-name/`
+2. Create `SKILL.md` with frontmatter + instructions
+3. (Optional) Create `commands/skill-name.md` slash command if direct user invocation is useful
+4. Test locally: `claude --plugin-dir . /skills-toolkit:command`
+5. Install plugin: `claude plugin install .`
+
 ## Notes for Future Development
 
-- No strict conventions enforced yet; establish patterns as collection grows
-- No automated workflows (sync, validation, etc.) implemented yet
-- Skills are manually deployed to target locations
+- Plugin architecture established; follow `.claude-plugin/` conventions
+- Skills are organized within plugin; use `skills/` directory for new additions
+- Commands auto-discovered from `commands/` directory
+- No automated workflows (validation, etc.) implemented yet

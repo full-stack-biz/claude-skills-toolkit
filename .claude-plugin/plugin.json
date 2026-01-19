@@ -1,0 +1,5 @@
+{
+  "name": "skills-toolkit",
+  "description": "Create and manage Claude Code skills and plugins. Use when building new skills from scratch, validating existing skills, creating plugins, or converting projects to plugins. Includes /skills-toolkit:create-skill and /skills-toolkit:create-plugin commands.",
+  "version": "1.0.0"
+}
