@@ -1,0 +1,30 @@
+{
+  "name": "skills-toolkit-marketplace",
+  "owner": {
+    "name": "full-stack-biz",
+    "email": "info@full-stack.biz"
+  },
+  "metadata": {
+    "description": "Marketplace for Claude Code skills and plugin development tools",
+    "version": "1.0.0",
+    "pluginRoot": "./"
+  },
+  "plugins": [
+    {
+      "name": "skills-toolkit",
+      "source": {
+        "source": "github",
+        "repo": "full-stack-biz/claude-skills-toolkit"
+      },
+      "description": "Create and manage Claude Code skills and plugins. Use when building new skills from scratch, validating existing skills, creating plugins, or converting projects to plugins. Includes /skills-toolkit:create-skill and /skills-toolkit:create-plugin commands.",
+      "version": "1.0.0",
+      "author": {
+        "name": "full-stack-biz"
+      },
+      "homepage": "https://github.com/full-stack-biz/claude-skills-toolkit",
+      "repository": "https://github.com/full-stack-biz/claude-skills-toolkit",
+      "license": "MIT",
+      "keywords": ["skills", "plugins", "development", "toolkit"]
+    }
+  ]
+}
