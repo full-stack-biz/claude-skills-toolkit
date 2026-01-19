@@ -171,14 +171,12 @@ See `references/installation-scopes.md` for scope details and use cases.
 
 ## Validation Checklist
 
-Before considering your plugin complete:
-- ✅ **Structure**: Directory layout matches Claude Code conventions
-- ✅ **Manifest**: Valid JSON, name + description present
-- ✅ **Activation**: Description includes specific trigger phrases
-- ✅ **Clarity**: Component descriptions tell Claude what each does
-- ✅ **Testing**: Tested locally with `claude --plugin-dir /path/to/plugin`
+See `references/validation-checklist.md` for comprehensive checklist.
 
-For comprehensive patterns and templates, see `references/plugin-templates.md`.
+**Quick priorities:**
+1. Run `claude plugin validate /path/to/plugin` (catches structural errors immediately)
+2. Review manifest description (most common activation signal issue)
+3. Test locally with `claude --plugin-dir /path/to/plugin`
 
 ## Advanced Topics
 

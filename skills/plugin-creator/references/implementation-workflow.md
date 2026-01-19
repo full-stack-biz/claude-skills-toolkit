@@ -182,9 +182,23 @@ Create `.lsp.json`:
 
 See `references/lsp-servers.md` for language examples.
 
-### Step 5: Validate Structure
+### Step 5: Validate with `claude plugin validate`
 
-Check against standards:
+Run the validation command to automatically check for structural and manifest errors:
+
+```bash
+claude plugin validate /path/to/my-plugin
+```
+
+This checks:
+- Valid JSON in `.claude-plugin/plugin.json`
+- Required fields present (name, description)
+- Component paths exist and are accessible
+- No structural errors that would block installation
+
+### Step 6: Manual Structure Review
+
+If validation passes, manually verify:
 
 - [ ] `.claude-plugin/plugin.json` exists and is valid JSON
 - [ ] `name` and `description` fields present in manifest
@@ -196,7 +210,7 @@ Check against standards:
 
 See `references/validation-checklist.md` for comprehensive validation checklist.
 
-### Step 6: Test Locally
+### Step 7: Test Locally
 
 ```bash
 # Test plugin without installing
@@ -206,7 +220,7 @@ claude --plugin-dir /path/to/my-plugin /my-plugin:command-name
 # Verify components load and work as expected
 ```
 
-### Step 7: Deploy
+### Step 8: Deploy
 
 **For personal/local use:**
 ```bash
@@ -347,7 +361,21 @@ Ensure all migrated components have:
 - [ ] Quick Start section (80% of tasks)
 - [ ] Key notes and constraints
 
-### Step 6: Test Locally
+### Step 6: Validate with `claude plugin validate`
+
+Run the validation command to automatically check for structural and manifest errors:
+
+```bash
+claude plugin validate /path/to/my-plugin
+```
+
+This checks:
+- Valid JSON in `.claude-plugin/plugin.json`
+- Required fields present (name, description)
+- Component paths exist and are accessible
+- No structural errors that would block installation
+
+### Step 7: Test Locally
 
 ```bash
 # Test the converted plugin
@@ -361,7 +389,7 @@ claude --plugin-dir /path/to/my-plugin /my-plugin:command-name
 # - Hooks fire at expected events
 ```
 
-### Step 7: Validate Against Plugin Standards
+### Step 8: Validate Against Plugin Standards
 
 Use the comprehensive checklist in `references/validation-checklist.md`:
 
@@ -372,7 +400,7 @@ Use the comprehensive checklist in `references/validation-checklist.md`:
 - [ ] No nested directory chains
 - [ ] All referenced paths are correct
 
-### Step 8: Deploy
+### Step 9: Deploy
 
 Move converted plugin to plugin directories:
 
@@ -390,7 +418,23 @@ cp -r my-plugin .claude/skills/
 
 Use this workflow when checking or refining existing plugins.
 
-### Step 1: Manifest Validation
+### Step 1: Run `claude plugin validate`
+
+Start with the automated validation command:
+
+```bash
+claude plugin validate /path/to/plugin
+```
+
+This identifies critical issues automatically:
+- Invalid JSON in manifest
+- Missing required fields
+- Broken component paths
+- Structural errors
+
+Review the output carefully. Address any errors before proceeding to manual checks.
+
+### Step 2: Manifest Validation
 
 Check `.claude-plugin/plugin.json`:
 
@@ -405,7 +449,7 @@ Check `.claude-plugin/plugin.json`:
 - Missing trigger phrases: Won't activate when user mentions relevant context
 - Invalid JSON syntax: Use `jq .` to validate
 
-### Step 2: Directory Structure Validation
+### Step 3: Directory Structure Validation
 
 Check plugin layout:
 
@@ -423,7 +467,7 @@ Check plugin layout:
 - Component directories with different names than Claude Code conventions
 - Nested chains: `commands/v1/latest/validate.md` instead of `commands/validate.md`
 
-### Step 3: Component Metadata Validation
+### Step 4: Component Metadata Validation
 
 For each component, check metadata:
 
@@ -450,7 +494,7 @@ For each component, check metadata:
 - [ ] Events match Claude Code event names
 - [ ] Command references point to actual command files
 
-### Step 4: Activation Signal Review
+### Step 5: Activation Signal Review
 
 Check if Claude will recognize when to use the plugin:
 
@@ -465,7 +509,7 @@ Check if Claude will recognize when to use the plugin:
 **Example poor description:**
 "A plugin for code operations."
 
-### Step 5: Clarity Review
+### Step 6: Clarity Review
 
 For each component, verify Claude understands its purpose:
 
@@ -480,7 +524,7 @@ For each component, verify Claude understands its purpose:
 - Passive language: "processing may occur"
 - No examples or constraints
 
-### Step 6: Improvement Action Plan
+### Step 7: Improvement Action Plan
 
 Based on validation, prioritize improvements:
 
@@ -504,7 +548,7 @@ Based on validation, prioritize improvements:
    - Documentation could be more comprehensive
    - Token efficiency improvements
 
-### Step 7: Implement Improvements
+### Step 8: Implement Improvements
 
 Apply fixes in priority order:
 
@@ -514,7 +558,7 @@ Apply fixes in priority order:
 4. Add examples and constraints
 5. Optimize for token efficiency
 
-### Step 8: Test Improvements
+### Step 9: Test Improvements
 
 ```bash
 # Test the improved plugin locally
@@ -523,7 +567,17 @@ claude --plugin-dir /path/to/plugin /plugin-name:command
 # Verify improvements actually help Claude execute better
 ```
 
-### Step 9: Re-validate
+### Step 10: Re-validate with `claude plugin validate`
+
+After implementing improvements, run the validation command again to confirm all issues are resolved:
+
+```bash
+claude plugin validate /path/to/plugin
+```
+
+Ensure the command runs without errors before marking the plugin as complete.
+
+### Step 11: Final Review
 
 Run through validation checklist again to confirm all issues addressed.
 

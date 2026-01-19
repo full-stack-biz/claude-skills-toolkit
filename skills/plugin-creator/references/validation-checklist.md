@@ -1,9 +1,20 @@
 # Plugin Validation Checklist
 
+**Start here:** Run `claude plugin validate` to automatically check for manifest and structural errors:
+
+```bash
+claude plugin validate /path/to/plugin
+```
+
+This catches critical issues immediately. After fixing any validation errors, use this checklist to manually review other aspects.
+
+---
+
 Use this checklist when validating new plugins or converting projects to plugins. Work through each section systematically.
 
 ## Phase 1: Plugin Manifest (plugin.json)
 
+- [ ] **Automated validation**: Run `claude plugin validate /path/to/plugin` with no errors
 - [ ] **File exists**: `.claude-plugin/plugin.json` is present
 - [ ] **Valid JSON**: File parses without syntax errors
 - [ ] **Required field present**:
@@ -205,7 +216,13 @@ Examples of problems this agent solves.
 
 ## Quick Validation Script
 
-Run this to validate plugin.json:
+**Use `claude plugin validate` first** for automated checking:
+
+```bash
+claude plugin validate /path/to/plugin
+```
+
+Then, run manual checks if needed:
 
 ```bash
 # Check JSON syntax
