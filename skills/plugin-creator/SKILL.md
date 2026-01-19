@@ -2,7 +2,7 @@
 name: plugin-creator
 description: >-
   Create, validate, and refine Claude Code plugins. Use when: building a new plugin from scratch ("help me create a plugin"), converting existing projects to plugins ("make this a plugin"), or validating/improving plugin structure. Includes manifest generation, component organization, and plugin testing.
-version: 1.0.2
+version: 1.0.3
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
 ---
 
@@ -69,13 +69,13 @@ my-plugin/
 See `references/implementation-workflow.md` for complete step-by-step procedures.
 
 ### 1. Creating a New Plugin from Scratch
-Interview requirements → create structure → add components → test locally
+Interview requirements → create structure → add components → run `claude plugin validate` → test locally
 
 ### 2. Converting an Existing Project to a Plugin
-Identify components → create plugin structure → migrate and update metadata → test locally
+Identify components → create plugin structure → migrate and update metadata → run `claude plugin validate` → test locally
 
 ### 3. Validating or Improving Existing Plugins
-Check manifest → verify structure → review metadata → improve and re-test
+**FIRST:** Run `claude plugin validate /path/to/plugin` directly. Review output for errors. **THEN:** Do manual checks for best practices from `references/validation-checklist.md`.
 
 ## Quick Start: 5-Minute Setup
 
@@ -90,7 +90,7 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 {
   "name": "my-plugin",
   "description": "[Action]. Use when [trigger contexts].",
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
 ```
 
@@ -171,12 +171,16 @@ See `references/installation-scopes.md` for scope details and use cases.
 
 ## Validation Checklist
 
-See `references/validation-checklist.md` for comprehensive checklist.
+**Step 1 (REQUIRED):** Run the validation command directly:
+```bash
+claude plugin validate /path/to/plugin
+```
+Do NOT create wrapper scripts. Run this command directly and review its output.
 
-**Quick priorities:**
-1. Run `claude plugin validate /path/to/plugin` (catches structural errors immediately)
-2. Review manifest description (most common activation signal issue)
-3. Test locally with `claude --plugin-dir /path/to/plugin`
+**Step 2:** If validation passes, check best practices from `references/validation-checklist.md`:
+- Manifest description includes specific trigger phrases
+- Component metadata is clear and complete
+- Test locally with `claude --plugin-dir /path/to/plugin`
 
 ## Advanced Topics
 

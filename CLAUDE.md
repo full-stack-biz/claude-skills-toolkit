@@ -173,6 +173,31 @@ When authoring skill examples that show code blocks within code blocks, use thes
 4. Test locally: `claude --plugin-dir . /skills-toolkit:command`
 5. Install plugin: `claude plugin install .`
 
+## Version Release Process
+
+When releasing a new version, update ALL version fields consistently:
+
+1. **Skill versions** - `skills/*/SKILL.md` frontmatter `version:` field
+2. **Plugin manifest** - `.claude-plugin/plugin.json` `version` field
+3. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
+   - `metadata.version`
+   - `plugins[].version` for each plugin entry
+4. **Example versions** - Any `"version": "X.Y.Z"` in SKILL.md body examples (e.g., Quick Start section)
+
+**Verification:**
+```bash
+# Check all versions are consistent
+grep -rn '"version"' .claude-plugin/ skills/*/SKILL.md
+
+# Validate plugin structure
+claude plugin validate .
+```
+
+**Semantic versioning:**
+- PATCH (1.0.X): Bug fixes, documentation updates, minor improvements
+- MINOR (1.X.0): New features, new skills, backward-compatible changes
+- MAJOR (X.0.0): Breaking changes, major refactors
+
 ## Notes for Future Development
 
 - Plugin architecture established; follow `.claude-plugin/` conventions
