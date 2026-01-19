@@ -160,6 +160,11 @@ Result: Centralized distribution with version control and easy updates.
 - team-marketplaces.md - Team distribution
 - And 14 more guides
 
+## Inspiration & Resources
+
+This project was built with guidance from the comprehensive best practices guide:
+- [Best Practices for Writing and Using SKILL.md Files](https://github.com/Dicklesworthstone/meta_skill/blob/main/BEST_PRACTICES_FOR_WRITING_AND_USING_SKILLS_MD_FILES.md)
+
 ## License
 
 MIT
