@@ -2,8 +2,8 @@
 name: plugin-creator
 description: >-
   Create, validate, and refine Claude Code plugins. Use when: building a new plugin from scratch ("help me create a plugin"), converting existing projects to plugins ("make this a plugin"), or validating/improving plugin structure. Includes manifest generation, component organization, and plugin testing.
-version: 1.0.0
-allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find)
+version: 1.0.2
+allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
 ---
 
 # Plugin Creator
@@ -90,7 +90,7 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 {
   "name": "my-plugin",
   "description": "[Action]. Use when [trigger contexts].",
-  "version": "1.0.0"
+  "version": "1.0.2"
 }
 ```
 
