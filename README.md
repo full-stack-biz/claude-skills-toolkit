@@ -20,6 +20,14 @@ Interactive guide for creating and managing plugins:
 - Configure installation scope (user/project/managed)
 - Validate plugin structure
 
+### `/skills-toolkit:create-hook`
+Interactive guide for creating and validating hooks:
+- Build plugin hooks from scratch (command, prompt, agent types)
+- Validate existing hooks against best practices
+- Refine hook quality (event matching, error handling, performance)
+- Configure event matching, matchers, and error handling
+- Test hooks with validation workflows
+
 ## Installation
 
 ```bash
@@ -42,6 +50,16 @@ Create a skill:
 Create a plugin:
 ```bash
 /skills-toolkit:create-plugin
+```
+
+Create a hook:
+```bash
+/skills-toolkit:create-hook
+```
+
+Create a subagent:
+```bash
+/skills-toolkit:create-subagent
 ```
 
 ## Usage Scenarios
@@ -101,64 +119,35 @@ Create a marketplace plugin that bundles your skills. Push it to GitHub. Team me
 
 Result: Centralized distribution with version control and easy updates.
 
-## What's Included
+## Features
 
 ### Skill Creator
-- Structured creation workflow
-- 7-phase validation process
-- Best practices checklist
-- Token efficiency guidelines
-- Tool scoping reference
-- 8 supporting guides
+Build custom Claude Code skills with structured guidance:
+- Interactive creation workflow for new skills
+- 7-phase validation process for quality assurance
+- Best practices and token efficiency optimization
+- Trigger phrase guidance for reliable skill activation
 
 ### Plugin Creator
-- Manifest generation
-- Component organization
-- Multi-component bundling
-- Distribution guidance
-- 21 supporting guides
+Create shareable plugins that bundle multiple components:
+- Generate proper `.claude-plugin/plugin.json` manifests
+- Organize and validate component structure
+- Support multi-component bundling (skills, commands, hooks, agents)
+- Convert existing projects into installable plugins
 
-## Directory Structure
+### Hook Creator
+Automate plugin workflows with event-driven hooks:
+- Create hooks for plugin automation (command, prompt, or agent types)
+- Validate event matching and error handling
+- Test hooks against best practices
+- Production-ready validation workflows
 
-```
-.
-├── .claude-plugin/
-│   ├── plugin.json           # Plugin manifest
-│   └── marketplace.json      # Marketplace definition
-├── skills/
-│   ├── skill-creator/
-│   │   ├── SKILL.md
-│   │   └── references/       # 8 guides
-│   └── plugin-creator/
-│       ├── SKILL.md
-│       └── references/       # 21 guides
-├── commands/
-│   ├── create-skill.md       # /skills-toolkit:create-skill
-│   └── create-plugin.md      # /skills-toolkit:create-plugin
-└── README.md
-```
-
-## Reference Guides
-
-### Skill Creator
-- how-skills-work.md - Token loading and execution model
-- validation-workflow.md - 7-phase validation
-- checklist.md - Best practices
-- templates.md - Skill templates
-- content-guidelines.md - Writing for Claude
-- allowed-tools.md - Tool scoping
-- advanced-patterns.md - Advanced patterns
-- self-containment-principle.md - Skill isolation
-
-### Plugin Creator
-- how-plugins-work.md - Plugin architecture
-- implementation-workflow.md - Step-by-step creation
-- validation-checklist.md - Quality checks
-- directory-structure.md - File organization
-- plugin-json-schema.md - Manifest schema
-- installation-scopes.md - Installation options
-- team-marketplaces.md - Team distribution
-- And 14 more guides
+### Subagent Creator
+Delegate complex tasks to specialized Claude agents:
+- Build subagents with clear delegation signals
+- Configure tool access with permission modes
+- Set up hooks for agent coordination
+- Validate against best practices for reliability
 
 ## Inspiration & Resources
 

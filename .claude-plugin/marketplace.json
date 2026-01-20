@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Marketplace for Claude Code skills and plugin development tools",
-    "version": "1.1.1",
+    "version": "1.2.1",
     "pluginRoot": "./"
   },
   "plugins": [
@@ -16,15 +16,15 @@
         "source": "github",
         "repo": "full-stack-biz/claude-skills-toolkit"
       },
-      "description": "Create and manage Claude Code skills, plugins, and subagents. Use when building new skills from scratch, validating existing skills, creating plugins, or converting projects to plugins. Create, validate, and refine Claude Code subagents for reliable delegation. Includes /skills-toolkit:create-skill, /skills-toolkit:create-plugin, and /skills-toolkit:create-subagent commands.",
-      "version": "1.1.1",
+      "description": "Create and manage Claude Code skills, plugins, subagents, and hooks. Use when building new skills, validating existing skills, creating plugins, converting projects to plugins, creating hooks, or managing plugin automation. Includes /skills-toolkit:create-skill, /skills-toolkit:create-plugin, /skills-toolkit:create-subagent, and /skills-toolkit:create-hook commands.",
+      "version": "1.2.1",
       "author": {
         "name": "full-stack-biz"
       },
       "homepage": "https://github.com/full-stack-biz/claude-skills-toolkit",
       "repository": "https://github.com/full-stack-biz/claude-skills-toolkit",
       "license": "MIT",
-      "keywords": ["skills", "plugins", "development", "toolkit"]
+      "keywords": ["skills", "plugins", "hooks", "agents", "subagents", "development", "toolkit", "automation"]
     }
   ]
 }

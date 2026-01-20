@@ -1,5 +1,5 @@
 {
   "name": "skills-toolkit",
-  "description": "Create and manage Claude Code skills, plugins, and subagents. Use when building new skills from scratch, validating existing skills, creating plugins, or converting projects to plugins. Create, validate, and refine Claude Code subagents for reliable delegation. Includes /skills-toolkit:create-skill, /skills-toolkit:create-plugin, and /skills-toolkit:create-subagent commands.",
-  "version": "1.1.1"
+  "description": "Create and manage Claude Code skills, plugins, subagents, and hooks. Use when building new skills, validating existing skills, creating plugins, converting projects to plugins, creating hooks, or managing plugin automation. Includes /skills-toolkit:create-skill, /skills-toolkit:create-plugin, /skills-toolkit:create-subagent, and /skills-toolkit:create-hook commands.",
+  "version": "1.2.1"
 }

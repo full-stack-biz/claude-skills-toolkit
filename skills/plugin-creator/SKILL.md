@@ -1,7 +1,7 @@
 ---
 name: plugin-creator
 description: >-
-  Create, validate, and refine Claude Code plugins. Use when: building a new plugin from scratch ("help me create a plugin"), converting existing projects to plugins ("make this a plugin"), or validating/improving plugin structure. Includes manifest generation, component organization, and plugin testing.
+  Create, validate, and refine Claude Code plugins with skills, commands, hooks, agents, and servers. Use when: building plugins from scratch, converting projects to plugins, or improving plugin structure. Includes manifest generation, component organization, and integration guidance (use hook-creator and subagent-creator skills for those components).
 version: 1.0.4
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
 ---
@@ -119,7 +119,8 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 - `references/slash-command-format.md` — Command file format, metadata, arguments
 - `references/agent-skills.md` — Packaging Skills in plugins
 - `references/subagents-in-plugins.md` — Packaging subagents in plugins with delegation
-- `references/hooks.md` — Event handlers, hook configuration, patterns
+- `references/hooks-in-plugins.md` — Packaging hooks in plugins (use `hook-creator` skill for creation/validation)
+- `references/hooks.md` — Hook event reference (events, formats, matchers, patterns)
 - `references/mcp-servers.md` — External service integration
 - `references/lsp-servers.md` — Language-specific code intelligence
 
@@ -137,7 +138,7 @@ See `references/quick-reference.md` for component templates, formats, and metada
 | **Slash Commands** (`commands/`) | User-facing commands via `/plugin-name:command` |
 | **Subagents** (`agents/`) | Isolated execution environments with custom prompts, tools, and permissions (use `subagent-creator` skill) |
 | **Agent Skills** (`skills/`) | Capabilities Claude uses automatically |
-| **Hooks** (`hooks.json`) | Event handlers (tool use, permissions, sessions) |
+| **Hooks** (`hooks.json`) | Event handlers (tool use, permissions, sessions). (use `hook-creator` skill) |
 | **MCP Servers** (`.mcp.json`) | External service integration (APIs, databases) |
 | **LSP Servers** (`.lsp.json`) | Language-specific code intelligence |
 

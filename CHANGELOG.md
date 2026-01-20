@@ -2,6 +2,22 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.2.1] - 2026-01-20
+
+### Changed
+- **plugin-creator skill:** Improved description to explicitly mention hooks, agents, and server integration
+- **Marketplace keywords:** Enhanced to include hooks, agents, subagents, and automation for better discoverability
+
+## [1.2.0] - 2026-01-20
+
+### Added
+- **New command: /skills-toolkit:create-hook** - Create, validate, and refine Claude Code plugin hooks
+  - Supports `create`, `validate`, and `refine` actions
+  - Takes optional `hook-name` argument for targeted work
+
+### Changed
+- **Plugin scope expanded:** Now manages skills, plugins, subagents, AND hooks
+
 ## [1.1.1] - 2026-01-20
 
 ### Added

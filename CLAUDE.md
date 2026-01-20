@@ -175,24 +175,60 @@ When authoring skill examples that show code blocks within code blocks, use thes
 
 ## Version Release Process
 
-Plugin and skill versions are **independent**. Each skill tracks its own version separately from the plugin version:
+**Brackets:** Semantic versioning has three brackets: PATCH (Z in X.Y.Z), MINOR (Y in X.Y.Z), MAJOR (X in X.Y.Z).
+- PATCH bracket: Bug fixes, wording improvements, reference updates (no new capability)
+- MINOR bracket: New features, expanded capabilities, new tools (backward compatible)
+- MAJOR bracket: Breaking changes, incompatible API/behavior changes (requires user action)
+
+**Core principle:** Version freezes at its bracket level until commit. Can only jump to higher bracket if scope demands it.
+
+**Bracket states:**
+- Refinements only (no new work started): version unchanged
+- Patch changes identified: bump Z (X.Y.Z → X.Y.Z+1), freeze in patch bracket
+- Patch bracket active + minor scope appears: jump to minor (X.Y.Z+1 → X.Y+1.0), freeze in minor bracket
+- Minor bracket active + major scope appears: jump to major (X.Y+1.0 → X+1.0.0), freeze in major bracket
+- Major bracket active + more changes: stay frozen (X+1.0.0 → X+1.0.0)
+- After commit: reset, ready for next cycle
+
+**Quick decision tree when making changes:**
+
+1. **Starting new work after commit?** → Assess scope level
+   - Patch-level (fixes, wording, reference updates)? → Bump patch (Z+1)
+   - Minor-level (new capability, expanded tools)? → Bump minor (Y+1, reset Z to 0)
+   - Major-level (breaking changes)? → Bump major (X+1, reset Y and Z to 0)
+
+2. **Already bumped in current cycle?** → Check current bracket
+   - In patch bracket + still patch-only? → Stay frozen
+   - In patch bracket + discover minor scope? → Jump to minor (reset Z)
+   - In minor bracket + still minor-level? → Stay frozen
+   - In minor bracket + discover major scope? → Jump to major (reset Y and Z)
+   - In major bracket + any other changes? → Stay frozen
+
+3. **Refined without starting new work?** → Version unchanged
+
+**Example workflow:**
+- Last commit: 1.0.1
+- Refining (no new work started): stays 1.0.1
+- After commit, new work: identify patch changes → bump to 1.0.2 (patch frozen)
+- Continue refining: more patch changes → stays 1.0.2 (frozen)
+- Discover minor changes needed: jump to 1.1.0 (minor frozen)
+- Continue: more work → stays 1.1.0 (frozen)
+- Discover breaking changes: jump to 2.0.0 (major frozen)
+- Continue: more work → stays 2.0.0 (frozen)
+- Commit: 2.0.0 committed
+- After commit, new work: identify patch → bump to 2.0.1 (fresh cycle)
 
 ### Skill Versions
-Update `skills/*/SKILL.md` `version:` field **only when the skill itself changes**:
-- Bug fixes, instruction improvements, reference updates
-- New capabilities or workflows added to the skill
-- Tool access changes
-- Changes to skill frontmatter (description, allowed-tools, etc.)
 
-**Do NOT** automatically bump skill versions just because the plugin version changed.
+Skill versions are **independent** from plugin versions. Use the bracket decision tree above.
 
 ### Plugin Version
-Update `.claude-plugin/plugin.json` `version:` field based on changes to **any bundled components**:
+
+Update `.claude-plugin/plugin.json` `version:` **only when committing changes**:
 
 **PATCH bump** (1.0.X → 1.0.Y) when:
 - Any included skill gets a PATCH version bump
 - Bug fixes to plugin structure or marketplace manifest
-- Documentation updates to CLAUDE.md
 
 **MINOR bump** (1.X.0 → 1.Y.0) when:
 - Any included skill gets a MINOR version bump
@@ -203,26 +239,30 @@ Update `.claude-plugin/plugin.json` `version:` field based on changes to **any b
 - Any included skill gets a MAJOR version bump
 - Breaking changes to plugin structure
 
-When updating plugin version, also update:
-1. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
+When committing version changes, also update:
+1. **CHANGELOG.md** - Add new section for version with date, changes categorized (Added/Changed/Fixed/Removed)
+   - **Critical:** Document ONLY user-facing changes. Internal development work (refinements, optimizations, refactoring) is scaffolding, not deliverables
+   - Examples of what to document: New commands, new skills, bug fixes, behavior changes, feature additions
+   - Examples of what NOT to document: Description improvements, token optimization, reference file reorganization, internal code cleanup
+   - **Rationale:** Users care about what changed for them, not how you built it. If refinements are invisible to users, they don't go in CHANGELOG
+2. **README.md** - Update any version references in installation commands or feature lists
+3. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
    - `metadata.version`
    - `plugins[].version` for each plugin entry
-2. **Example versions** - Any `"version": "X.Y.Z"` in SKILL.md body examples (e.g., Quick Start section) only if the skill itself changed
+4. **Example versions** - Any `"version": "X.Y.Z"` in SKILL.md body examples only if that skill's version changed
 
 **Verification:**
 ```bash
-# Check versions in plugin and modified skills only
+# Check versions across all components
 grep -rn '"version"' .claude-plugin/
-grep '"version"' skills/*/SKILL.md  # Check which skills were actually modified
+grep '"version"' skills/*/SKILL.md
+
+# Verify version consistency in documentation
+grep -i 'version' CHANGELOG.md README.md
 
 # Validate plugin structure
 claude plugin validate .
 ```
-
-**Semantic versioning:**
-- PATCH (1.0.X): Bug fixes, documentation updates, minor improvements
-- MINOR (1.X.0): New features, new skills, backward-compatible changes
-- MAJOR (X.0.0): Breaking changes, major refactors
 
 ## Notes for Future Development
 
