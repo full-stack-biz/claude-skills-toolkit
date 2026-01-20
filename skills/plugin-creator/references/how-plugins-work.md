@@ -7,7 +7,7 @@ Understanding plugin architecture helps you create effective plugins.
 - [Plugin Discovery & Activation](#plugin-discovery--activation)
 - [Token Loading Hierarchy](#token-loading-hierarchy)
 - [Plugin vs Standalone Configuration](#plugin-vs-standalone-configuration)
-- [Slash Commands](#slash-commands)
+- [Skills (User-Invoked)](#skills-user-invoked)
 - [Custom Agents](#custom-agents)
 - [Agent Skills](#agent-skills)
 - [Hooks & Event Handlers](#hooks--event-handlers)
@@ -33,9 +33,8 @@ Claude Code discovers plugins by:
    - Extracts `name` (for namespace) and `description` (for activation)
 
 3. **Indexing components:**
-   - Slash commands in `commands/` directory
+   - Agent Skills in `skills/` directory (both auto-invoked and user-invoked via `/`)
    - Custom agents in `agents/` directory
-   - Agent Skills in `skills/` directory
    - Hooks in `hooks.json`
    - MCP servers in `.mcp.json`
 
@@ -50,9 +49,8 @@ Claude decides when to use a plugin based on:
 - Result: Plugin recommended/activated
 
 **Component metadata:**
-- Slash command descriptions (if user explicitly requests command)
+- Skill descriptions and frontmatter (automatically activated by Claude when relevant, or user-invoked via `/`)
 - Agent descriptions (if complex workflow needed)
-- Skill descriptions (automatically activated by Claude when relevant)
 
 **Specificity matters:**
 - Vague descriptions ("A plugin for processing") = rarely activated
@@ -73,17 +71,15 @@ Always loaded when Claude Code starts or scans plugins:
 ### Level 2: Component Metadata (~50-200 tokens per component)
 Loaded when plugin is recommended or explicitly requested:
 - Full manifest content (plugin.json)
-- Slash command metadata (name, description, arguments)
+- Skill frontmatter (name, description, version, allowed-tools)
 - Agent descriptions
-- Skill frontmatter
 
 **Why on-demand:** Claude only needs component details when actually using the plugin.
 
 ### Level 3: Full Content (unlimited)
 Loaded only when Claude executes a component:
-- Slash command body (instructions)
+- Skill body (SKILL.md instructions)
 - Agent body (detailed instructions)
-- Skill body (detailed instructions)
 - Reference files (only if Claude determines they're needed)
 
 **Why on-demand:** Full instructions only needed during execution.
@@ -106,44 +102,63 @@ Loaded only when Claude executes a component:
 
 **Key difference:** Plugins use namespacing (`/plugin-name:command`) to prevent conflicts across teams.
 
-## Slash Commands
+## Skills (User-Invoked)
 
-### Execution Flow
+Skills handle both automatic activation AND user invocation via `/` slash commands. This unified approach replaces the old separate "commands" system.
 
-1. **User types:** `/plugin-name:command-name`
-2. **Claude Code loads:** Command metadata and body
-3. **Claude parses:** Arguments from user input
-4. **Claude executes:** Follows instructions in command body
-5. **Return output:** Displays results to user
+### User Invocation Flow
 
-### Command Resolution
+1. **User types:** `/plugin-name:skill-name` or just `/skill-name`
+2. **Claude Code loads:** Skill frontmatter and body
+3. **Claude executes:** Follows instructions in SKILL.md body
+4. **Return output:** Displays results to user
 
-Commands are located by:
-1. Plugin name (`/code-reviewer:`)
-2. Command name (`:validate`)
-3. File match: `commands/validate.md`
+### Skill Invocation Control
 
-**Example:**
-- User: `/code-reviewer:validate` with code argument
-- Resolved to: `.claude-plugin/../commands/validate.md`
-- Executed: Instructions in validate.md body
-
-### Argument Handling
-
-Arguments in command metadata define expected inputs:
+Skills use frontmatter to control who can invoke them:
 
 ```yaml
-arguments:
-  code:
-    description: Source code to validate
-    required: true
+---
+name: my-skill
+description: What this skill does. Use when [trigger context].
+disable-model-invocation: false  # Claude can auto-invoke
+user-invocable: true             # User can invoke with /
+---
 ```
 
-Claude:
-1. **Parses** user's slash command for arguments
-2. **Validates** required arguments are present
-3. **Passes** to command instructions
-4. **Executes** instructions with argument values
+**Three invocation modes:**
+- **Default** (both enabled) - Claude auto-activates + user can invoke with `/`
+- `disable-model-invocation: true` - Only user can invoke (for side-effect operations)
+- `user-invocable: false` - Only Claude can invoke (for background knowledge)
+
+### User Invocation Examples
+
+```
+/plugin-name:skill-name
+/my-validator
+/code-reviewer:analyze
+```
+
+### Argument Passing
+
+Use `$ARGUMENTS` in skill body to receive arguments:
+
+```yaml
+---
+name: validate-code
+description: Validate code for best practices
+argument-hint: "[code]"
+---
+
+Validate the following code against best practices:
+
+$ARGUMENTS
+```
+
+User can invoke:
+```
+/validate-code function foo() { ... }
+```
 
 ## Custom Agents
 

@@ -5,13 +5,30 @@ description: >-
   building new skills from scratch, validating existing skills against standards,
   or improving subpar skills to production quality. For personal, team, or
   production environments.
-version: 1.0.0
+version: 1.0.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
 # Skill Creator
 
 **Dual purpose:** Create skills right the first time OR elevate existing skills to best practices.
+
+## Quick Routing
+
+Use this to understand what you're here to do:
+
+**What would you like to do?**
+- **Create a new skill** - Build a skill from scratch with structured guidance (frontmatter, body structure, references, validation)
+- **Validate an existing skill** - Check your skill against best practices (structure, activation, token efficiency, tool scoping)
+- **Refine a skill** - Improve an existing skill (length, clarity, activation triggers, organization)
+
+**What is the skill name or path?**
+- If validating/refining: Provide the skill directory name (e.g., `pdf-processor`) or full path
+- If creating: Tell us what you want to call it (e.g., `code-analyzer`, `test-runner`)
+
+Then proceed to the appropriate section below.
+
+---
 
 ## When to Use This Skill
 

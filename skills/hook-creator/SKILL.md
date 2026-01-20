@@ -5,13 +5,30 @@ description: >-
   Use when building new hooks from scratch, validating existing hooks against best
   practices, or improving hook quality for production. Handles command hooks (shell scripts),
   prompt hooks (LLM-based decisions), event matching, JSON decision schemas, and safety validation.
-version: 2.0.1
+version: 2.0.2
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
 # Hook Creator
 
 **Dual purpose:** Create hooks right the first time OR elevate existing hooks to best practices.
+
+## Quick Routing
+
+Use this to understand what you're here to do:
+
+**What would you like to do?**
+- **Create a new hook** - Build a hook from scratch (event type, matcher, command/prompt/agent, error handling)
+- **Validate an existing hook** - Check your hooks against best practices (event binding, matcher syntax, error handling, security)
+- **Refine hook quality** - Improve an existing hook (performance, reliability, maintainability, validation)
+
+**What is the hook about?**
+- If creating: Describe what you want to automate (e.g., `format-on-write`, `pre-commit-check`, `post-tool-use`)
+- If validating/refining: Provide the hook name or describe the hook event
+
+Then proceed to the appropriate section below.
+
+---
 
 ## When to Use This Skill
 

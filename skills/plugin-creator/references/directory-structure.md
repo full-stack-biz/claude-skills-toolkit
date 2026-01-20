@@ -7,9 +7,8 @@ This guide documents the standard plugin directory layout, file organization pat
 - [Standard Plugin Layout](#standard-plugin-layout)
 - [Directory Organization Rules](#directory-organization-rules)
   - [Required: .claude-plugin/ Directory](#required-claude-plugin-directory)
-  - [Optional: commands/ Directory](#optional-commands-directory)
-  - [Optional: agents/ Directory](#optional-agents-directory)
   - [Optional: skills/ Directory](#optional-skills-directory)
+  - [Optional: agents/ Directory](#optional-agents-directory)
   - [Optional: hooks/ Directory](#optional-hooks-directory)
   - [Optional: scripts/ Directory](#optional-scripts-directory)
   - [Optional: .mcp.json File](#optional-mcpjson-file)
@@ -34,23 +33,21 @@ A complete, production-ready plugin follows this structure:
 my-plugin/
 ├── .claude-plugin/                 # Metadata directory (required)
 │   └── plugin.json                # Plugin manifest (required)
-├── commands/                        # Slash commands (optional)
-│   ├── validate.md
-│   ├── report.md
-│   └── export.md
-├── agents/                          # Custom agents (optional)
-│   ├── security-reviewer.md
-│   ├── performance-tester.md
-│   └── compliance-checker.md
-├── skills/                          # Agent Skills (optional)
+├── skills/                          # Agent Skills (optional, can be user or auto-invoked)
 │   ├── code-analyzer/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── guide.md
-│   └── pdf-processor/
-│       ├── SKILL.md
-│       └── scripts/
-│           └── process.py
+│   ├── pdf-processor/
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   │       └── process.py
+│   └── formatter/
+│       └── SKILL.md
+├── agents/                          # Custom agents (optional)
+│   ├── security-reviewer.md
+│   ├── performance-tester.md
+│   └── compliance-checker.md
 ├── hooks/                           # Hook configurations (optional)
 │   └── hooks.json
 ├── .mcp.json                        # MCP server definitions (optional)
@@ -102,40 +99,6 @@ my-plugin/
 │   ├── plugin.json
 │   ├── commands/            ← Don't put here
 │   └── agents/              ← Don't put here
-```
-
-### Optional: commands/ Directory
-
-**Purpose:** Slash commands that users invoke with `/plugin-name:command`
-
-**Structure:**
-```
-commands/
-├── validate.md              # /plugin-name:validate
-├── report.md                # /plugin-name:report
-└── export.md                # /plugin-name:export
-```
-
-**Rules:**
-- Each command is a `.md` file
-- Filename becomes command name (lowercase-hyphen)
-- File must contain YAML frontmatter with `name` and `description`
-- One command per file
-
-**File format:**
-```markdown
----
-name: validate
-description: Validate code against best practices
-arguments:
-  code:
-    description: Source code to validate
-    required: true
----
-
-# Validate Command
-
-Instructions for Claude to follow when running this command.
 ```
 
 ### Optional: agents/ Directory
@@ -208,6 +171,9 @@ name: skill-name
 description: >-
   What the skill does. Use when [trigger context].
 version: 1.0.0
+allowed-tools: Read,Write,Bash
+disable-model-invocation: false  # Allow Claude auto-invoke
+user-invocable: true              # Allow user /skill-name invocation
 ---
 
 # Skill Name
@@ -220,6 +186,11 @@ Essential execution steps.
 ## Key Notes
 Important constraints and edge cases.
 ```
+
+**Frontmatter fields for invocation control:**
+- `disable-model-invocation: true` - Only user can invoke (for side-effect operations like deploy, commit)
+- `user-invocable: false` - Only Claude can invoke (for background knowledge skills)
+- Default (or omitted) - Both Claude auto-invoke and user invocation enabled
 
 ### Optional: hooks/ Directory
 
@@ -255,7 +226,7 @@ hooks/
 
 ### Optional: scripts/ Directory
 
-**Purpose:** Utility scripts used by hooks, MCP servers, or commands
+**Purpose:** Utility scripts used by hooks, MCP servers, or skills
 
 **Structure:**
 ```
@@ -405,9 +376,8 @@ assets/
 | Component | Default Location | Type | Required? | Purpose |
 |-----------|------------------|------|-----------|---------|
 | **Manifest** | `.claude-plugin/plugin.json` | File | ✅ Yes | Plugin configuration |
-| **Commands** | `commands/` | Directory | ❌ No | Slash commands |
+| **Skills** | `skills/` | Directory | ❌ No | Agent Skills (auto + user-invoked) |
 | **Agents** | `agents/` | Directory | ❌ No | Custom agents |
-| **Skills** | `skills/` | Directory | ❌ No | Agent Skills |
 | **Hooks** | `hooks/hooks.json` or inline | File/Config | ❌ No | Event handlers |
 | **MCP servers** | `.mcp.json` or inline | File/Config | ❌ No | External service integration |
 | **LSP servers** | `.lsp.json` or inline | File/Config | ❌ No | Code intelligence |
@@ -419,44 +389,51 @@ assets/
 
 ## Common Plugin Patterns
 
-### Simple Plugin (Single Command)
+### Simple Plugin (Single Skill)
 
 ```
 simple-plugin/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   └── format.md
+├── skills/
+│   └── formatter/
+│       └── SKILL.md
 └── README.md
 ```
 
-### Multi-Command Plugin
+### Multi-Skill Plugin
 
 ```
 code-tools-plugin/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   ├── validate.md
-│   ├── format.md
-│   ├── analyze.md
-│   └── report.md
+├── skills/
+│   ├── validator/
+│   │   └── SKILL.md
+│   ├── formatter/
+│   │   └── SKILL.md
+│   ├── analyzer/
+│   │   └── SKILL.md
+│   └── reporter/
+│       └── SKILL.md
 └── README.md
 ```
 
-### Plugin with Skills
+### Plugin with Skills and References
 
 ```
 analyzer-plugin/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   └── analyze.md
 ├── skills/
 │   ├── code-analyzer/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── patterns.md
 │   └── pattern-detector/
-│   │   └── SKILL.md
+│       ├── SKILL.md
+│       └── scripts/
+│           └── detect.py
 └── README.md
 ```
 
@@ -466,9 +443,11 @@ analyzer-plugin/
 database-plugin/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   ├── query.md
-│   └── schema.md
+├── skills/
+│   ├── query-builder/
+│   │   └── SKILL.md
+│   └── schema-analyzer/
+│       └── SKILL.md
 ├── .mcp.json
 ├── mcp/
 │   └── database.py
@@ -481,14 +460,15 @@ database-plugin/
 enterprise-plugin/
 ├── .claude-plugin/
 │   └── plugin.json
-├── commands/
-│   ├── deploy.md
-│   ├── status.md
-│   └── logs.md
-├── agents/
-│   ├── deployment-manager.md
-│   └── security-auditor.md
 ├── skills/
+│   ├── deploy-coordinator/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── deployment-checklist.md
+│   ├── status-monitor/
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   │       └── check-health.py
 │   ├── kubernetes-deployment/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -497,6 +477,9 @@ enterprise-plugin/
 │       ├── SKILL.md
 │       └── scripts/
 │           └── sync.py
+├── agents/
+│   ├── deployment-manager.md
+│   └── security-auditor.md
 ├── hooks/
 │   └── hooks.json
 ├── .mcp.json
@@ -524,10 +507,10 @@ Before installing or distributing your plugin:
 - [ ] `plugin.json` is valid JSON (validate with `jq .`)
 - [ ] Required fields in manifest: `name`, `description`
 - [ ] Component directories at plugin root (not in `.claude-plugin/`)
-- [ ] Command files are `.md` with YAML frontmatter
-- [ ] Command names are lowercase-hyphen
+- [ ] Skill directories contain `SKILL.md` with required frontmatter (name, description)
+- [ ] Skill frontmatter includes invocation control (disable-model-invocation, user-invocable)
+- [ ] Skill names are lowercase-hyphen
 - [ ] Agent files have required `description` and `capabilities`
-- [ ] Skill directories contain `SKILL.md`
 - [ ] All paths in `plugin.json` use `./` prefix
 - [ ] Hook scripts are executable (`chmod +x`)
 - [ ] Hook scripts have shebang line
@@ -535,6 +518,7 @@ Before installing or distributing your plugin:
 - [ ] No components inside `.claude-plugin/` directory
 - [ ] Directory depth appropriate (not overly nested)
 - [ ] No circular references or dependencies
+- [ ] No `commands/` directory (use skills instead)
 
 ## Size and Performance Considerations
 

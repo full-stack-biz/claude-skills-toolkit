@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Purpose
 
-This repository is a **Claude Code plugin** that bundles reusable skills for creating skills and plugins. The plugin is named **skills-toolkit** and provides Agent Skills (auto-activated) and slash commands for managing Claude Code skills and plugins.
+This repository is a **Claude Code plugin** that bundles reusable skills for creating skills and plugins. The plugin is named **skills-toolkit** and provides Agent Skills that can be auto-activated by Claude or invoked directly with `/skills-toolkit:skill-name` slash commands.
 
 **CRITICAL MINDSET:** Skills are instructions FOR CLAUDE, not documentation FOR PEOPLE. When evaluating or improving a skill, the question is always: "Will this help Claude understand and execute the task?" not "Will people find this easy to read?"
 
-**Plugin structure:** This project is organized as a Claude Code plugin with `.claude-plugin/plugin.json` manifest, `skills/` directory for Agent Skills, and `commands/` directory for slash commands.
+**Plugin structure:** This project is organized as a Claude Code plugin with `.claude-plugin/plugin.json` manifest and `skills/` directory for Agent Skills. Skills control invocation behavior through frontmatter (see [Control who invokes a skill](#control-who-invokes-a-skill) below).
 
 ## Skill Structure
 
@@ -52,12 +52,14 @@ allowed-tools: Read,Write,Bash(*)   # Optional: principle of least privilege
 ## Plugin Components
 
 ### Agent Skills (in `skills/`)
-- **skill-creator** - Create and refine Claude Code skills following best practices. Invoked via `/skills-toolkit:create-skill` or auto-activated by Claude when skill-related tasks are detected.
-- **plugin-creator** - Create, convert, and validate Claude Code plugins. Invoked via `/skills-toolkit:create-plugin` or auto-activated when plugin-related tasks are detected.
+Skills are discoverable and invocable via both auto-activation and direct `/` commands:
 
-### Slash Commands (in `commands/`)
-- `/skills-toolkit:create-skill` - Shortcut to invoke skill-creator skill
-- `/skills-toolkit:create-plugin` - Shortcut to invoke plugin-creator skill
+- **skill-creator** - Create and refine Claude Code skills following best practices. Claude auto-activates when detecting skill-related tasks; users can invoke directly with `/skills-toolkit:create-skill`.
+- **plugin-creator** - Create, convert, and validate Claude Code plugins. Claude auto-activates when detecting plugin-related tasks; users can invoke directly with `/skills-toolkit:create-plugin`.
+- **subagent-creator** - Create, validate, and refine Claude Code subagents. Claude auto-activates for subagent delegation tasks; users can invoke with `/skills-toolkit:create-subagent`.
+- **hook-creator** - Create, validate, and refine hooks for automating workflows. Claude auto-activates for hook-related work; users can invoke with `/skills-toolkit:create-hook`.
+
+No separate command files are needed—skills use frontmatter to control invocation behavior.
 
 ## Development Workflow
 
@@ -98,9 +100,7 @@ claude --plugin-dir /Users/sergeymoiseev/full-stack.biz/claude-skills
 
 **Plugin structure:**
 - **Manifest**: `.claude-plugin/plugin.json` - metadata (name, description, version)
-- **Skills**: `skills/` - Agent Skills bundled in plugin (auto-discoverable)
-- **Commands**: `commands/` - slash commands that invoke skills
-- **Standalone**: `rails-migrations/` - not part of plugin; deploy separately if needed
+- **Skills**: `skills/` - Agent Skills bundled in plugin (auto-discoverable with `/` command support)
 
 ## Skill Anatomy (Quick Reference)
 
@@ -168,9 +168,12 @@ When authoring skill examples that show code blocks within code blocks, use thes
 ## Workflow: Adding a New Skill to the Plugin
 
 1. Create skill in `skills/skill-name/`
-2. Create `SKILL.md` with frontmatter + instructions
-3. (Optional) Create `commands/skill-name.md` slash command if direct user invocation is useful
-4. Test locally: `claude --plugin-dir . /skills-toolkit:command`
+2. Create `SKILL.md` with frontmatter (including `name`, `description`, and invocation controls) + instructions
+3. Use frontmatter fields to control invocation:
+   - Default: Both Claude auto-activation and `/` command invocation enabled
+   - `disable-model-invocation: true` - Only users can invoke (e.g., for `/deploy`, `/commit`)
+   - `user-invocable: false` - Only Claude can invoke (e.g., for background context skills)
+4. Test locally: `claude --plugin-dir . /skills-toolkit:skill-name`
 5. Install plugin: `claude plugin install .`
 
 ## Version Release Process
@@ -233,7 +236,6 @@ Update `.claude-plugin/plugin.json` `version:` **only when committing changes**:
 **MINOR bump** (1.X.0 → 1.Y.0) when:
 - Any included skill gets a MINOR version bump
 - Adding or removing skills from the plugin
-- New or modified commands
 
 **MAJOR bump** (X.0.0 → Y.0.0) when:
 - Any included skill gets a MAJOR version bump
@@ -242,11 +244,27 @@ Update `.claude-plugin/plugin.json` `version:` **only when committing changes**:
 When committing version changes, also update:
 1. **CHANGELOG.md** - Add new section for version with date, changes categorized (Added/Changed/Fixed/Removed)
    - **Critical:** Document ONLY user-facing changes. Internal development work (refinements, optimizations, refactoring) is scaffolding, not deliverables
-   - **NEVER document version bumps themselves** - The version number in the header (e.g., `## [1.2.2]`) IS the documentation that a version bump occurred. Don't add entries like "Bumped to 1.2.2" or "PATCH: improvements" — this is circular/redundant
-   - Only document WHAT CHANGED: New features, behavior changes, bug fixes, breaking changes
-   - Examples of what to document: New commands, new skills, bug fixes, behavior changes, feature additions
-   - Examples of what NOT to document: Version bump statements, description improvements, token optimization, reference file reorganization, internal code cleanup
-   - **Rationale:** Users care about what changed for them, not how you built it or that versioning happened. If refinements are invisible to users, they don't go in CHANGELOG
+
+   **⚠️ ABSOLUTE RULE: NEVER document version bumps or internal versioning details**
+   - The version number in the section header (e.g., `## [1.2.3]`) IS the complete documentation that a version change occurred
+   - **BANNED entries:** "Bumped to 1.2.3", "PATCH: improvements", "skill-creator: 1.0.0 → 1.0.1", "Bumped individual skill versions"
+   - Don't explain WHY versions changed (e.g., "Bumped plugin for skill version changes")
+   - Don't list skill version numbers or bumps anywhere in the body
+   - **Circular/redundant examples to avoid:**
+     - "Bumped skill-creator to 1.0.1" ← NO (version is metadata, not a change)
+     - "Updated plugin version for compatibility" ← NO (users don't care about internal versioning)
+     - "Technical: Bumped versions" sections ← NO (version numbers are not user-facing changes)
+
+   **What to document instead: User-facing impact**
+   - New features/skills that users can now use
+   - Behavior changes that affect how users interact with skills
+   - Bug fixes that improve user experience
+   - Breaking changes users need to know about
+   - Enhanced documentation/examples that users will read
+
+   - Examples of what to document: New commands, new skills, behavior changes, bug fixes, feature additions, documentation improvements
+   - Examples of what NOT to document: Version bumps, version numbers, skill versioning, internal improvements, token optimization, code cleanup
+   - **Rationale:** Users care what value changed for them, not metadata about how it was versioned. Version numbers are implementation detail. The section header `## [1.2.3]` tells users a version exists; the body tells them what they need to do/use.
 2. **README.md** - Update any version references in installation commands or feature lists
 3. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
    - `metadata.version`
@@ -266,9 +284,17 @@ grep -i 'version' CHANGELOG.md README.md
 claude plugin validate .
 ```
 
+## Control who invokes a skill
+
+Skills support frontmatter fields to control invocation behavior:
+
+- **`disable-model-invocation: true`** - Only you can invoke via `/skill-name`. Use for workflows with side effects (e.g., `/deploy`, `/commit`, `/send-slack-message`). Prevents Claude from triggering these automatically.
+- **`user-invocable: false`** - Only Claude can invoke. Use for background knowledge skills that shouldn't be directly actionable (e.g., a `legacy-system-context` skill that teaches Claude about old systems).
+- **(default)** - Both you and Claude can invoke. Skill description always in context; Claude loads full skill when relevant.
+
 ## Notes for Future Development
 
 - Plugin architecture established; follow `.claude-plugin/` conventions
 - Skills are organized within plugin; use `skills/` directory for new additions
-- Commands auto-discovered from `commands/` directory
+- Legacy `commands/` directory can be deprecated; use skill frontmatter instead
 - No automated workflows (validation, etc.) implemented yet

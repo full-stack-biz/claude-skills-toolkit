@@ -2,13 +2,30 @@
 name: plugin-creator
 description: >-
   Create, validate, and refine Claude Code plugins with skills, commands, hooks, agents, and servers. Use when: building plugins from scratch, converting projects to plugins, or improving plugin structure. Includes manifest generation, component organization, and integration guidance (use hook-creator and subagent-creator skills for those components).
-version: 1.0.4
+version: 1.0.5
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
 ---
 
 # Plugin Creator
 
 **Dual purpose:** Create plugins from scratch OR transform existing projects into well-structured plugins.
+
+## Quick Routing
+
+Use this to understand what you're here to do:
+
+**What would you like to do?**
+- **Create a new plugin** - Build a plugin from scratch with proper manifest, directory structure, and components
+- **Convert a project** - Transform an existing project into a Claude Code plugin with proper organization
+- **Validate a plugin** - Check your plugin against Claude Code standards (manifest, structure, naming)
+
+**What is the plugin name?**
+- If creating/validating: Provide the plugin name (e.g., `code-reviewer`, `api-tools`, `deployment-manager`)
+- If converting: Provide the path to the existing project
+
+Then proceed to the appropriate section below.
+
+---
 
 ## When to Use This Skill
 

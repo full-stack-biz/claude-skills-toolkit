@@ -2,6 +2,28 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.2.3] - 2026-01-20
+
+### Changed
+- **Unified skills approach:** Migrated from separate commands/ directory to unified skills system
+  - Skills now handle both auto-activation and user invocation via `/` commands
+  - Replaces deprecated command-based architecture with skill-based invocation control
+- **skill-creator, plugin-creator, subagent-creator, hook-creator:** Added "Quick Routing" sections
+  - Interactive questions guide users through action selection (create/validate/refine)
+  - Examples embedded in questions for better discoverability
+  - Frontmatter invocation control (`disable-model-invocation`, `user-invocable`) documented
+- **plugin-creator references:** Comprehensive architecture documentation updates
+  - `how-plugins-work.md`: Replaced "Slash Commands" section with "Skills (User-Invoked)" explaining unified approach
+  - `directory-structure.md`: Updated all plugin examples to use skills-only structure
+  - Updated token loading hierarchy and component metadata documentation
+
+### Removed
+- **commands/ directory:** Deleted (all functionality preserved in skills)
+  - create-skill.md → migrated to skill-creator Quick Routing
+  - create-plugin.md → migrated to plugin-creator Quick Routing
+  - create-subagent.md → migrated to subagent-creator Quick Routing
+  - create-hook.md → migrated to hook-creator Quick Routing
+
 ## [1.2.2] - 2026-01-20
 
 ### Changed

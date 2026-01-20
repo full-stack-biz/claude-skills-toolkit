@@ -5,13 +5,30 @@ description: >-
   Use when building new subagents, validating existing ones, improving quality,
   scoping tool access, configuring permission modes, or setting up hook
   validation. For personal, team, or production environments.
-version: 1.0.0
+version: 1.0.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
 # Subagent Creator
 
 **Dual purpose:** Create subagents right the first time OR elevate existing subagents to best practices.
+
+## Quick Routing
+
+Use this to understand what you're here to do:
+
+**What would you like to do?**
+- **Create a new subagent** - Build a subagent from scratch with proper scoping, permissions, and delegation signals
+- **Validate an existing subagent** - Check your subagent against best practices (configuration, delegation, tool scoping, permissions)
+- **Refine a subagent** - Improve an existing subagent (robustness, error handling, permissions, hooks)
+
+**What is the subagent name?**
+- If creating: What do you want to call it? (e.g., `db-analyzer`, `code-reviewer`, `compliance-auditor`)
+- If validating/refining: Provide the subagent name or path
+
+Then proceed to the appropriate section below.
+
+---
 
 ## When to Use This Skill
 
