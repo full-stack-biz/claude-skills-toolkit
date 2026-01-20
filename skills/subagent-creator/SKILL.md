@@ -5,7 +5,7 @@ description: >-
   Use when building new subagents, validating existing ones, improving quality,
   scoping tool access, configuring permission modes, or setting up hook
   validation. For personal, team, or production environments.
-version: 1.0.3
+version: 1.1.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -64,20 +64,42 @@ Examples:
 
 ## Implementation Approach
 
-**START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
+**⚠️ CRITICAL: Scope Detection & Clarification**
 
-```
-Question 1: What would you like to do?
-- Create a new subagent (Recommended) - Build from scratch
-- Validate an existing subagent - Check against best practices
-- Refine a subagent - Improve existing subagent
+Always detect project type first, then clarify scope only when needed:
 
-Question 2: What is the subagent name?
-- If creating: What do you want to call it? (e.g., `db-analyzer`, `code-reviewer`, `compliance-auditor`)
-- If validating/refining: Provide the subagent name or path
-```
+**Allowed scopes:**
+- **Claude plugin projects** (has `.claude-plugin/plugin.json`): Subagents in `agents/` (plugin) or `.claude/agents/` (project-level)
+- **Regular projects**: Subagents in `.claude/agents/` only
+- **NEVER** edit subagents from installed locations: `~/.claude/plugins/cache/`, `~/.claude/agents/`, or global installations
+- If user provides a path to an installed subagent, refuse and explain the difference
 
-Based on their answers, route to the appropriate workflow below.
+**START HERE - Scope Detection & Clarification Flow:**
+
+1. **Ask Question 1: Action type**
+   - Create a new subagent (Recommended)
+   - Validate an existing subagent
+   - Refine a subagent
+
+2. **AUTO-DETECT: Check for `.claude-plugin/plugin.json`**
+   - If it exists (project is a Claude plugin): Go to step 3a
+   - If it doesn't exist (regular project): Go to step 3b
+
+3a. **IF PROJECT IS A CLAUDE PLUGIN - Ask Question 2: Scope choice**
+   ```
+   Should this subagent be part of the plugin or project-level?
+   - Part of the plugin - Add to `agents/` directory (bundled with plugin)
+   - Project-level - Add to `.claude/agents/` directory (local, not bundled)
+   ```
+   Then ask: "What do you want to call it?" (e.g., `db-analyzer`, `code-reviewer`, `compliance-auditor`)
+
+3b. **IF PROJECT IS REGULAR - No scope question needed**
+   - Inform user: "Creating project-level subagent in `.claude/agents/`"
+   - Ask: "What do you want to call it?" (e.g., `db-analyzer`, `code-reviewer`, `compliance-auditor`)
+
+**For validating/refining:** Ask "Provide the subagent name or path relative to project root" (e.g., `agents/db-analyzer` for plugins or `.claude/agents/db-analyzer` for regular projects)
+
+Based on answers, route to the appropriate workflow below.
 
 ### For New Subagents: Requirements Interview First
 
@@ -93,18 +115,24 @@ After routing to "create", **interview the user to gather requirements** using A
 
 Then use `references/templates.md` to apply requirements to the appropriate subagent structure.
 
-### For Existing Subagents
+### For Existing Subagents (Validating)
 
-1. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
-2. Use `references/checklist.md` to identify gaps during validation
-3. Check `references/delegation-signals.md` for description clarity
-4. Validate: Complete workflow + checklist before considering the subagent complete
+1. **FIRST: Verify the subagent path is project-scoped** — Check if path contains `.claude/agents/` or `agents/` relative to project root. If path is from `~/.claude/plugins/cache/` or `~/.claude/`, REFUSE and explain project scope
+2. **SECOND: Detect if subagent is plugin or project-level** — Infer from path prefix:
+   - Path starts with `agents/` → Plugin-level subagent
+   - Path starts with `.claude/agents/` → Project-level subagent
+3. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
+4. Use `references/checklist.md` to identify gaps during validation
+5. Check `references/delegation-signals.md` for description clarity
+6. Validate: Complete workflow + checklist before considering the subagent complete
 
-### For Improvements
+### For Improvements (Refining)
 
-1. Ask user which aspects need improvement (delegation, tools, permissions, etc.)
-2. Reference relevant sections from `references/checklist.md` or `references/delegation-signals.md`
-3. Make targeted improvements rather than rewriting everything
+1. **FIRST: Verify the subagent path is project-scoped** — Check if path is in project directory, NOT in installed locations. Refuse if it's installed/cached
+2. **SECOND: Detect scope from path** — Determine if subagent is plugin-level or project-level based on path prefix
+3. Ask user which aspects need improvement (delegation, tools, permissions, etc.)
+4. Reference relevant sections from `references/checklist.md` or `references/delegation-signals.md`
+5. Make targeted improvements rather than rewriting everything
 
 ## Outcome Metrics
 

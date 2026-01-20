@@ -2,6 +2,21 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.3.0] - 2026-01-20
+
+### Added
+- **Scope detection for artifact creation** - Automatically determine correct placement for skills, hooks, and subagents
+  - **skill-creator, hook-creator, subagent-creator:** Auto-detect if project is a Claude plugin
+  - **For plugin projects:** Prompt users to choose between plugin-level (bundled) or project-level (local) placement
+  - **For regular projects:** Automatically place artifacts in project-level location without prompts
+  - Prevents accidental creation of artifacts in wrong locations (e.g., global `~/.claude/` vs project scope)
+
+### Changed
+- **skill-creator, hook-creator, subagent-creator:** Enhanced workflows with project scope detection
+  - Added automatic `.claude-plugin/plugin.json` detection to determine project type
+  - Improved validation to refuse editing installed/cached artifacts from global locations
+  - Scope detection applies to create, validate, and refine workflows
+
 ## [1.2.6] - 2026-01-20
 
 ### Changed

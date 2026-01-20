@@ -5,7 +5,7 @@ description: >-
   validating an existing skill against best practices, or improving a skill's
   clarity and execution. Handles skill structure, frontmatter, activation,
   references, tool scoping, and production readiness.
-version: 1.0.4
+version: 1.1.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -60,26 +60,42 @@ Examples:
 
 ## Implementation Approach
 
-**⚠️ CRITICAL: Project Scope Only**
-- ONLY edit skills in project scope: `.claude/skills/` or `skills/` (relative to project root)
-- NEVER edit skills from installed locations: `~/.claude/plugins/cache/`, `~/.claude/skills/`, or global installations
+**⚠️ CRITICAL: Scope Detection & Clarification**
+
+Always detect project type first, then clarify scope only when needed:
+
+**Allowed scopes:**
+- **Claude plugin projects** (has `.claude-plugin/plugin.json`): Skills in `skills/` (plugin) or `.claude/skills/` (project-level)
+- **Regular projects**: Skills in `.claude/skills/` only
+- **NEVER** edit skills from installed locations: `~/.claude/plugins/cache/`, `~/.claude/skills/`, or global installations
 - If user provides a path to an installed skill, refuse and explain the difference
-- Always verify path is project-scoped before making any edits
 
-**START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
+**START HERE - Scope Detection & Clarification Flow:**
 
-```
-Question 1: What would you like to do?
-- Create a new skill (Recommended) - Build a skill from scratch
-- Validate an existing skill - Check your skill against best practices
-- Refine a skill - Improve an existing skill
+1. **Ask Question 1: Action type**
+   - Create a new skill (Recommended)
+   - Validate an existing skill
+   - Refine a skill
 
-Question 2: What is the skill name or path?
-- If creating: What do you want to call it? (e.g., `code-analyzer`, `test-runner`)
-- If validating/refining: Provide the skill directory path relative to project root (e.g., `skills/pdf-processor`)
-```
+2. **AUTO-DETECT: Check for `.claude-plugin/plugin.json`**
+   - If it exists (project is a Claude plugin): Go to step 3a
+   - If it doesn't exist (regular project): Go to step 3b
 
-Based on their answers, route to the appropriate workflow below.
+3a. **IF PROJECT IS A CLAUDE PLUGIN - Ask Question 2: Scope choice**
+   ```
+   Should this skill be part of the plugin or project-level?
+   - Part of the plugin - Add to `skills/` directory (bundled with plugin)
+   - Project-level - Add to `.claude/skills/` directory (local, not bundled)
+   ```
+   Then ask: "What do you want to call it?" (e.g., `code-analyzer`, `test-runner`)
+
+3b. **IF PROJECT IS REGULAR - No scope question needed**
+   - Inform user: "Creating project-level skill in `.claude/skills/`"
+   - Ask: "What do you want to call it?" (e.g., `code-analyzer`, `test-runner`)
+
+**For validating/refining:** Ask "Provide the skill path relative to project root" (e.g., `skills/pdf-processor` or `.claude/skills/pdf-processor`)
+
+Based on answers, route to the appropriate workflow below.
 
 ### For New Skills: Requirements Interview First
 
@@ -94,20 +110,24 @@ After routing to "create", **interview the user to gather requirements** using A
 
 Then use `references/templates.md` to apply requirements to the appropriate template structure.
 
-### For Existing Skills
+### For Existing Skills (Validating)
 
 1. **FIRST: Verify the skill path is project-scoped** — Check if path contains `.claude/skills/` or `skills/` relative to project root. If path is from `~/.claude/plugins/cache/` or `~/.claude/`, REFUSE and explain project scope
-2. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
-3. Use `references/checklist.md` to identify gaps during Phase 3-6
-4. Check `references/allowed-tools.md` if tool scoping is involved
-5. Validate: Complete workflow + checklist before considering the skill complete
+2. **SECOND: Detect if path is plugin or project-level** — Infer from path prefix:
+   - Path starts with `skills/` → Plugin-level skill
+   - Path starts with `.claude/skills/` → Project-level skill
+3. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
+4. Use `references/checklist.md` to identify gaps during Phase 3-6
+5. Check `references/allowed-tools.md` if tool scoping is involved
+6. Validate: Complete workflow + checklist before considering the skill complete
 
-### For Improvements
+### For Improvements (Refining)
 
 1. **FIRST: Verify the skill path is project-scoped** — Check if path is in project directory, NOT in installed locations. Refuse if it's installed/cached
-2. Ask user which aspects need improvement (structure, length, triggering, etc.)
-3. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
-4. Make targeted improvements rather than rewriting everything
+2. **SECOND: Detect scope from path** — Determine if skill is plugin-level or project-level based on path prefix
+3. Ask user which aspects need improvement (structure, length, triggering, etc.)
+4. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
+5. Make targeted improvements rather than rewriting everything
 
 ## Outcome Metrics
 
