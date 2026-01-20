@@ -2,6 +2,15 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.2.6] - 2026-01-20
+
+### Changed
+- **skill-creator:** Improved activation and safeguards
+  - Description now uses specific trigger phrases for reliable activation ("building a new skill", "validating against best practices", "improving clarity")
+  - Added critical project-scope safeguards to prevent accidentally editing installed/cached skill versions
+  - Enhanced Reference Guide with explicit "Load if" conditions so Claude knows exactly when to load each reference file
+  - Improved token efficiency (20% reduction while preserving all essential guidance)
+
 ## [1.2.5] - 2026-01-20
 
 ### Changed

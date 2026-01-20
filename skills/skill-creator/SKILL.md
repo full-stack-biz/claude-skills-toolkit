@@ -1,11 +1,11 @@
 ---
 name: skill-creator
 description: >-
-  Create and refine Claude Code skills following best practices. Use when
-  building new skills from scratch, validating existing skills against standards,
-  or improving subpar skills to production quality. For personal, team, or
-  production environments.
-version: 1.0.3
+  Create, validate, and refine Claude Code skills. Use when: building a new skill,
+  validating an existing skill against best practices, or improving a skill's
+  clarity and execution. Handles skill structure, frontmatter, activation,
+  references, tool scoping, and production readiness.
+version: 1.0.4
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -23,47 +23,26 @@ Use AskUserQuestion to gather requirements, then proceed to the appropriate sect
 
 ---
 
-## When to Use This Skill
+## Use Cases
 
-Invoke skill-creator in these scenarios (Claude will guide you through each):
+**Create new skills** - Build from scratch with correct structure, naming, frontmatter, and validation guidance.
+**Validate existing skills** - Check against best practices (structure, activation clarity, token efficiency, tool scoping).
+**Improve skills** - Refine activation, clarity, organization, or efficiency of existing skills.
+**Team/production skills** - Ensure robustness with error handling, tool scoping, and version tracking.
 
-**Creating new skills:** Building a skill from scratch and need structured guidance so Claude will execute it correctly (naming, frontmatter for activation, body structure for Claude's execution, references, validation).
+## Mindset
 
-**Validating existing skills:** Have a skill and want to ensure Claude will follow it effectively (correct structure, progressive disclosure, token efficiency, clear tool scoping).
+**CRITICAL:** Skills are instructions FOR CLAUDE, not documentation FOR PEOPLE. Always ask: "Will this help Claude execute the task?" not "Will people find this readable?"
 
-**Improving skill quality:** Skill works but Claude might execute it inefficiently (too long, missing references, poor organization, inconsistent terminology, unclear instructions).
+## Foundation: Three Key Concepts
 
-**Team/production skills:** Creating skills for multiple Claude instances and need to ensure they're robust (error handling, tool scoping, version tracking, clear documentation Claude can follow).
+**Token loading:** Metadata (~100 tokens) always loads. SKILL.md body (~1-5k tokens) loads on trigger. References load on-demand only (zero penalty until needed).
 
-**NOT for:** General Claude questions, debugging existing skills in use, writing skill content directly (focus on structure/guidance only).
+**Activation:** Skills trigger via description text alone. Vague descriptions never activate. Specific trigger phrases ("create skill", "validate", "improve") = reliable activation.
 
-## Why This Exists
+**Efficiency:** Keep SKILL.md body <500 lines. Move detailed content to references. Quick Start should handle 80% of cases without references.
 
-**CRITICAL MINDSET:** Skills are instructions FOR CLAUDE, not documentation FOR PEOPLE. When evaluating or improving a skill, the question is always: "Will this help Claude understand and execute the task?" not "Will people find this easy to read?"
-
-Skills solve a critical problem: Claude's knowledge is general-purpose, but specific domains need specialized execution patterns. Without structured skill creation guidance, skills end up inconsistent and hard for Claude to follow effectively. skill-creator ensures every skill is optimized for Claude's task execution (progressive disclosure, token efficiency, tool scoping, clear procedures) from the start.
-
-## Foundation: How Skills Trigger & Load
-
-To create and validate skills effectively, you need to understand how skills work internally:
-
-**Token loading hierarchy** — Skills load in three levels:
-1. **Level 1 (Metadata)**: ~100 tokens, always loaded (name + description)
-2. **Level 2 (SKILL.md body)**: ~1,500-5,000 tokens, loads when triggered
-3. **Level 3 (References/scripts)**: Unlimited, loads on-demand
-
-**Selection mechanism** — Pure LLM reasoning on descriptions. Claude evaluates skill descriptions using natural language understanding (not keyword matching). This means:
-- Vague descriptions = skills never trigger when needed
-- Specific trigger phrases = reliable activation for Claude
-- Descriptions are Claude's primary activation signal
-
-**Why this matters for your work:**
-- Descriptions must be specific and include concrete trigger phrases Claude will recognize
-- SKILL.md body should stay <500 lines (Claude loads this every trigger; token efficiency matters)
-- Reference files have zero token penalty when not needed (Claude loads only on-demand)
-- Quick Start sections are critical (Claude should execute 80% of tasks from Quick Start alone)
-
-See `references/how-skills-work.md` for complete architectural details.
+Full details: See `references/how-skills-work.md`.
 
 ## THE EXACT PROMPT
 
@@ -81,6 +60,12 @@ Examples:
 
 ## Implementation Approach
 
+**⚠️ CRITICAL: Project Scope Only**
+- ONLY edit skills in project scope: `.claude/skills/` or `skills/` (relative to project root)
+- NEVER edit skills from installed locations: `~/.claude/plugins/cache/`, `~/.claude/skills/`, or global installations
+- If user provides a path to an installed skill, refuse and explain the difference
+- Always verify path is project-scoped before making any edits
+
 **START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
 
 ```
@@ -91,7 +76,7 @@ Question 1: What would you like to do?
 
 Question 2: What is the skill name or path?
 - If creating: What do you want to call it? (e.g., `code-analyzer`, `test-runner`)
-- If validating/refining: Provide the skill directory name (e.g., `pdf-processor`) or full path
+- If validating/refining: Provide the skill directory path relative to project root (e.g., `skills/pdf-processor`)
 ```
 
 Based on their answers, route to the appropriate workflow below.
@@ -111,16 +96,18 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 ### For Existing Skills
 
-1. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
-2. Use `references/checklist.md` to identify gaps during Phase 3-6
-3. Check `references/allowed-tools.md` if tool scoping is involved
-4. Validate: Complete workflow + checklist before considering the skill complete
+1. **FIRST: Verify the skill path is project-scoped** — Check if path contains `.claude/skills/` or `skills/` relative to project root. If path is from `~/.claude/plugins/cache/` or `~/.claude/`, REFUSE and explain project scope
+2. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
+3. Use `references/checklist.md` to identify gaps during Phase 3-6
+4. Check `references/allowed-tools.md` if tool scoping is involved
+5. Validate: Complete workflow + checklist before considering the skill complete
 
 ### For Improvements
 
-1. Ask user which aspects need improvement (structure, length, triggering, etc.)
-2. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
-3. Make targeted improvements rather than rewriting everything
+1. **FIRST: Verify the skill path is project-scoped** — Check if path is in project directory, NOT in installed locations. Refuse if it's installed/cached
+2. Ask user which aspects need improvement (structure, length, triggering, etc.)
+3. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
+4. Make targeted improvements rather than rewriting everything
 
 ## Outcome Metrics
 
@@ -178,32 +165,23 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 4. **Test activation:** Will Claude recognize this description in real requests? Will it activate when needed?
 5. **Re-validate** using the workflow before considering refinements complete
 
-## Key Patterns & Reference Files
+## Reference Guide
 
-For detailed guidance, see references/:
+**Load when understanding skill fundamentals:**
+- `references/how-skills-work.md` — **Load if:** User asks why descriptions trigger activation, or you need to explain token loading hierarchy, selection mechanism, or skill architecture
 
-### Understanding Skills (how Claude uses skills)
-- **`how-skills-work.md`** — How skills activate and execute (token loading hierarchy, selection mechanism, execution model, activation signals)
+**Load when creating a new skill:**
+- `references/templates.md` — **Load if:** User describes requirements and you need copy-paste starting points (basic template vs. production template, workflow patterns)
+- `references/content-guidelines.md` — **Load if:** Writing skill descriptions/frontmatter and need to verify trigger phrases work, or checking terminology consistency in existing skill
 
-### Creating & Validating (ensuring Claude will execute well)
-- **`validation-workflow.md`** — 7-phase validation process Claude will follow (frontmatter activation, body clarity, references organization, tool scoping, real-world testing)
-- **`checklist.md`** — Best practices Claude needs (activation clarity, execution clarity, token efficiency, error handling for production)
-- **`templates.md`** — Copy-paste starting points Claude can follow (basic template, production template, workflow patterns)
+**Load when validating or improving skills:**
+- `references/validation-workflow.md` — **Load if:** Systematically validating through phases (frontmatter clarity → body clarity → references organization → tool scoping → real-world testing)
+- `references/checklist.md` — **Load if:** Assessing skill quality across all dimensions (activation, clarity, token efficiency, error handling, production readiness)
+- `references/advanced-patterns.md` — **Load if:** Skill is production/team-use and needs error handling, version history, risk assessment, security review, or advanced patterns
 
-### Content Quality (writing so Claude executes correctly)
-- **`content-guidelines.md`** — Writing descriptions Claude will recognize, terminology consistency, code examples Claude can adapt
-- **`allowed-tools.md`** — Tool scoping (what tools Claude needs, principle of least privilege, security)
-
-### Advanced Usage
-- **`advanced-patterns.md`** — Production patterns (impact tiering, implementation approach, outcome metrics, version history, skill archetypes, risk tiering)
-
-## Core Principles
-
-**Self-Containment** — Skills must be self-contained. Claude needs everything within the skill directory (references, scripts, examples). Avoid external references or network dependencies unless core to the skill's purpose. See `references/self-containment-principle.md` for complete guidance.
-
-**Progressive Disclosure** — Essential execution instructions first (Quick Start), detailed guidance second (references/), advanced topics last. Claude should execute 80% of tasks from Quick Start alone without loading references (token efficiency matters).
-
-**Token Efficiency** — Every token Claude loads must justify its cost. Use code examples over prose, tables over lists, and move detailed content to references/. SKILL.md body is loaded every trigger, so minimize it ruthlessly.
+**Load when configuring permissions and structure:**
+- `references/allowed-tools.md` — **Load if:** Determining which tools skill needs, or reviewing security/principle of least privilege
+- `references/self-containment-principle.md` — **Load if:** Deciding whether skill has external dependencies, or troubleshooting self-containment violations
 
 ## Key Notes
 
@@ -232,30 +210,8 @@ Example: "Run tests and generate reports. Use when validating code before commit
 
 The description must contain phrases Claude will see in user requests. If the description is vague, Claude won't activate the skill when needed.
 
-**Team/Production considerations:**
-- Error handling is mandatory (robust try/except, clear messages)
-- Scripts must be tested before sharing
-- Tool scoping: minimal permissions (principle of least privilege)
-- Version tracking recommended for team coordination
-- See `checklist.md` → "Team & Production Skills" section
+**Team/Production considerations:** Error handling mandatory. Scripts tested. Tool scoping: least privilege. Version tracking recommended. See `references/advanced-patterns.md` and `references/checklist.md`.
 
-**Content distribution rule (Claude loads SKILL.md body every trigger):**
-- Keep SKILL.md <500 lines (enforced; Claude reads this every time, so minimize token load)
-- If adding >50 lines of content: create a reference file instead
-- Example: "Add allowed-tools docs" → create `references/allowed-tools.md`, link briefly in SKILL.md
-- Reference files have zero token penalty until Claude needs them (much better token efficiency)
+**Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
 
-**Deployment:**
-- Global: `~/.claude/skills/`
-- Project-local: `.claude/skills/`
-
-## Advanced Topics
-
-For team/production skills, ensure Claude will execute robustly:
-- **Error handling**: Robust try/except blocks, clear error messages Claude can understand
-- **Tool scoping**: Minimal permissions (principle of least privilege for security)
-- **Validation scripts**: Include example code Claude can reference and execute
-- **Security review**: Peer review before deployment to catch edge cases Claude might miss
-- **Clear documentation**: So Claude (and other team members) understand context and constraints
-
-For common patterns, see `references/templates.md` → Workflow Pattern Examples and Optional Frontmatter Fields.
+**Deployment:** Global `~/.claude/skills/` or project-local `.claude/skills/`.
