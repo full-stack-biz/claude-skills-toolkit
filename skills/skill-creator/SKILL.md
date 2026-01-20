@@ -5,7 +5,7 @@ description: >-
   building new skills from scratch, validating existing skills against standards,
   or improving subpar skills to production quality. For personal, team, or
   production environments.
-version: 1.0.1
+version: 1.0.2
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -15,18 +15,11 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 ## Quick Routing
 
-Use this to understand what you're here to do:
+Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
 
-**What would you like to do?**
-- **Create a new skill** - Build a skill from scratch with structured guidance (frontmatter, body structure, references, validation)
-- **Validate an existing skill** - Check your skill against best practices (structure, activation, token efficiency, tool scoping)
-- **Refine a skill** - Improve an existing skill (length, clarity, activation triggers, organization)
-
-**What is the skill name or path?**
-- If validating/refining: Provide the skill directory name (e.g., `pdf-processor`) or full path
-- If creating: Tell us what you want to call it (e.g., `code-analyzer`, `test-runner`)
-
-Then proceed to the appropriate section below.
+1. Ask what the user wants to do (create/validate/refine)
+2. Ask for the skill name or path based on the action
+3. Route to the appropriate workflow section
 
 ---
 
@@ -88,9 +81,24 @@ Examples:
 
 ## Implementation Approach
 
+**START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
+
+```
+Question 1: What would you like to do?
+- Create a new skill (Recommended) - Build a skill from scratch
+- Validate an existing skill - Check your skill against best practices
+- Refine a skill - Improve an existing skill
+
+Question 2: What is the skill name or path?
+- If creating: What do you want to call it? (e.g., `code-analyzer`, `test-runner`)
+- If validating/refining: Provide the skill directory name (e.g., `pdf-processor`) or full path
+```
+
+Based on their answers, route to the appropriate workflow below.
+
 ### For New Skills: Requirements Interview First
 
-Before creating skill structure, **interview the user to gather requirements** using AskUserQuestion. This ensures the skill will activate correctly and Claude will execute it effectively:
+After routing to "create", **interview the user to gather requirements** using AskUserQuestion. This ensures the skill will activate correctly and Claude will execute it effectively:
 
 1. **Skill purpose** - What domain-specific task should Claude execute? What problem does this solve?
 2. **Trigger phrases** - What phrases will Claude see in requests when this skill should activate?

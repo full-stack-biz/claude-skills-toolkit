@@ -5,7 +5,7 @@ description: >-
   Use when building new hooks from scratch, validating existing hooks against best
   practices, or improving hook quality for production. Handles command hooks (shell scripts),
   prompt hooks (LLM-based decisions), event matching, JSON decision schemas, and safety validation.
-version: 2.0.2
+version: 2.0.3
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -15,18 +15,11 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 ## Quick Routing
 
-Use this to understand what you're here to do:
+Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
 
-**What would you like to do?**
-- **Create a new hook** - Build a hook from scratch (event type, matcher, command/prompt/agent, error handling)
-- **Validate an existing hook** - Check your hooks against best practices (event binding, matcher syntax, error handling, security)
-- **Refine hook quality** - Improve an existing hook (performance, reliability, maintainability, validation)
-
-**What is the hook about?**
-- If creating: Describe what you want to automate (e.g., `format-on-write`, `pre-commit-check`, `post-tool-use`)
-- If validating/refining: Provide the hook name or describe the hook event
-
-Then proceed to the appropriate section below.
+1. Ask what the user wants to do (create/validate/refine)
+2. Ask for the hook name or description based on the action
+3. Route to the appropriate workflow section
 
 ---
 
@@ -107,8 +100,23 @@ Examples:
 
 ## Workflow by Action
 
+**START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
+
+```
+Question 1: What would you like to do?
+- Create a new hook (Recommended) - Build from scratch
+- Validate an existing hook - Check against best practices
+- Refine hook quality - Improve existing hook
+
+Question 2: What is the hook about?
+- If creating: Describe what you want to automate (e.g., `format-on-write`, `pre-commit-check`, `post-tool-use`)
+- If validating/refining: Provide the hook name or describe the hook event
+```
+
+Based on their answers, route to the appropriate workflow below:
+
 ### Create New Hooks
-1. Interview user: hook purpose, event type, matcher conditions, action type, error handling needs
+1. Interview user: hook purpose, event type, matcher conditions, action type, error handling needs (use AskUserQuestion)
 2. Use `references/templates.md` to start from appropriate template
 3. Configure event → matcher → action → error handling
 4. Validate using `references/checklist.md` before completion
@@ -119,7 +127,7 @@ Examples:
 3. Complete all 7 phases before signing off
 
 ### Improve Hooks
-1. Ask which aspect needs improvement (event, matcher, performance, error handling)
+1. Ask which aspect needs improvement (event, matcher, performance, error handling) using AskUserQuestion
 2. Reference `references/checklist.md` for best practices in that area
 3. Make targeted fixes rather than rewrites
 

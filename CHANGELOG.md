@@ -2,6 +2,14 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.2.4] - 2026-01-20
+
+### Changed
+- **skill-creator, plugin-creator, subagent-creator, hook-creator:** Enhanced initial guidance with interactive questions
+  - Replaced text-based routing prompts with structured AskUserQuestion for better UX
+  - Consistent pattern across all creator skills for gathering requirements
+  - Clearer workflow routing based on user intent (create/validate/refine)
+
 ## [1.2.3] - 2026-01-20
 
 ### Changed

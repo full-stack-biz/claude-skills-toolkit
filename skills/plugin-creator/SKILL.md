@@ -2,7 +2,7 @@
 name: plugin-creator
 description: >-
   Create, validate, and refine Claude Code plugins with skills, commands, hooks, agents, and servers. Use when: building plugins from scratch, converting projects to plugins, or improving plugin structure. Includes manifest generation, component organization, and integration guidance (use hook-creator and subagent-creator skills for those components).
-version: 1.0.5
+version: 1.0.6
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
 ---
 
@@ -12,18 +12,11 @@ allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude
 
 ## Quick Routing
 
-Use this to understand what you're here to do:
+Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
 
-**What would you like to do?**
-- **Create a new plugin** - Build a plugin from scratch with proper manifest, directory structure, and components
-- **Convert a project** - Transform an existing project into a Claude Code plugin with proper organization
-- **Validate a plugin** - Check your plugin against Claude Code standards (manifest, structure, naming)
-
-**What is the plugin name?**
-- If creating/validating: Provide the plugin name (e.g., `code-reviewer`, `api-tools`, `deployment-manager`)
-- If converting: Provide the path to the existing project
-
-Then proceed to the appropriate section below.
+1. Ask what the user wants to do (create/convert/validate)
+2. Ask for the plugin name or path based on the action
+3. Route to the appropriate workflow section
 
 ---
 
@@ -83,13 +76,30 @@ my-plugin/
 
 ## Choose Your Workflow
 
-See `references/implementation-workflow.md` for complete step-by-step procedures.
+**START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
+
+```
+Question 1: What would you like to do?
+- Create a new plugin (Recommended) - Build from scratch
+- Convert a project - Transform existing project into a plugin
+- Validate a plugin - Check against Claude Code standards
+
+Question 2: What is the plugin name or path?
+- If creating/validating: Provide the plugin name (e.g., `code-reviewer`, `api-tools`)
+- If converting: Provide the path to the existing project
+```
+
+Based on their answers, route to the appropriate workflow below:
 
 ### 1. Creating a New Plugin from Scratch
 Interview requirements → create structure → add components → run `claude plugin validate` → test locally
 
+See `references/implementation-workflow.md` for complete step-by-step procedures.
+
 ### 2. Converting an Existing Project to a Plugin
 Identify components → create plugin structure → migrate and update metadata → run `claude plugin validate` → test locally
+
+See `references/implementation-workflow.md` for complete step-by-step procedures.
 
 ### 3. Validating or Improving Existing Plugins
 **FIRST:** Run `claude plugin validate /path/to/plugin` directly. Review output for errors. **THEN:** Do manual checks for best practices from `references/validation-checklist.md`.
