@@ -5,7 +5,7 @@ description: >-
   building new skills from scratch, validating existing skills against standards,
   or improving subpar skills to production quality. For personal, team, or
   production environments.
-version: 1.0.2
+version: 1.0.3
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 

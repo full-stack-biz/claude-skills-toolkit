@@ -2,7 +2,7 @@
 name: plugin-creator
 description: >-
   Create, validate, and refine Claude Code plugins with skills, commands, hooks, agents, and servers. Use when: building plugins from scratch, converting projects to plugins, or improving plugin structure. Includes manifest generation, component organization, and integration guidance (use hook-creator and subagent-creator skills for those components).
-version: 1.0.6
+version: 1.0.7
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
 ---
 

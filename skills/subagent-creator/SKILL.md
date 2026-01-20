@@ -5,7 +5,7 @@ description: >-
   Use when building new subagents, validating existing ones, improving quality,
   scoping tool access, configuring permission modes, or setting up hook
   validation. For personal, team, or production environments.
-version: 1.0.2
+version: 1.0.3
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 

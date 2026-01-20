@@ -1,23 +1,33 @@
-# Self-Containment Principle for Skills
+# Bounded Scope Principle for Skills
 
 ## Core Principle
 
-**Skills must be self-contained.** A skill should not depend on external references, network fetches, or information that must be downloaded from outside the skill directory. Everything needed to use the skill must be bundled with it.
+**Skills operate within bounded scope.** Skills follow Claude's progressive disclosure architecture: metadata is always available, full instructions load when triggered, and supporting resources load on-demand. Skills must not reference external content as requirements—all knowledge and data needed for execution must be bundled within the skill directory or accessed only through explicitly allowed tools.
 
 **Why this matters:**
-- **Reliability**: No network latency, no external service outages affecting skill performance
-- **Reproducibility**: Same skill works identically across environments and time
-- **Portability**: Skills deploy anywhere without configuration or external dependencies
-- **User experience**: Instant access without waiting for remote resources
-- **Security**: No uncontrolled network access or third-party dependencies
+- **Reliability**: Skills work independently without external fetch dependencies; network calls only when explicitly designed
+- **Reproducibility**: Same skill executes identically across time and environments
+- **Portability**: Deploy anywhere without external setup or runtime configuration
+- **Token efficiency**: Progressive loading means Claude only pays for content used
+- **Boundary clarity**: Explicit separation between bundled content and optional external access
 
 ---
 
-## What Self-Containment Means
+## What Bounded Scope Means
 
-### ✅ Allowed: Bundled Within Skill
+### Progressive Disclosure Architecture
 
-Everything the skill needs should be included in the skill directory:
+Claude's skill loading follows three layers:
+
+1. **Metadata Layer** (~100 tokens, always loaded): Skill frontmatter (name, description) in Claude's prompt
+2. **Instruction Layer** (~1,500-5,000 tokens, triggered): Full SKILL.md body when skill is activated
+3. **Resource Layer** (unlimited, on-demand): Supporting files loaded only when Claude determines they're needed
+
+Bounded scope means operating within this architecture's allowed boundaries.
+
+### ✅ Allowed: Bundled Content (No External Dependencies for Operation)
+
+Everything required for skill operation should be included in the skill directory:
 
 ```
 skill-name/
@@ -41,41 +51,56 @@ skill-name/
 - ✅ Helper scripts in `scripts/`
 - ✅ Output templates in `assets/`
 
-### ❌ Forbidden: External References (Exceptions Below)
+### ❌ Forbidden: Content Dependencies on External URLs
 
-Skills should NOT depend on:
-- 🚫 Downloading files from remote URLs
-- 🚫 Fetching documentation from websites
-- 🚫 Making API calls to external services for skill operation
-- 🚫 Requiring internet connection to function
-- 🚫 Storing state in external databases
-- 🚫 Referencing credentials stored outside the skill
+**Skills must NOT require:**
+- 🚫 External URLs as content sources (e.g., "see docs at https://...")
+- 🚫 Downloading files to function (e.g., "install this library from...")
+- 🚫 External configuration as setup (e.g., "get config from cloud storage")
+- 🚫 Mandatory API keys/credentials from external services
+- 🚫 Runtime dependencies on external services being available
 
-**Examples to avoid:**
-- ❌ "See the API docs at https://api.example.com/docs"
-- ❌ "Fetch config from cloud storage"
-- ❌ "Download the latest schema from the registry"
-- ❌ "Call this endpoint to get the list of valid options"
+**Examples to avoid (content dependencies):**
+- ❌ "For full documentation, see https://api.example.com/docs" (should be in references/)
+- ❌ "Download the latest schema from https://registry.example.com" (should be bundled)
+- ❌ "This skill requires AWS credentials in ~/.aws/config" (should be optional or user-provided)
+
+**Critical distinction:** This forbids REQUIRING external dependencies for operation. It does NOT forbid optional network calls when explicitly designed.
 
 ---
 
-## When External Access is Acceptable
+## When External Access is Allowed by Architecture
 
-### Network Access (Rare, Justified Cases)
+### Optional Network Calls (Via Explicitly Allowed Tools)
 
-Network calls are acceptable **only when**:
-1. **It's the core purpose of the skill** — The skill's job is to fetch/query external data
-2. **It's user-controlled** — User explicitly requests the network call
-3. **It's non-critical to operation** — Network failure doesn't break the skill
-4. **It's from trusted sources** — Only internal APIs or well-established services
-5. **It's scoped in allowed-tools** — Declared in skill frontmatter with `Bash(curl:*)`
+Network access is allowed **only when**:
+
+1. **Declared in allowed-tools** — Explicitly listed in skill frontmatter (e.g., `Bash(curl:*)`, `Bash(gh:*)`)
+2. **User-initiated** — Called only when user explicitly requests it or provides input
+3. **Not mandatory for operation** — Skill works with reduced functionality if network unavailable
+4. **From trusted sources** — Only internal APIs or official services (e.g., GitHub, npm registries)
+5. **Documented clearly** — SKILL.md documents what external calls happen and why
+
+**Allowed network patterns:**
+- ✅ `allowed-tools: Bash(curl:*, gh:*)` with user asking "fetch GitHub data"
+- ✅ `allowed-tools: Bash(curl:*)` with explicit network call in SKILL.md instructions
+- ✅ Bundled `scripts/fetch.sh` that uses curl only when called
 
 **Examples where network is acceptable:**
-- ✅ A "weather checker" skill that fetches current weather
-- ✅ A "GitHub helper" skill that queries GitHub's public API on request
-- ✅ A "log analyzer" skill that fetches logs from a company's log service (user-initiated)
+- ✅ GitHub helper skill: queries GitHub API on user request (with `allowed-tools: Bash(gh:*)`)
+- ✅ Weather checker skill: fetches weather on user request (with `allowed-tools: Bash(curl:*)`)
+- ✅ Log analyzer skill: fetches logs from company service on user request (documented, optional)
 
-**But even then:** Cache results, document dependencies, provide offline fallbacks if possible.
+**Always document:**
+```yaml
+---
+name: github-helper
+allowed-tools: Bash(gh:*)
+description: >-
+  Query GitHub repositories and issues. Requires GitHub CLI and authentication.
+  Network calls made only on request.
+---
+```
 
 ### Building on Other Skills
 
@@ -202,34 +227,71 @@ Instead, fail gracefully with clear error messages
 
 ---
 
-## Self-Containment Checklist
+## Bounded Scope Validation Checklist
 
-When validating a skill, verify:
+When validating a skill against bounded scope requirements:
 
-- [ ] **SKILL.md has no external URL references** (except in Sources/Acknowledgments)
-- [ ] **All documentation is in references/** — no "see external doc" links
-- [ ] **Example data is bundled** — sample files in references/ if needed
-- [ ] **Scripts don't require external downloads** — all dependencies listed
-- [ ] **No network calls unless documented** — and only user-initiated
-- [ ] **No external configuration required** — skill works after deployment
-- [ ] **All required files exist in skill directory** — no missing dependencies
-- [ ] **Credentials/secrets are user-provided** — not stored externally
+**Metadata Layer (Frontmatter):**
+- [ ] `allowed-tools` explicitly lists any network access (e.g., `Bash(curl:*)`, `Bash(gh:*)`)
+- [ ] Description clearly states external dependencies (if any)
+
+**Instruction Layer (SKILL.md body):**
+- [ ] No external URL references as content sources (except Sources/Acknowledgments)
+- [ ] No "download from" or "see external docs at" instructions
+- [ ] All required knowledge is in SKILL.md or references/
+
+**Resource Layer (Supporting files):**
+- [ ] All documentation referenced exists in references/
+- [ ] All example data is bundled (sample files in references/)
+- [ ] Scripts are self-contained (no automatic external downloads)
+- [ ] No API keys or credentials stored in files (documented as user-provided)
+
+**External Access (if applicable):**
+- [ ] Network calls (curl, gh, etc.) explicitly documented in SKILL.md
+- [ ] Network calls are optional, not required for operation
+- [ ] Only user-initiated or explicitly triggered
+- [ ] Fail gracefully if network unavailable
+
+**Overall:**
+- [ ] Skill works standalone after deployment
+- [ ] No external setup or configuration required (except optional credentials)
+- [ ] All required files exist in skill directory
 
 ---
 
-## Why This Principle Protects Future Skills
+## Why Bounded Scope Matters
 
-Without the self-containment principle, skills become fragile:
-- External docs get moved/deleted → skill breaks
-- Network access fails → skill unusable
-- External services change → skill needs updates
-- Skills scattered across wikis/repos → hard to maintain
-- Setup complexity increases → adoption drops
+**Without bounded scope, skills become fragile and opaque:**
+- External docs get moved/deleted → skill fails silently
+- Network dependencies introduce unpredictable failures
+- Hidden setup requirements break deployment
+- Skills scattered across external systems → hard to audit
+- Token bloat from content that could be bundled
 
-With the self-containment principle:
-- Skills are portable and reliable
-- Deploy once, works everywhere
-- No external maintenance burden
-- Clear scope and dependencies
-- Easier to share and collaborate on
+**With bounded scope:**
+- **Predictable**: All content included; skill works identically everywhere
+- **Efficient**: Progressive disclosure means Claude only loads needed content
+- **Maintainable**: Updates to bundled content don't affect external systems
+- **Transparent**: Explicit `allowed-tools` shows what external access exists
+- **Reliable**: Optional network calls don't block skill operation
+- **Auditable**: All knowledge and dependencies visible in skill directory
+
+Bounded scope aligns with Claude's progressive disclosure architecture and creates skills that are reliable, transparent, and maintainable across deployment contexts.
+
+---
+
+## Grounding in Claude Architecture
+
+This principle is built on Claude Code's official skill loading model:
+
+1. **Metadata loading** - Frontmatter (`name`, `description`, `allowed-tools`) always available for discovery
+2. **Progressive disclosure** - Full skill content loads only when relevant; supporting resources on-demand
+3. **Allowed tools declaration** - `allowed-tools` frontmatter explicitly declares what external access is available
+4. **Bundled resources** - All skill content lives in the skill directory (SKILL.md, references/, scripts/, assets/)
+
+This creates a clear boundary:
+- **Inside**: All content required for operation (bundled)
+- **Outside**: Optional external resources (network calls via explicitly declared tools)
+
+Skills respecting bounded scope work reliably across all Claude Code deployment contexts: local, project, user, and managed scopes.
 

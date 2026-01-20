@@ -61,6 +61,64 @@ Skills are discoverable and invocable via both auto-activation and direct `/` co
 
 No separate command files are needed—skills use frontmatter to control invocation behavior.
 
+## Known Limitation: Knowledge Duplication & Future Refactoring
+
+### Current State
+
+This toolkit has intentional **knowledge duplication** that respects Claude's official architecture:
+
+- `plugin-creator` includes summaries of skill/subagent/hook knowledge in `references/`
+- These overlap with the full guidance in `skill-creator/`, `subagent-creator/`, and `hook-creator/`
+- This duplication follows the **Bounded Scope Principle** (see `skills/skill-creator/references/bounded-scope-principle.md`)
+
+**Why?** Claude's official architecture does not support skill-to-skill delegation as a first-class feature. Each skill must be completely self-contained within its directory structure. This is documented in [Claude Code Skills documentation](https://code.claude.com/docs/en/skills).
+
+### Future Improvement Path
+
+When Claude implements full support for `context: fork` skill execution ([Feature request on GitHub](https://github.com/anthropics/claude-code/issues/17283)), we can refactor for Single Responsibility Principle:
+
+```yaml
+# Future: When context: fork fully works for skills
+---
+name: plugin-creator
+description: Create and organize plugins with proper structure
+context: fork  # ← Delegate complex tasks to subagents
+agent: general-purpose
+---
+
+# plugin-creator focuses on: manifest, directory layout, CLI
+# Delegates to: skill-creator, subagent-creator, hook-creator for component knowledge
+```
+
+This will enable:
+- Reduced duplication in `plugin-creator/references/`
+- True Single Responsibility Principle (SRP)
+- Knowledge owned by one specialist (skill-creator owns skill knowledge)
+- `plugin-creator` focuses solely on plugin structure
+
+### What This Means
+
+**For Users:**
+- Current behavior unchanged: `/plugin-creator` works as-is
+- Direct skill invocation works as-is
+- No changes required to your usage
+
+**For Contributors:**
+- Don't try to eliminate duplication by sharing files (violates bounded scope)
+- When updating skill knowledge, update both the specialist skill AND the summary in plugin-creator
+- Watch for the Claude feature request resolution; we'll refactor when possible
+
+**For Agents (You, Claude):**
+- Bounded scope design is intentional, not a bug
+- Duplication exists because the architecture demands it (for now)
+- This will improve when Claude's skill delegation becomes stable
+
+### References
+
+- Official principle: [Bounded Scope Principle for Skills](skills/skill-creator/references/bounded-scope-principle.md)
+- Claude docs: [Extend Claude with skills](https://code.claude.com/docs/en/skills)
+- Tracking: [GitHub issue for context: fork support](https://github.com/anthropics/claude-code/issues/17283)
+
 ## Development Workflow
 
 ### Creating a New Skill

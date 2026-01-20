@@ -5,7 +5,7 @@ description: >-
   Use when building new hooks from scratch, validating existing hooks against best
   practices, or improving hook quality for production. Handles command hooks (shell scripts),
   prompt hooks (LLM-based decisions), event matching, JSON decision schemas, and safety validation.
-version: 2.0.3
+version: 2.0.4
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 

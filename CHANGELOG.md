@@ -2,6 +2,19 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.2.5] - 2026-01-20
+
+### Changed
+- **Architecture documentation:** Refined and clarified Claude Code skill design principles
+  - Renamed "Self-Containment Principle" to "Bounded Scope Principle" for clearer alignment with Claude's official progressive disclosure architecture
+  - Added comprehensive grounding section showing how bounded scope derives from Claude's three-layer loading model (metadata, instruction, resource)
+  - Clarified distinction between "content dependencies" (forbidden) and "optional network access" (allowed via declared tools)
+  - Enhanced validation checklist to map to Claude's three-layer architecture
+- **Project-level documentation:** Added architectural context for users and developers
+  - CLAUDE.md: New "Known Limitation: Knowledge Duplication & Future Refactoring" section explaining why skills contain overlapping knowledge and when SRP refactoring becomes possible
+  - README.md: New "Design Notes: Architecture & DRY" section explaining the design rationale and tracking the Claude feature request for skill delegation
+  - Both sections reference the GitHub issue tracking `context: fork` support for full SRP alignment
+
 ## [1.2.4] - 2026-01-20
 
 ### Changed

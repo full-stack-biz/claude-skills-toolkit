@@ -119,6 +119,20 @@ Create a marketplace plugin that bundles your skills. Push it to GitHub. Team me
 
 Result: Centralized distribution with version control and easy updates.
 
+## Design Notes: Architecture & DRY
+
+This toolkit follows **Claude's Bounded Scope Principle** for skills, which creates some intentional knowledge duplication:
+
+- **plugin-creator** includes summaries of skill/subagent/hook concepts for users getting started with plugins
+- **skill-creator**, **subagent-creator**, and **hook-creator** provide authoritative, detailed knowledge
+- These overlap because Claude's skill architecture doesn't support skill-to-skill delegation yet
+
+**Why this design?** Each skill must be completely self-contained within its directory—this ensures skills work reliably across any deployment context (local, project, user, marketplace). For details, see [Bounded Scope Principle](skills/skill-creator/references/bounded-scope-principle.md).
+
+**When will this improve?** Claude is actively developing support for full skill delegation via `context: fork`. Once stable, we can reorganize for better Single Responsibility Principle separation.
+
+**Does this affect you?** No. All skills work exactly as expected. The duplication is internal and intentional.
+
 ## Features
 
 ### Skill Creator
