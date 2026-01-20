@@ -2,7 +2,7 @@
 name: plugin-creator
 description: >-
   Create, validate, and refine Claude Code plugins. Use when: building a new plugin from scratch ("help me create a plugin"), converting existing projects to plugins ("make this a plugin"), or validating/improving plugin structure. Includes manifest generation, component organization, and plugin testing.
-version: 1.0.3
+version: 1.0.4
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
 ---
 
@@ -42,8 +42,8 @@ my-plugin/
 ├── commands/
 │   ├── hello.md                       # Optional: slash commands
 │   └── review.md
-├── agents/                            # Optional: custom agents
-│   ├── code-reviewer.md
+├── agents/                            # Optional: subagents
+│   ├── code-reviewer.md               # Subagent (use subagent-creator skill)
 │   └── security-auditor.md
 ├── skills/                            # Optional: Agent Skills
 │   └── code-review/
@@ -118,6 +118,7 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 **Components & Configuration:**
 - `references/slash-command-format.md` — Command file format, metadata, arguments
 - `references/agent-skills.md` — Packaging Skills in plugins
+- `references/subagents-in-plugins.md` — Packaging subagents in plugins with delegation
 - `references/hooks.md` — Event handlers, hook configuration, patterns
 - `references/mcp-servers.md` — External service integration
 - `references/lsp-servers.md` — Language-specific code intelligence
@@ -134,7 +135,7 @@ See `references/quick-reference.md` for component templates, formats, and metada
 | Component | Use Case |
 |-----------|----------|
 | **Slash Commands** (`commands/`) | User-facing commands via `/plugin-name:command` |
-| **Custom Agents** (`agents/`) | Complex multi-step workflows with planning |
+| **Subagents** (`agents/`) | Isolated execution environments with custom prompts, tools, and permissions (use `subagent-creator` skill) |
 | **Agent Skills** (`skills/`) | Capabilities Claude uses automatically |
 | **Hooks** (`hooks.json`) | Event handlers (tool use, permissions, sessions) |
 | **MCP Servers** (`.mcp.json`) | External service integration (APIs, databases) |
@@ -195,6 +196,9 @@ See `references/hooks.md` for event handler configuration and common automation 
 
 **Agent Skills in Plugins:**
 See `references/agent-skills.md` for packaging Skills in plugins. (Note: To create new Skills, use the `skill-creator` skill.)
+
+**Subagents in Plugins:**
+See `references/subagents-in-plugins.md` for packaging subagents in plugins. (Note: To create new subagents, use the `subagent-creator` skill.)
 
 **External Service Integration (MCP):**
 See `references/mcp-servers.md` for MCP server configuration and testing.

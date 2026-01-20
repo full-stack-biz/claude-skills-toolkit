@@ -175,19 +175,45 @@ When authoring skill examples that show code blocks within code blocks, use thes
 
 ## Version Release Process
 
-When releasing a new version, update ALL version fields consistently:
+Plugin and skill versions are **independent**. Each skill tracks its own version separately from the plugin version:
 
-1. **Skill versions** - `skills/*/SKILL.md` frontmatter `version:` field
-2. **Plugin manifest** - `.claude-plugin/plugin.json` `version` field
-3. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
+### Skill Versions
+Update `skills/*/SKILL.md` `version:` field **only when the skill itself changes**:
+- Bug fixes, instruction improvements, reference updates
+- New capabilities or workflows added to the skill
+- Tool access changes
+- Changes to skill frontmatter (description, allowed-tools, etc.)
+
+**Do NOT** automatically bump skill versions just because the plugin version changed.
+
+### Plugin Version
+Update `.claude-plugin/plugin.json` `version:` field based on changes to **any bundled components**:
+
+**PATCH bump** (1.0.X → 1.0.Y) when:
+- Any included skill gets a PATCH version bump
+- Bug fixes to plugin structure or marketplace manifest
+- Documentation updates to CLAUDE.md
+
+**MINOR bump** (1.X.0 → 1.Y.0) when:
+- Any included skill gets a MINOR version bump
+- Adding or removing skills from the plugin
+- New or modified commands
+
+**MAJOR bump** (X.0.0 → Y.0.0) when:
+- Any included skill gets a MAJOR version bump
+- Breaking changes to plugin structure
+
+When updating plugin version, also update:
+1. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
    - `metadata.version`
    - `plugins[].version` for each plugin entry
-4. **Example versions** - Any `"version": "X.Y.Z"` in SKILL.md body examples (e.g., Quick Start section)
+2. **Example versions** - Any `"version": "X.Y.Z"` in SKILL.md body examples (e.g., Quick Start section) only if the skill itself changed
 
 **Verification:**
 ```bash
-# Check all versions are consistent
-grep -rn '"version"' .claude-plugin/ skills/*/SKILL.md
+# Check versions in plugin and modified skills only
+grep -rn '"version"' .claude-plugin/
+grep '"version"' skills/*/SKILL.md  # Check which skills were actually modified
 
 # Validate plugin structure
 claude plugin validate .
