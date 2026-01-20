@@ -2,6 +2,21 @@
 
 Systematic 7-phase process to validate hooks for correctness, reliability, and production-readiness.
 
+## Table of Contents
+
+- [Phase 1: Event Correctness](#phase-1-event-correctness)
+- [Phase 2: Matcher Analysis](#phase-2-matcher-analysis)
+- [Phase 3: Hook Type & Action](#phase-3-hook-type--action)
+- [Phase 4: Error Handling](#phase-4-error-handling)
+- [Phase 5: Performance Impact](#phase-5-performance-impact)
+- [Phase 6: Integration & Side Effects](#phase-6-integration--side-effects)
+- [Phase 7: Testing & Documentation](#phase-7-testing--documentation)
+- [Validation Checklist](#validation-checklist)
+- [Common Hook Patterns](#common-hook-patterns)
+- [When a Hook Fails Validation](#when-a-hook-fails-validation)
+
+---
+
 ## Phase 1: Event Correctness
 
 **Question:** Is the hook attached to the right event?

@@ -2,6 +2,19 @@
 
 Comprehensive checklist for creating and validating hooks for production use.
 
+## Table of Contents
+
+- [New Hook Creation Checklist](#new-hook-creation-checklist)
+- [Existing Hook Validation Checklist](#existing-hook-validation-checklist)
+- [Command Hook Specific Checklist](#command-hook-specific-checklist)
+- [Prompt Hook Specific Checklist](#prompt-hook-specific-checklist)
+- [Agent Hook Specific Checklist](#agent-hook-specific-checklist)
+- [Production & Team Hooks Checklist](#production--team-hooks-checklist)
+- [Troubleshooting Checklist](#troubleshooting-checklist)
+- [Sign-Off Checklist](#sign-off-checklist)
+
+---
+
 ## New Hook Creation Checklist
 
 Use this checklist when creating a new hook from scratch.

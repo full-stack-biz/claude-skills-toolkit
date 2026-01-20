@@ -2,6 +2,34 @@
 
 Detailed documentation of all Claude Code events, when they fire, and what data is available.
 
+## Table of Contents
+
+- [Tool Events](#tool-events)
+  - [PreToolUse](#pretooluse)
+  - [PostToolUse](#posttooluse)
+  - [PostToolUseFailure](#posttoolusefailure)
+- [Prompt Events](#prompt-events)
+  - [UserPromptSubmit](#userpromptsubmit)
+- [Session Events](#session-events)
+  - [SessionStart](#sessionstart)
+  - [SessionEnd](#sessionend)
+  - [PreCompact](#precompact)
+- [Permission Events](#permission-events)
+  - [PermissionRequest](#permissionrequest)
+- [Notification Events](#notification-events)
+  - [Notification](#notification)
+- [Lifecycle Events](#lifecycle-events)
+  - [Stop](#stop)
+- [Subagent Events](#subagent-events)
+  - [SubagentStart](#subagentstart)
+  - [SubagentStop](#subagentstop)
+- [Event Data Availability Matrix](#event-data-availability-matrix)
+- [Common Event Selection Mistakes](#common-event-selection-mistakes)
+- [Timing Diagram: Complete Event Sequence](#timing-diagram-complete-event-sequence)
+- [Event Selection Decision Tree](#event-selection-decision-tree)
+
+---
+
 ## Tool Events
 
 ### PreToolUse

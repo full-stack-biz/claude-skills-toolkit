@@ -2,6 +2,42 @@
 
 Complete architectural understanding of the hook system for creating reliable hooks.
 
+## Table of Contents
+
+- [Hook Lifecycle](#hook-lifecycle)
+- [Event System](#event-system)
+  - [Available Events](#available-events)
+  - [Event Timing Diagram](#event-timing-diagram)
+- [Matcher System](#matcher-system)
+  - [How Matchers Work](#how-matchers-work)
+  - [Matcher Types](#matcher-types)
+  - [Matcher Evaluation](#matcher-evaluation)
+  - [Common Matcher Mistakes](#common-matcher-mistakes)
+- [Hook Types & Actions](#hook-types--actions)
+  - [Command Hooks](#command-hooks)
+  - [Prompt Hooks](#prompt-hooks)
+  - [Agent Hooks](#agent-hooks)
+- [Hook Execution Model](#hook-execution-model)
+  - [Synchronous (Blocking)](#synchronous-blocking)
+  - [Asynchronous (Non-blocking)](#asynchronous-non-blocking)
+- [Hook Result & onError](#hook-result--onerror)
+  - [onError Behaviors](#onerror-behaviors)
+  - [Result Flow](#result-flow)
+- [Hook Ordering](#hook-ordering)
+- [Hook Context & $ARGUMENTS](#hook-context--arguments)
+  - [Placeholder: ${ARGUMENTS}](#placeholder-arguments)
+- [Hook Safety & Security](#hook-safety--security)
+  - [What hooks CAN'T do](#what-hooks-cant-do)
+  - [What hooks CAN do](#what-hooks-can-do)
+  - [Security Best Practices](#security-best-practices)
+- [Performance Considerations](#performance-considerations)
+  - [Typical Hook Latencies](#typical-hook-latencies)
+  - [Impact on Claude](#impact-on-claude)
+  - [Optimization Strategies](#optimization-strategies)
+- [Debugging Hooks](#debugging-hooks)
+
+---
+
 ## Hook Lifecycle
 
 ```

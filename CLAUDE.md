@@ -242,9 +242,11 @@ Update `.claude-plugin/plugin.json` `version:` **only when committing changes**:
 When committing version changes, also update:
 1. **CHANGELOG.md** - Add new section for version with date, changes categorized (Added/Changed/Fixed/Removed)
    - **Critical:** Document ONLY user-facing changes. Internal development work (refinements, optimizations, refactoring) is scaffolding, not deliverables
+   - **NEVER document version bumps themselves** - The version number in the header (e.g., `## [1.2.2]`) IS the documentation that a version bump occurred. Don't add entries like "Bumped to 1.2.2" or "PATCH: improvements" — this is circular/redundant
+   - Only document WHAT CHANGED: New features, behavior changes, bug fixes, breaking changes
    - Examples of what to document: New commands, new skills, bug fixes, behavior changes, feature additions
-   - Examples of what NOT to document: Description improvements, token optimization, reference file reorganization, internal code cleanup
-   - **Rationale:** Users care about what changed for them, not how you built it. If refinements are invisible to users, they don't go in CHANGELOG
+   - Examples of what NOT to document: Version bump statements, description improvements, token optimization, reference file reorganization, internal code cleanup
+   - **Rationale:** Users care about what changed for them, not how you built it or that versioning happened. If refinements are invisible to users, they don't go in CHANGELOG
 2. **README.md** - Update any version references in installation commands or feature lists
 3. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
    - `metadata.version`

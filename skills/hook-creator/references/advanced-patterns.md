@@ -2,6 +2,28 @@
 
 Production-grade patterns for complex hook scenarios.
 
+## Table of Contents
+
+- [Pattern 1: Conditional Execution](#pattern-1-conditional-execution)
+- [Pattern 2: Sequential Hooks with Fallback](#pattern-2-sequential-hooks-with-fallback)
+- [Pattern 3: Rate Limiting](#pattern-3-rate-limiting)
+- [Pattern 4: Caching Results](#pattern-4-caching-results)
+- [Pattern 5: Multiple Tool Matchers with Different Actions](#pattern-5-multiple-tool-matchers-with-different-actions)
+- [Pattern 6: Event Chaining (Upstream/Downstream)](#pattern-6-event-chaining-upstreamdownstream)
+- [Pattern 7: Idempotent Updates](#pattern-7-idempotent-updates)
+- [Pattern 8: Validation Before Blocking](#pattern-8-validation-before-blocking)
+- [Pattern 9: Async Hook for Slow Operations](#pattern-9-async-hook-for-slow-operations)
+- [Pattern 10: Multi-Stage Verification](#pattern-10-multi-stage-verification)
+- [Pattern 11: Conditional Blocking Based on Context](#pattern-11-conditional-blocking-based-on-context)
+- [Pattern 12: Logging & Monitoring Integration](#pattern-12-logging--monitoring-integration)
+- [Pattern 13: Environment-Based Hook Behavior](#pattern-13-environment-based-hook-behavior)
+- [Pattern 14: Retry Logic](#pattern-14-retry-logic)
+- [Pattern 15: Complex Decision Agent](#pattern-15-complex-decision-agent)
+- [Debugging Complex Hooks](#debugging-complex-hooks)
+- [Production Deployment Checklist](#production-deployment-checklist-for-advanced-hooks)
+
+---
+
 ## Pattern 1: Conditional Execution
 
 **Scenario:** Hook should only run under certain conditions.

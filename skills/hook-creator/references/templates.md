@@ -2,6 +2,27 @@
 
 Copy-paste starting points for common hook patterns. Adapt these templates to your needs.
 
+## Table of Contents
+
+- [Basic Command Hook](#basic-command-hook)
+- [Command Hook with Error Handling](#command-hook-with-error-handling)
+- [Prompt Hook (UserPromptSubmit)](#prompt-hook-userpromptsubmit)
+- [Prompt Hook (Stop/SubagentStop)](#prompt-hook-stopsubagentsop)
+- [Prompt Hook (PreToolUse / PermissionRequest)](#prompt-hook-pretooluse--permissionrequest)
+- [Multiple Hooks on Same Event](#multiple-hooks-on-same-event)
+- [Multiple Matchers on Same Event](#multiple-matchers-on-same-event)
+- [Format on Write Hook](#format-on-write-hook)
+- [Validate Before Commit Hook](#validate-before-commit-hook)
+- [Cleanup on Session End Hook](#cleanup-on-session-end-hook)
+- [Hook File Organization](#hook-file-organization)
+- [Common Matcher Patterns](#common-matcher-patterns)
+- [Environment Variables in Hooks](#environment-variables-in-hooks)
+- [Testing Hooks Locally](#testing-hooks-locally)
+- [Migration: From Script-Based to Hook-Based](#migration-from-script-based-to-hook-based)
+- [Production Deployment Checklist](#production-deployment-checklist-for-hooks)
+
+---
+
 ## Basic Command Hook
 
 **Use case:** Run a script after a tool executes. Example: format code after writing a file.
@@ -73,20 +94,21 @@ Copy-paste starting points for common hook patterns. Adapt these templates to yo
 
 ---
 
-## Prompt Hook
+## Prompt Hook (UserPromptSubmit)
 
-**Use case:** Ask LLM to make decision about hook execution. Example: validate code quality before commit.
+**Use case:** LLM-based validation on user input. Example: block prompts with sensitive data patterns.
+
+**Available for:** UserPromptSubmit only (on command hooks, use exit codes)
 
 ```json
 {
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": "commit|push|deploy",
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Review the changes for: ${ARGUMENTS}. Are they safe to commit? Respond with YES or NO.",
+            "prompt": "Does this prompt contain code or legitimate technical question? ${ARGUMENTS}\n\nRespond with: {\"ok\": true} or {\"ok\": false, \"reason\": \"why\"}",
             "timeout": 10000
           }
         ]
@@ -96,35 +118,34 @@ Copy-paste starting points for common hook patterns. Adapt these templates to yo
 }
 ```
 
-**Customization:**
-- `matcher` - Text pattern in user prompt that triggers this hook
-- `prompt` - What to ask LLM. Use `${ARGUMENTS}` for context
-- `timeout` - How long to wait for LLM response (10000ms = 10 seconds)
+**LLM Response format:**
+```json
+{
+  "ok": true,
+  "reason": "Valid code question"
+}
+```
 
-**Best practices:**
-- Keep prompt concise (costs tokens)
-- Ask for specific output (YES/NO, 1-3 words)
-- Include context via `${ARGUMENTS}`
-- Set reasonable timeout (LLM might be slow)
+If LLM responds with `ok: false`, prompt is blocked with reason shown to user.
 
 ---
 
-## Agent Hook
+## Prompt Hook (Stop/SubagentStop)
 
-**Use case:** Run verification agent for complex validation. Example: security check before deployment.
+**Use case:** Intelligent decision-making on stop. Example: prevent stop if work incomplete.
+
+**Available for:** Stop, SubagentStop only
 
 ```json
 {
   "hooks": {
-    "UserPromptSubmit": [
+    "Stop": [
       {
-        "matcher": "deploy",
         "hooks": [
           {
-            "type": "agent",
-            "agent": "security-verifier",
-            "timeout": 15000,
-            "onError": "warn"
+            "type": "prompt",
+            "prompt": "Evaluate if work can stop: ${ARGUMENTS}\n\nRespond with: {\"ok\": true, \"reason\": \"why stop\"} or {\"ok\": false, \"reason\": \"why continue\"}",
+            "timeout": 30000
           }
         ]
       }
@@ -133,10 +154,56 @@ Copy-paste starting points for common hook patterns. Adapt these templates to yo
 }
 ```
 
-**Customization:**
-- `agent` - Name of agent to run (agent must be defined elsewhere in plugin)
-- `timeout` - How long to wait for agent (longer than prompt hooks)
-- `onError` - What to do if agent fails
+**LLM Response format:**
+```json
+{
+  "ok": true,
+  "reason": "All tasks completed successfully"
+}
+```
+
+Or:
+```json
+{
+  "ok": false,
+  "reason": "Tests still running, wait for completion"
+}
+```
+
+If `ok: false`, stop is prevented and reason shown to Claude.
+
+---
+
+## Prompt Hook (PreToolUse / PermissionRequest)
+
+**Use case:** Context-aware permission decisions. Example: allow risky commands only in safe contexts.
+
+**Available for:** PreToolUse, PermissionRequest only
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Is this bash command safe? Command: ${ARGUMENTS}\n\nRespond: {\"ok\": true} or {\"ok\": false, \"reason\": \"why not\"}",
+            "timeout": 15000
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Note on prompt hooks:**
+- Cost tokens (API calls ~2-10s each)
+- Use for complex decisions needing context understanding
+- Don't use for simple deterministic validation (use command hooks instead)
+- Timeouts longer than command hooks (10-30s typical)
 
 ---
 

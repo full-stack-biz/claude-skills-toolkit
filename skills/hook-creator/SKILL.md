@@ -3,9 +3,9 @@ name: hook-creator
 description: >-
   Create, validate, and refine Claude Code plugin hooks for automating workflows.
   Use when building new hooks from scratch, validating existing hooks against best
-  practices, or improving hook quality for production. Handles command, prompt, and
-  agent hook types with event matching, error handling, and safety validation.
-version: 1.0.0
+  practices, or improving hook quality for production. Handles command hooks (shell scripts),
+  prompt hooks (LLM-based decisions), event matching, JSON decision schemas, and safety validation.
+version: 2.0.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -35,24 +35,44 @@ Hook configuration is error-prone: wrong events cause missed triggers, loose mat
 
 ## Hook System Essentials
 
-**How hooks execute:**
+**Hook lifecycle:**
 1. Event fires (tool use, prompt submit, session end, etc.)
-2. Matcher evaluates conditions
-3. If matched, hook action executes (command, prompt, or agent)
-4. Result may block/modify behavior or continue
+2. Matcher (regex/text) evaluated against event data
+3. If matched, hook action executes (command or prompt)
+4. Action returns decision (allow/deny/block) or data (context/error)
+5. Claude Code acts on decision (proceed/block/continue)
 
-**Hook types:**
-- **command** - Shell scripts (synchronous, fast)
-- **prompt** - LLM evaluation using $ARGUMENTS
-- **agent** - Verification agent with tool access
+**Hook types and when to use:**
+- **command** - Execute shell scripts for deterministic logic, validation, formatting
+- **prompt** - Send event context to LLM for intelligent decisions (only for Stop, SubagentStop, UserPromptSubmit, PermissionRequest, PreToolUse)
 
-**Key constraints:**
-- Matchers must be precise (wrong = missed/excessive triggers)
-- Commands must be fast (<1s); blocking slows Claude
-- Error handling is mandatory; failed hooks can break plugins
-- Right event timing is critical (Pre vs Post distinction)
+**Event data and matchers:**
+- Events fire with context data (tool name, arguments, results, timestamps)
+- Matchers are case-sensitive regex patterns: `^(Write|Edit)$` matches exactly, `\.js$` matches files, `.*` matches all
+- Some events (Stop, SessionEnd, UserPromptSubmit) don't require matchers (omit field entirely)
+- MCP tools use special names: `mcp__<server>__<tool>` (e.g., `mcp__memory__create_entities`)
 
-See `references/how-hooks-work.md` for architecture details and `references/event-reference.md` for complete event listing.
+**Decision schemas:**
+Each event supports specific decision fields for returning control:
+- PreToolUse: `permissionDecision` (allow/deny/ask), `updatedInput`, `additionalContext`
+- PermissionRequest: `behavior` (allow/deny), `updatedInput`, `message`, `interrupt`
+- PostToolUse/PostToolUseFailure: `decision` (block), `additionalContext`
+- Stop/SubagentStop: `decision` (block), `reason`
+- UserPromptSubmit: `decision` (block), `additionalContext`
+- SessionStart: `additionalContext`
+
+**Exit codes (for command hooks):**
+- 0 = Success; stdout shown in verbose mode (UserPromptSubmit/SessionStart add to context)
+- 2 = Blocking error; stderr blocks action and shown to Claude
+- Other = Non-blocking error; stderr shown in verbose mode only
+
+**Critical constraints:**
+- Matchers must be precise (broad matchers = performance impact, missed triggers = silent failures)
+- Commands must be fast (<1s); blocking slows Claude proportionally by frequency
+- Prompt hooks make API calls (~2-10s); use for Stop/SubagentStop where speed less critical
+- Error handling mandatory; failed hooks can break plugin if onError not set
+
+See `references/how-hooks-work.md` for execution model, `references/event-reference.md` for event timing, `references/decision-schemas.md` for JSON outputs, `references/exit-code-behavior.md` for command exit behaviors.
 
 ## THE EXACT PROMPT
 
@@ -123,9 +143,13 @@ Measure success by whether the hook will execute reliably and safely:
 |------|---------|
 | `how-hooks-work.md` | Hook lifecycle, event timing, matcher evaluation, execution model |
 | `event-reference.md` | Event documentation (when events fire, available data, timing constraints) |
+| `decision-schemas.md` | JSON output formats for each event (PreToolUse, PermissionRequest, Stop, etc.) |
+| `exit-code-behavior.md` | Command hook exit codes (0, 2, other) and error handling |
 | `validation-workflow.md` | 7-phase validation process (event, matcher, action, error handling, performance) |
 | `checklist.md` | Best practices and validation checklists (creation, validation, troubleshooting) |
-| `templates.md` | Copy-paste templates for command, prompt, agent hooks and common patterns |
+| `templates.md` | Copy-paste templates for command and prompt hooks, common patterns |
+| `mcp-tools.md` | MCP tool naming patterns, matching MCP tools in hooks |
+| `component-scoped-hooks.md` | Defining hooks in skill/agent frontmatter, once option, environment variables |
 | `advanced-patterns.md` | Production patterns (conditional execution, fallbacks, monitoring, testing) |
 
 ## Core Principles
@@ -140,35 +164,52 @@ Measure success by whether the hook will execute reliably and safely:
 
 ## Key Notes
 
-**Hook structure (plugin.json or .claude-plugin/hooks.json):**
+**Hook JSON structure** (in plugin.json, `.claude-plugin/hooks.json`, or skill/agent frontmatter):
 ```json
 {
   "hooks": {
     "EventName": [{
-      "matcher": "pattern",
+      "matcher": "regex-pattern",  // Optional for some events; case-sensitive
       "hooks": [{
-        "type": "command|prompt|agent",
-        "command": "...",
-        "timeout": 5000
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/scripts/script.sh",
+        "timeout": 5000,
+        "onError": "warn"
+      }, {
+        "type": "prompt",
+        "prompt": "Evaluate: ${ARGUMENTS}. Return YES or NO.",
+        "timeout": 10000
       }]
     }]
   }
 }
 ```
 
-**Naming:** Describe action + event: `format-on-write`, `validate-before-commit`, `cleanup-on-session-end`
+**Matcher requirements by event:**
+- **Require matcher**: PreToolUse, PostToolUse, PostToolUseFailure, PermissionRequest, Notification
+- **Matcher optional**: UserPromptSubmit, SessionStart, SessionEnd, PreCompact, Stop, SubagentStart, SubagentStop (if omitted, applies to all)
 
-**Event selection:** What action triggers hook? (write, prompt submit, session end) → When should hook respond? (before/after) → Which event? (PreToolUse vs PostToolUse)
+**Naming convention:** action-on-event (e.g., `format-on-write`, `validate-on-prompt-submit`, `backup-on-compact`)
 
-**Matcher formula:** "Fire on [EVENT], only when [CONDITIONS]" — e.g., "PostToolUse when Write or Edit tool"
+**Event selection decision tree:**
+- Before execution? → PreToolUse
+- After success? → PostToolUse (or PostToolUseFailure for errors)
+- User input validation? → UserPromptSubmit
+- Session/state? → SessionStart/SessionEnd/PreCompact
+- Permissions? → PermissionRequest
+- Lifecycle? → Stop/SubagentStart/SubagentStop
+
+**Command vs Prompt decision:**
+- Deterministic validation (linting, formatting, checks)? → command
+- Intelligent decision-making (needs context understanding)? → prompt (but only for appropriate events)
+- Multiple conditions, complex logic? → command (simpler error handling)
 
 **Production requirements:**
-- Timeout mandatory (<5s for sync)
-- Error handling with clear messages (onError: warn/fail/continue)
-- Test matcher with real scenarios (false triggers are silent failures)
-- Version tracking for team coordination
-
-**Deployment:** Plugin-local (`.claude-plugin/hooks.json` or inline) or global (`~/.claude/hooks.json`)
+- Timeout set (<2s for command, <10s for prompt); prevents hanging
+- onError behavior specified (warn/fail/continue); prevents cascade failures
+- Matcher tested with real scenarios (broad matchers have silent performance impact)
+- Decisions use proper JSON schemas (see decision-schemas.md)
+- Exit codes/JSON output correct (see exit-code-behavior.md)
 
 ## Advanced Topics
 

@@ -2,6 +2,22 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.2.2] - 2026-01-20
+
+### Changed
+- **hook-creator:** Enhanced `Hook System Essentials` section with comprehensive documentation
+  - Complete 5-step hook lifecycle explanation
+  - Clarified hook types (command vs prompt) with specific use cases
+  - Event data and matcher pattern examples (regex, text, tool patterns)
+  - Decision schemas overview for each event type
+  - Exit code behavior documentation (0, 2, other)
+  - Critical constraints (matcher precision, timing, error handling)
+- **hook-creator:** Improved skill description to highlight command/prompt hooks, JSON decision schemas, and validation capabilities
+- **hook-creator:** Added navigation tables of contents to 9 reference files for easier browsing:
+  - advanced-patterns.md, how-hooks-work.md, templates.md, event-reference.md, validation-workflow.md, decision-schemas.md, exit-code-behavior.md, component-scoped-hooks.md, checklist.md
+- **hook-creator:** Expanded reference documentation table to include all 10 reference files with clear purpose descriptions
+- **hook-creator:** Reorganized templates.md section structure for improved clarity
+
 ## [1.2.1] - 2026-01-20
 
 ### Changed
