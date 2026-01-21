@@ -28,6 +28,13 @@ Interactive guide for creating and validating hooks:
 - Configure event matching, matchers, and error handling
 - Test hooks with validation workflows
 
+### `/skills-toolkit:create-subagent`
+Interactive guide for creating and validating subagents:
+- Build subagents with clear delegation signals
+- Configure tool access with permission modes
+- Set up hooks for agent coordination
+- Validate against best practices for reliability
+
 ## Installation
 
 ```bash
@@ -40,35 +47,13 @@ Or directly from GitHub:
 claude plugin install https://github.com/full-stack-biz/claude-skills-toolkit --scope user
 ```
 
-## Quick Start
-
-Create a skill:
-```bash
-/skills-toolkit:create-skill
-```
-
-Create a plugin:
-```bash
-/skills-toolkit:create-plugin
-```
-
-Create a hook:
-```bash
-/skills-toolkit:create-hook
-```
-
-Create a subagent:
-```bash
-/skills-toolkit:create-subagent
-```
-
 ## Usage Scenarios
 
 ### Scenario 1: Build a Domain-Specific Skill
 You have specialized knowledge about API testing and want Claude to consistently follow your testing patterns.
 
-```bash
-/skills-toolkit:create-skill
+```
+I need to build a new skill for API testing.
 ```
 
 The guide walks you through defining trigger phrases (so Claude activates it automatically when relevant), structuring your instructions clearly, and validating it works as expected.
@@ -78,8 +63,8 @@ Result: A reusable skill Claude activates whenever you mention API testing or va
 ### Scenario 2: Create a Team Plugin
 Your team needs multiple tools: a code review skill, deployment automation, and custom hooks for validation.
 
-```bash
-/skills-toolkit:create-plugin
+```
+I need to build a plugin from scratch for our team.
 ```
 
 Organize all components into one installable plugin with a single manifest. Team members install once and get all capabilities.
@@ -89,8 +74,8 @@ Result: Shareable plugin your team can install and keep up to date.
 ### Scenario 3: Validate an Existing Skill
 You have a skill that mostly works but want to ensure Claude understands it correctly and it's optimized.
 
-```bash
-/skills-toolkit:create-skill
+```
+I need to validate an existing skill against best practices.
 ```
 
 Select validation mode. The guide checks your skill structure, trigger phrases, tool permissions, and efficiency.
@@ -100,8 +85,8 @@ Result: Confidence your skill works reliably and loads efficiently into Claude's
 ### Scenario 4: Convert a Project to a Plugin
 You have an existing project with helper scripts, documentation, and utilities. You want to make it installable as a Claude plugin.
 
-```bash
-/skills-toolkit:create-plugin
+```
+I need to convert my project to a Claude plugin.
 ```
 
 The guide generates the proper manifest structure, organizes your files, and validates everything is set up correctly.
@@ -111,8 +96,8 @@ Result: Your project becomes an installable plugin others can discover and use.
 ### Scenario 5: Set Up Team Distribution
 You've created several skills and want your organization to access them through a central marketplace.
 
-```bash
-/skills-toolkit:create-plugin
+```
+I need to improve my plugin structure for team distribution.
 ```
 
 Create a marketplace plugin that bundles your skills. Push it to GitHub. Team members install once from your marketplace.
@@ -133,39 +118,9 @@ This toolkit follows **Claude's Bounded Scope Principle** for skills, which crea
 
 **Does this affect you?** No. All skills work exactly as expected. The duplication is internal and intentional.
 
-## Features
+## Inspiration
 
-### Skill Creator
-Build custom Claude Code skills with structured guidance:
-- Interactive creation workflow for new skills
-- 7-phase validation process for quality assurance
-- Best practices and token efficiency optimization
-- Trigger phrase guidance for reliable skill activation
-
-### Plugin Creator
-Create shareable plugins that bundle multiple components:
-- Generate proper `.claude-plugin/plugin.json` manifests
-- Organize and validate component structure
-- Support multi-component bundling (skills, commands, hooks, agents)
-- Convert existing projects into installable plugins
-
-### Hook Creator
-Automate plugin workflows with event-driven hooks:
-- Create hooks for plugin automation (command, prompt, or agent types)
-- Validate event matching and error handling
-- Test hooks against best practices
-- Production-ready validation workflows
-
-### Subagent Creator
-Delegate complex tasks to specialized Claude agents:
-- Build subagents with clear delegation signals
-- Configure tool access with permission modes
-- Set up hooks for agent coordination
-- Validate against best practices for reliability
-
-## Inspiration & Resources
-
-This project was built with guidance from the comprehensive best practices guide:
+The original inspiration for this project came from the comprehensive best practices guide:
 - [Best Practices for Writing and Using SKILL.md Files](https://github.com/Dicklesworthstone/meta_skill/blob/main/BEST_PRACTICES_FOR_WRITING_AND_USING_SKILLS_MD_FILES.md)
 
 ## License
