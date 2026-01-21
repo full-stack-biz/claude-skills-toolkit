@@ -2,6 +2,25 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.6.1] - 2026-01-21
+
+- **skill-creator 1.3.1:**
+
+  ### Added
+  - New reference file `references/team-production-patterns.md`
+    - Error handling patterns for robust skill execution
+    - Tool scoping and principle of least privilege guidance
+    - Validation scripts and security review checklists
+    - Documentation requirements for team environments
+
+  ### Fixed
+  - Consolidated Core Principles and Foundation sections for unified guidance
+  - Fixed scope detection contradiction (auto-detect first, ask only when ambiguous)
+  - Removed stale line number references; now reference by section names
+  - Aligned frontmatter guidance with official Claude Code docs (name optional, description recommended)
+  - Merged duplicate refining workflows into single authoritative workflow
+  - Clarified 80% rule as unified concept across all principles
+
 ## [1.6.0] - 2026-01-21
 
 ### Added

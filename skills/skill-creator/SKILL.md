@@ -5,7 +5,7 @@ description: >-
   validating an existing skill against best practices, or improving a skill's
   clarity and execution. Handles skill structure, frontmatter, activation,
   references, tool scoping, and production readiness.
-version: 1.3.0
+version: 1.3.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -34,29 +34,19 @@ Use AskUserQuestion to gather requirements, then proceed to the appropriate sect
 
 **CRITICAL:** Skills are instructions FOR CLAUDE, not documentation FOR PEOPLE. Always ask: "Will this help Claude execute the task?" not "Will people find this readable?"
 
-## Foundation: Three Key Concepts
+## Core Principles
 
-**Token loading:** Metadata (~100 tokens) always loads. SKILL.md body (~1-5k tokens) loads on trigger. References load on-demand only (zero penalty until needed).
+These principles apply to all skill creation and validation work—the foundational mental model Claude must follow.
 
-**Activation:** Skills trigger via description text alone. Vague descriptions never activate. Specific trigger phrases ("create skill", "validate", "improve") = reliable activation.
+**Self-Containment** — Skills must be self-contained. Claude needs everything within the skill directory (references, scripts, examples). Avoid external references or network dependencies unless core to the skill's purpose. See `references/self-containment-principle.md` for complete guidance.
 
-**Efficiency:** Keep SKILL.md body <500 lines (non-negotiable). Quick Start ideally handles 80% of cases. Decide what stays vs. moves: ask "Will Claude execute this in 80%+ of cases?" Core procedural content (patterns, workflows, copyable examples) stays. Supplementary content (edge cases, alternatives, adjacent context) moves to references. See `references/content-distribution-guide.md` for the decision tree.
+**Progressive Disclosure** — Essential execution instructions first (Quick Start), detailed guidance second (references/), advanced topics last. Quick reference patterns solve 80% of task variants without loading auxiliary files.
 
-Full details: See `references/how-skills-work.md`.
+**Token Efficiency** — Every token Claude loads must justify its cost. Keep SKILL.md body <500 lines (non-negotiable). Use code examples over prose, tables over lists. Minimize only supplementary content (<20% cases); core procedural content (80%+ cases) must stay. Always follow `references/refinement-preservation-policy.md`; never delete content to reduce line count if it impairs execution. See `references/content-distribution-guide.md` for decisions.
 
-## THE EXACT PROMPT
+**Token Loading** — Metadata (~100 tokens) always loads. SKILL.md body (~1-5k tokens) loads on trigger. References load on-demand only (zero penalty until needed). Full details: `references/how-skills-work.md`.
 
-When creating or improving a skill, use this exact request:
-
-```
-Use skill-creator to [create/validate/improve] my [skill-name] skill.
-Focus on: [specific area - e.g., "SKILL.md structure", "allowed-tools setup", "reference organization"]
-```
-
-Examples:
-- "Use skill-creator to create my pdf-processor skill"
-- "Use skill-creator to validate my test-runner skill against best practices"
-- "Use skill-creator to improve my code-analyzer skill, focus on token efficiency"
+**Activation** — Skills trigger via description text alone. Vague descriptions never activate. Specific trigger phrases ("create skill", "validate", "improve") = reliable activation.
 
 ## Implementation Approach
 
@@ -76,7 +66,7 @@ Only ask about scope when there's actual ambiguity. Detect where user is working
 
 **▶️ START HERE - Scope Detection & Clarification Flow:**
 
-Execute this flowchart for **every create/validate/refine** request. This prevents scope violations and routing errors.
+Auto-detect context first; only ask when genuinely ambiguous. This prevents unnecessary questions while catching scope violations.
 
 1. **Ask Question 1: Action type**
    - Create a new skill (Recommended)
@@ -89,20 +79,20 @@ Execute this flowchart for **every create/validate/refine** request. This preven
 
 3. **AUTO-DETECT: Is this a Claude plugin project?**
    - Check if `.claude-plugin/plugin.json` exists
-   - If YES: Go to step 4a (ask plugin vs. project-level scope)
-   - If NO: Go to step 4b (ask nested vs. project-level scope if nested, otherwise default)
+   - If YES and only one obvious scope: default to `skills/` (plugin scope)
+   - If NO and at project root: default to `.claude/skills/` (project scope)
+   - Only ask (step 4a/4b) if genuinely ambiguous
 
-4a. **IF CLAUDE PLUGIN PROJECT - Ask: Plugin or project-level?**
+4a. **IF AMBIGUOUS in plugin project - Ask: Plugin or project-level?**
    ```
    Should this skill be part of the plugin or project-level?
    - Plugin - Add to `skills/` directory (bundled with plugin)
    - Project-level - Add to `.claude/skills/` at project root (available across project)
    ```
 
-4b. **IF REGULAR PROJECT - Ask about nesting** (only if user is in nested directory)
-   - If user is at project root:
-     - Inform: "Creating project-level skill in `.claude/skills/`"
-   - If user is in nested directory (e.g., `packages/frontend/`):
+4b. **IF AMBIGUOUS in regular project** (user in nested directory)
+   - If user is at project root: default to `.claude/skills/` without asking
+   - If user is in nested directory and unclear which scope:
      ```
      Where should this skill live?
      - Nested - Add to `packages/frontend/.claude/skills/` (Recommended)
@@ -138,25 +128,23 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 ### For Existing Skills (Validating)
 
-1. **FIRST: Verify the skill path is project-scoped** — Check if path contains `skills/` or `.claude/skills/` relative to project root. If path is from `~/.claude/plugins/cache/` or `~/.claude/`, REFUSE and explain project scope
-2. **SECOND: Detect scope from path** — Infer from path structure:
-   - Path starts with `skills/` → Plugin-level skill
-   - Path contains `.claude/skills/` anywhere → Project-level skill (can be root `.claude/skills/` or nested like `packages/frontend/.claude/skills/`)
-3. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
-4. Use `references/checklist.md` to identify gaps during Phase 3-6
-5. Check `references/allowed-tools.md` if tool scoping is involved
-6. Validate: Complete workflow + checklist before considering the skill complete
+1. **Verify scope:** Use scope detection rules from "Allowed scopes" and "Forbidden scopes" subsections above. Refuse if path is from `~/.claude/plugins/cache/` or `~/.claude/`
+2. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
+3. Use `references/checklist.md` to identify gaps during Phase 3-6
+4. Check `references/allowed-tools.md` if tool scoping is involved
+5. Validate: Complete workflow + checklist before considering the skill complete
 
 ### For Improvements (Refining)
 
-1. **FIRST: Verify the skill path is project-scoped** — Check if path is in project directory, NOT in installed locations. Refuse if it's installed/cached
-2. **SECOND: Detect scope from path** — Infer from path structure:
-   - Path starts with `skills/` → Plugin-level skill
-   - Path contains `.claude/skills/` anywhere (root or nested) → Project-level skill
-3. Ask user which aspects need improvement (structure, length, triggering, etc.)
-4. **CRITICAL for length/organization improvements:** Use `references/content-distribution-guide.md` to decide what stays in SKILL.md vs. moves to references. Ask: "Will Claude execute this in 80%+ of cases?" Core procedural content stays; supplementary content moves.
-5. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
-6. Make targeted improvements rather than rewriting everything
+1. **Verify scope:** Use scope detection rules from "Allowed scopes" and "Forbidden scopes" subsections above. Refuse if installed/cached
+2. Ask user which aspects need improvement (structure, length, triggering, etc.)
+3. **Follow validation workflow** (`references/validation-workflow.md`) to identify all issues systematically
+4. **For length/organization:** Use `references/content-distribution-guide.md` to decide what stays in SKILL.md vs. moves to references. Core procedural content (80%+ cases) stays; supplementary content moves.
+5. **Review against checklist** (`references/checklist.md`) during validation; check `references/allowed-tools.md` if tool scoping is involved
+6. **Improve systematically:** frontmatter clarity (activation) → instruction clarity → examples → separate detailed content
+7. **Test activation:** Will Claude recognize this description in real requests?
+8. **Re-validate** using the workflow before considering refinements complete
+9. Make targeted improvements rather than rewriting everything
 
 ## Outcome Metrics
 
@@ -205,14 +193,6 @@ Create `references/` subdirectories for:
 
 **Step 5: Validate**
 Use the checklist in `references/checklist.md` to verify quality before deployment.
-
-## Refining Existing Skills
-
-1. **Follow the validation workflow** (references/validation-workflow.md) to identify all issues systematically
-2. **Review against the checklist** (references/checklist.md) during validation phases 3-6
-3. **Improve so Claude executes better:** frontmatter clarity (activation) → instruction clarity → examples Claude can adapt → separate detailed content
-4. **Test activation:** Will Claude recognize this description in real requests? Will it activate when needed?
-5. **Re-validate** using the workflow before considering refinements complete
 
 ## ⚠️ CRITICAL: Refinement Preservation Rules
 
@@ -263,16 +243,19 @@ See `references/refinement-preservation-policy.md` for detailed rules, case stud
 - `references/checklist.md` — **MAY load:** To assess skill quality across all dimensions (activation, clarity, token efficiency, error handling, production readiness). Use when systematic quality review needed
 - `references/advanced-patterns.md` — **MAY load:** When skill is production/team-use and needs error handling, version history, risk assessment, security review, or advanced patterns
 
+**Load for team/production skill patterns:**
+- `references/team-production-patterns.md` — **MAY load:** When creating skills for team environments or production systems. Covers error handling, tool scoping, validation scripts, security review, and documentation patterns for robust execution.
+
 **Load when configuring permissions and structure:**
 - `references/allowed-tools.md` — **MUST load:** When determining which tools skill needs or reviewing security/principle of least privilege
 - `references/self-containment-principle.md` — **MAY load:** When deciding whether skill has external dependencies, or troubleshooting self-containment violations
 
 ## Key Notes
 
-**Required frontmatter (Claude reads this to discover and activate skills):**
+**Frontmatter (Claude reads this to discover and activate skills):**
 - YAML syntax (use triple dashes: `---`)
-- `name`: Required, lowercase-hyphen, ≤64 chars, no "anthropic"/"claude" (how Claude references the skill)
-- `description`: Required, must include specific trigger phrases Claude recognizes, ≤1024 chars
+- `name`: Optional (uses directory name if omitted), lowercase-hyphen, ≤64 chars, no "anthropic"/"claude"
+- `description`: Recommended, ≤1024 chars, must include specific trigger phrases Claude recognizes
 - Description is Claude's activation signal (vague descriptions = skill never activates)
 
 **Optional frontmatter (for team/production skills):**
@@ -294,10 +277,10 @@ Example: "Run tests and generate reports. Use when validating code before commit
 
 The description must contain phrases Claude will see in user requests. If the description is vague, Claude won't activate the skill when needed.
 
-**Team/Production considerations:** Error handling mandatory. Scripts tested. Tool scoping: least privilege. Version tracking recommended. See `references/advanced-patterns.md` and `references/checklist.md`.
+**Team/Production considerations:** For skills used in team environments or with production data, ensure robust error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/team-production-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
 
 **Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
 
-**Scope reference:** See "Implementation Approach" section (lines 67-115) for complete scope detection flowchart. In summary:
+**Scope reference:** See "Implementation Approach" section for complete scope detection flowchart. In summary:
 - ✅ **Allowed:** `skills/` (plugin), `.claude/skills/` (project root), `.claude/skills/` (nested directories)
 - ❌ **Forbidden:** `~/.claude/skills/` (user-space), `~/.claude/plugins/cache/` (installed/cached)
