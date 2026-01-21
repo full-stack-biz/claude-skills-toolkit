@@ -323,6 +323,14 @@ When committing version changes, also update:
    - Examples of what to document: New commands, new skills, behavior changes, bug fixes, feature additions, documentation improvements
    - Examples of what NOT to document: Version bumps, version numbers, skill versioning, internal improvements, token optimization, code cleanup
    - **Rationale:** Users care what value changed for them, not metadata about how it was versioned. Version numbers are implementation detail. The section header `## [1.2.3]` tells users a version exists; the body tells them what they need to do/use.
+
+   **⚠️ CRITICAL: Verify changes in git history, NOT from assumptions or context**
+   - Check `git diff` to see exactly what changed in this commit
+   - Do NOT infer or assume what changed based on reasoning or conversation context
+   - Do NOT write "no longer asks X" unless X actually existed in previous committed code
+   - Do NOT write "improved Y" if the improvement is speculative; only document measurable/visible changes
+   - Example of WRONG approach: Assume monorepo support was added because you're implementing it → write changelog claiming old behavior was removed. WRONG. Check git history first.
+   - Example of RIGHT approach: Run `git diff skills/skill-creator/SKILL.md`, read the actual changes, document only what the diff shows was added/changed/removed
 2. **README.md** - Update any version references in installation commands or feature lists
 3. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
    - `metadata.version`

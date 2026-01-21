@@ -2,6 +2,15 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.3.1] - 2026-01-21
+
+### Changed
+- **skill-creator:** Enhanced scope detection to support nested directory skills
+  - Auto-detects where user is working (project root vs nested directory)
+  - For nested directories, asks whether skill should be local (auto-discovered in that directory) or global (project-wide)
+  - Supports monorepo patterns with nested `.claude/skills/` directories at any level (e.g., `packages/frontend/.claude/skills/`)
+  - Improved user guidance explaining auto-discovery behavior for local skills
+
 ## [1.3.0] - 2026-01-20
 
 ### Added

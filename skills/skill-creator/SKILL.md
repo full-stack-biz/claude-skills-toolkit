@@ -5,7 +5,7 @@ description: >-
   validating an existing skill against best practices, or improving a skill's
   clarity and execution. Handles skill structure, frontmatter, activation,
   references, tool scoping, and production readiness.
-version: 1.1.0
+version: 1.1.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -62,11 +62,12 @@ Examples:
 
 **⚠️ CRITICAL: Scope Detection & Clarification**
 
-Always detect project type first, then clarify scope only when needed:
+Only ask about scope when there's actual ambiguity. Detect where user is working first.
 
 **Allowed scopes:**
 - **Claude plugin projects** (has `.claude-plugin/plugin.json`): Skills in `skills/` (plugin) or `.claude/skills/` (project-level)
-- **Regular projects**: Skills in `.claude/skills/` only
+- **Project-level skills**: `.claude/skills/` at project root (discovered everywhere)
+- **Local (nested) skills**: `.claude/skills/` in any subdirectory (auto-discovered when editing files there, e.g., `packages/frontend/.claude/skills/`)
 - **NEVER** edit skills from installed locations: `~/.claude/plugins/cache/`, `~/.claude/skills/`, or global installations
 - If user provides a path to an installed skill, refuse and explain the difference
 
@@ -77,23 +78,39 @@ Always detect project type first, then clarify scope only when needed:
    - Validate an existing skill
    - Refine a skill
 
-2. **AUTO-DETECT: Check for `.claude-plugin/plugin.json`**
-   - If it exists (project is a Claude plugin): Go to step 3a
-   - If it doesn't exist (regular project): Go to step 3b
+2. **AUTO-DETECT: Where is user working?**
+   - Determine current working directory
+   - Is user in project root? Or a nested directory (e.g., `packages/frontend/`, `services/api/`)?
 
-3a. **IF PROJECT IS A CLAUDE PLUGIN - Ask Question 2: Scope choice**
+3. **AUTO-DETECT: Is this a Claude plugin project?**
+   - Check if `.claude-plugin/plugin.json` exists
+   - If YES: Go to step 4a (ask plugin vs. project scope)
+   - If NO: Go to step 4b (ask local vs. global scope if nested, otherwise default)
+
+4a. **IF CLAUDE PLUGIN PROJECT - Ask: Plugin or project-level?**
    ```
    Should this skill be part of the plugin or project-level?
    - Part of the plugin - Add to `skills/` directory (bundled with plugin)
-   - Project-level - Add to `.claude/skills/` directory (local, not bundled)
+   - Project-level - Add to `.claude/skills/` directory (available across project)
    ```
-   Then ask: "What do you want to call it?" (e.g., `code-analyzer`, `test-runner`)
 
-3b. **IF PROJECT IS REGULAR - No scope question needed**
-   - Inform user: "Creating project-level skill in `.claude/skills/`"
-   - Ask: "What do you want to call it?" (e.g., `code-analyzer`, `test-runner`)
+4b. **IF REGULAR PROJECT - Ask about nesting** (only if user is in nested directory)
+   - If user is at project root:
+     - Inform: "Creating project-level skill in `.claude/skills/`"
+   - If user is in nested directory (e.g., `packages/frontend/`):
+     ```
+     Where should this skill be available?
+     - Local to this directory - Add to `packages/frontend/.claude/skills/` (Recommended)
+       Claude auto-discovers this when you edit files here.
+     - Global to project - Add to `.claude/skills/`
+       Skill available everywhere in the project.
+     ```
 
-**For validating/refining:** Ask "Provide the skill path relative to project root" (e.g., `skills/pdf-processor` or `.claude/skills/pdf-processor`)
+5. **Ask: What do you want to call it?** (e.g., `code-analyzer`, `test-runner`)
+
+**For validating/refining:** Ask "Provide the skill path relative to project root"
+- Examples: `skills/pdf-processor`, `.claude/skills/pdf-processor`, `packages/frontend/.claude/skills/pdf-processor`, `api/.claude/skills/test-runner`
+- Paths can be at any directory level where `.claude/skills/` exists
 
 Based on answers, route to the appropriate workflow below.
 
@@ -112,10 +129,10 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 ### For Existing Skills (Validating)
 
-1. **FIRST: Verify the skill path is project-scoped** — Check if path contains `.claude/skills/` or `skills/` relative to project root. If path is from `~/.claude/plugins/cache/` or `~/.claude/`, REFUSE and explain project scope
-2. **SECOND: Detect if path is plugin or project-level** — Infer from path prefix:
+1. **FIRST: Verify the skill path is project-scoped** — Check if path contains `skills/` or `.claude/skills/` relative to project root. If path is from `~/.claude/plugins/cache/` or `~/.claude/`, REFUSE and explain project scope
+2. **SECOND: Detect scope from path** — Infer from path structure:
    - Path starts with `skills/` → Plugin-level skill
-   - Path starts with `.claude/skills/` → Project-level skill
+   - Path contains `.claude/skills/` anywhere → Project-level skill (can be root `.claude/skills/` or nested like `packages/frontend/.claude/skills/`)
 3. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
 4. Use `references/checklist.md` to identify gaps during Phase 3-6
 5. Check `references/allowed-tools.md` if tool scoping is involved
@@ -124,7 +141,9 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 ### For Improvements (Refining)
 
 1. **FIRST: Verify the skill path is project-scoped** — Check if path is in project directory, NOT in installed locations. Refuse if it's installed/cached
-2. **SECOND: Detect scope from path** — Determine if skill is plugin-level or project-level based on path prefix
+2. **SECOND: Detect scope from path** — Infer from path structure:
+   - Path starts with `skills/` → Plugin-level skill
+   - Path contains `.claude/skills/` anywhere (root or nested) → Project-level skill
 3. Ask user which aspects need improvement (structure, length, triggering, etc.)
 4. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
 5. Make targeted improvements rather than rewriting everything
