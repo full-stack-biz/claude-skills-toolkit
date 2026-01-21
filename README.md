@@ -35,6 +35,62 @@ Interactive guide for creating and validating subagents:
 - Set up hooks for agent coordination
 - Validate against best practices for reliability
 
+## Quick Start: From Knowledge to Plugin
+
+### The Problem
+
+Teams struggle with processes that matter but don't get followed. You document a release process, testing workflow, or code review guide. It sits in a repo. People don't find it. They forget it. They ask the same questions.
+
+### The Solution: Interactive Guidance
+
+Instead of documentation sitting idle, turn it into a skill—interactive guidance Claude activates when relevant. Then package it as a plugin so your team can install it once and get the full workflow.
+
+### How It Works
+
+1. **Start with what you know** - You have documentation, a process guide, or expertise
+2. **Turn it into a skill** - Use `/skills-toolkit:create-skill` to formalize it into instructions Claude follows
+3. **Validate and refine** - The toolkit checks that Claude understands it and it's optimized
+4. **Package for your team** - Use `/skills-toolkit:create-plugin` to make it installable
+5. **Share and evolve** - Team members install once, Claude guides the process every time
+
+### Real Example: Release Process to Plugin
+
+**User:** `@RELEASE_PROCESS.md` — I have this release management guide. Turn it into a skill.
+
+Claude asked clarifying questions:
+- Where should this skill live?
+- Will this be used by your team or in production?
+
+**User:** Plugin skill. Team and production.
+
+Claude built it. Created the skill with a detailed workflow. Extracted supporting material into reference guides. Added proper frontmatter, scoped the tools, made it activatable.
+
+**User:** Now package this into a plugin so I can share it.
+
+Claude asked:
+- What would you like to do?
+- What should the plugin be named?
+
+**User:** Convert this project. Call it dev-flow.
+
+Claude created the plugin manifest, README, changelog, added the skill, made it installable.
+
+**User:** Do a fresh review. Make sure everything is solid.
+
+Claude asked:
+- Which refinement areas matter most for your team?
+
+**User:** Activation & trigger phrases, token efficiency, quick start strengthening, error prevention guardrails.
+
+Claude re-read what was built. Found ambiguities. Refined the guidance. Tightened the wording. Caught its own mistakes.
+
+### Why This Pattern Works
+
+1. Knowledge in documentation gets ignored. Skills get loaded.
+2. Skills activate automatically when relevant. Documentation doesn't.
+3. Plugins make skills installable and shareable across teams.
+4. Iteration catches gaps the first draft misses.
+
 ## Installation
 
 ```bash

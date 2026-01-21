@@ -2,6 +2,20 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.5.0] - 2026-01-21
+
+### Added
+- **skill-creator:** Content distribution decision guide
+  - New reference file `references/content-distribution-guide.md` with decision tree for organizing SKILL.md vs. reference files
+  - Prevents moving core procedural content (patterns, workflows, examples) to references unnecessarily
+  - Includes real-world examples from skill refinement scenarios
+
+### Changed
+- **skill-creator:** Enhanced refinement workflow with content organization guidance
+  - Foundation section now includes decision tree question: "Will Claude execute this in 80%+ of cases?"
+  - Refinement workflow step 4 marked CRITICAL for length/organization improvements, references content-distribution-guide.md
+  - Reference guide section updated with activation criteria for new content-distribution-guide.md
+
 ## [1.4.0] - 2026-01-21
 
 ### Added

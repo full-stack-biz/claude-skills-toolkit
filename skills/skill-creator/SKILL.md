@@ -5,7 +5,7 @@ description: >-
   validating an existing skill against best practices, or improving a skill's
   clarity and execution. Handles skill structure, frontmatter, activation,
   references, tool scoping, and production readiness.
-version: 1.1.2
+version: 1.2.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -40,7 +40,7 @@ Use AskUserQuestion to gather requirements, then proceed to the appropriate sect
 
 **Activation:** Skills trigger via description text alone. Vague descriptions never activate. Specific trigger phrases ("create skill", "validate", "improve") = reliable activation.
 
-**Efficiency:** Keep SKILL.md body <500 lines. Move detailed content to references. Quick Start should handle 80% of cases without references.
+**Efficiency:** Keep SKILL.md body <500 lines (non-negotiable). Quick Start ideally handles 80% of cases. Decide what stays vs. moves: ask "Will Claude execute this in 80%+ of cases?" Core procedural content (patterns, workflows, copyable examples) stays. Supplementary content (edge cases, alternatives, adjacent context) moves to references. See `references/content-distribution-guide.md` for the decision tree.
 
 Full details: See `references/how-skills-work.md`.
 
@@ -152,8 +152,9 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
    - Path starts with `skills/` → Plugin-level skill
    - Path contains `.claude/skills/` anywhere (root or nested) → Project-level skill
 3. Ask user which aspects need improvement (structure, length, triggering, etc.)
-4. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
-5. Make targeted improvements rather than rewriting everything
+4. **CRITICAL for length/organization improvements:** Use `references/content-distribution-guide.md` to decide what stays in SKILL.md vs. moves to references. Ask: "Will Claude execute this in 80%+ of cases?" Core procedural content stays; supplementary content moves.
+5. Reference relevant sections from `references/checklist.md` or `references/allowed-tools.md`
+6. Make targeted improvements rather than rewriting everything
 
 ## Outcome Metrics
 
@@ -222,6 +223,7 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 
 **Load when validating or improving skills:**
 - `references/validation-workflow.md` — **Load if:** Systematically validating through phases (frontmatter clarity → body clarity → references organization → tool scoping → real-world testing)
+- `references/content-distribution-guide.md` — **Load if:** Deciding what content stays in SKILL.md vs. moves to references, or refining skill organization/length (prevents moving core procedural content unnecessarily)
 - `references/checklist.md` — **Load if:** Assessing skill quality across all dimensions (activation, clarity, token efficiency, error handling, production readiness)
 - `references/advanced-patterns.md` — **Load if:** Skill is production/team-use and needs error handling, version history, risk assessment, security review, or advanced patterns
 
