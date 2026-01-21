@@ -2,6 +2,30 @@
 
 Claude Code provides command-line commands for plugin management, useful for scripting, automation, and non-interactive workflows.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [plugin install](#plugin-install)
+- [plugin uninstall](#plugin-uninstall)
+- [plugin enable](#plugin-enable)
+- [plugin disable](#plugin-disable)
+- [plugin update](#plugin-update)
+- [Plugin Lifecycle](#plugin-lifecycle)
+- [Scope Management Examples](#scope-management-examples)
+  - [Installing Same Plugin to Multiple Scopes](#installing-same-plugin-to-multiple-scopes)
+  - [Managing Project vs. User Plugins](#managing-project-vs-user-plugins)
+  - [Updating Specific Versions](#updating-specific-versions)
+- [Integration with Scripts](#integration-with-scripts)
+- [Error Handling](#error-handling)
+- [Plugin List Command](#plugin-list-command)
+- [Validation Command](#validation-command)
+- [Help Command](#help-command)
+- [Automation Examples](#automation-examples)
+  - [Bulk Install](#bulk-install)
+  - [Disable All User Plugins](#disable-all-user-plugins)
+  - [Check Plugin Status](#check-plugin-status)
+- [See Also](#see-also)
+
 ## Overview
 
 All plugin commands follow the pattern:

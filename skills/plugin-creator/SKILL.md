@@ -1,9 +1,9 @@
 ---
 name: plugin-creator
 description: >-
-  Create, validate, and refine Claude Code plugins with skills, commands, hooks, agents, and servers. Use when: building plugins from scratch, converting projects to plugins, or improving plugin structure. Includes manifest generation, component organization, and integration guidance (use hook-creator and subagent-creator skills for those components).
-version: 1.0.7
-allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(cp,mkdir,ls,find,claude)
+  Create, validate, and refine Claude Code plugins with Agent Skills, hooks, agents, and servers. Use when: building plugins from scratch, converting projects to plugins, or improving plugin structure. Includes automated scanning, manifest generation, component organization, and validation guidance (use hook-creator and subagent-creator skills for those components).
+version: 1.1.0
+allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(find,grep,head,jq,du,xargs,bash,claude,rm,chmod)
 ---
 
 # Plugin Creator
@@ -30,18 +30,26 @@ Invoke plugin-creator in these scenarios:
 
 **Validating plugin structure:** Check existing plugins against Claude Code plugin standards (manifest schema, directory layout, naming conventions).
 
-**Multi-component plugins:** Creating plugins that bundle multiple elements (Skills + slash commands, hooks + agents, MCP servers + Skills, etc.).
+**Multi-component plugins:** Creating plugins that bundle multiple elements (Skills, hooks, agents, MCP servers, etc.).
 
 **Team/production plugins:** Building plugins for distribution across teams or deployment to plugin marketplaces.
 
 **NOT for:** General Claude questions, debugging plugin behavior at runtime, writing plugin code directly (focus on structure/organization only).
+
+## ⚠️ Important: Slash Commands Deprecated
+
+**Slash commands** (via `commands/` directory) are deprecated in favor of **Agent Skills**.
+
+When creating new plugins, use Agent Skills (`skills/` directory) instead. Slash commands still work for backward compatibility but are being phased out. Use `skill-creator` to build Agent Skills instead.
+
+---
 
 ## Foundation: How Plugins Work
 
 Plugins extend Claude Code with custom functionality shared across projects and teams.
 
 **Plugin activation:** Pure LLM reasoning on manifest metadata. Claude discovers plugins via:
-- **name**: Unique identifier (plugin namespace for slash commands: `/plugin-name:command`)
+- **name**: Unique identifier (plugin namespace)
 - **description**: Tells Claude when to suggest or use the plugin
 
 **Plugin structure:**
@@ -49,18 +57,18 @@ Plugins extend Claude Code with custom functionality shared across projects and 
 my-plugin/
 ├── .claude-plugin/
 │   └── plugin.json                    # Required: metadata manifest
-├── commands/
-│   ├── hello.md                       # Optional: slash commands
-│   └── review.md
+├── skills/                            # Optional: Agent Skills (recommended)
+│   └── code-review/
+│       └── SKILL.md
 ├── agents/                            # Optional: subagents
 │   ├── code-reviewer.md               # Subagent (use subagent-creator skill)
 │   └── security-auditor.md
-├── skills/                            # Optional: Agent Skills
-│   └── code-review/
-│       └── SKILL.md
 ├── hooks.json                         # Optional: event handlers
 ├── .mcp.json                          # Optional: MCP servers
-└── .lsp.json                          # Optional: LSP servers
+├── .lsp.json                          # Optional: LSP servers
+└── commands/                          # DEPRECATED: Use skills instead
+    ├── hello.md
+    └── review.md
 ```
 
 **Token loading hierarchy:**
@@ -70,7 +78,7 @@ my-plugin/
 
 **Why this matters for your plugin:**
 - **plugin.json description** is your activation signal (vague = plugin never recommended when needed)
-- **Naming conventions** are critical (plugin name becomes slash command namespace: `/my-plugin:command`)
+- **Naming conventions** are critical (plugin name becomes skill namespace in plugins)
 - **Directory structure** must be exact (Claude Code uses path conventions to discover components)
 - **Component metadata** must be clear (descriptions tell Claude what each command/agent/skill does)
 
@@ -90,6 +98,159 @@ Question 2: What is the plugin name or path?
 ```
 
 Based on their answers, route to the appropriate workflow below:
+
+---
+
+## Automated Scanning Phase (For Validation)
+
+**When the user wants to validate an existing plugin, always run this scanning phase FIRST before manual validation:**
+
+The scanning phase is **read-only only**—it scans and reports, never modifies. User decisions are explicit and visible.
+
+### Workflow
+
+1. **Run the read-only scanner:**
+   ```bash
+   bash /path/to/plugin-creator/scripts/scan-plugin.sh /path/to/plugin /tmp/plugin-scan.json
+   ```
+   This generates a structured JSON report with three categories:
+   - **errors**: Critical issues that prevent installation (must fix)
+   - **warnings**: Best-practice violations (should fix)
+   - **decisions_needed**: Items requiring user choice (files to delete, permissions to set, etc.)
+
+2. **Read and interpret the JSON report:**
+   Parse the JSON to identify what the scanner found. Output should show:
+   - A summary count of errors, warnings, decisions
+   - Errors printed first (must fix before validation)
+   - Warnings categorized by type (security, naming, documentation, etc.)
+   - Decisions with target file/directory for user approval
+
+3. **Process errors first:**
+   For each error, report it clearly and suggest the fix. Example:
+   ```
+   ❌ MANIFEST ERROR: Missing .claude-plugin/plugin.json
+      Fix: Run mkdir -p .claude-plugin and create plugin.json
+   ```
+
+4. **Process warnings next:**
+   Categorize by type and show user. Example:
+   ```
+   ⚠ SECURITY WARNING: Script contains hardcoded secrets
+      File: scripts/deploy.sh
+      Suggestion: Move secrets to environment variables
+
+   ⚠ NAMING WARNING: Command name 'Check_Status' doesn't follow convention
+      File: commands/Check_Status.md
+      Suggestion: Rename to 'check-status'
+   ```
+
+5. **Present decisions via AskUserQuestion:**
+
+   **For non-standard files in .claude-plugin/:**
+   ```
+   Question: "Found non-standard files in .claude-plugin/. What should we do?"
+   Header: "File Cleanup"
+   Options:
+   - Delete all non-standard files (Recommended) - Removes MANIFEST.md, etc.
+   - Review each file - Show what's in .claude-plugin/ and decide individually
+   - Keep as-is - Leave everything
+   ```
+
+   **For orphaned directories:**
+   ```
+   Question: "Found non-standard directory '[name]'. Keep it or remove?"
+   Header: "Directory Cleanup"
+   Options:
+   - Delete '[name]' - Remove the directory
+   - Keep '[name]' - Custom structure is OK
+   - Review all directories - List all and decide each one
+   ```
+
+   **For executable scripts:**
+   ```
+   Question: "Script '[filename]' is not executable. Fix permissions?"
+   Header: "Permissions"
+   Options:
+   - Make executable (Recommended) - Run chmod +x
+   - Leave as-is - Keep current permissions
+   ```
+
+   **For security warnings that need action:**
+   ```
+   Question: "Script '[filename]' contains potential secrets. Review and remove?"
+   Header: "Security"
+   Options:
+   - Review now - Show file content so you can clean it
+   - Already cleaned - Skip this check
+   - Keep as-is - It's not actually a secret
+   ```
+
+6. **Execute decisions explicitly:**
+   After user approves each decision category, run the specific commands:
+
+   **User approved: Delete files**
+   ```bash
+   rm -rf /path/to/.claude-plugin/MANIFEST.md
+   rm -rf /path/to/.claude-plugin/REFINEMENT_SUMMARY.md
+   ```
+
+   **User approved: Fix permissions**
+   ```bash
+   chmod +x /path/to/scripts/deploy.sh
+   chmod +x /path/to/scripts/validate.sh
+   ```
+
+   Always show the exact command before executing. Give user a final chance to abort.
+
+7. **Re-scan after changes:**
+   After applying decisions, re-run the scanner to verify issues are resolved:
+   ```bash
+   bash /path/to/plugin-creator/scripts/scan-plugin.sh /path/to/plugin /tmp/plugin-scan-v2.json
+   ```
+
+8. **Proceed to manual validation:**
+   Once scan passes with no errors/decisions:
+   ```bash
+   claude plugin validate /path/to/plugin
+   ```
+   Then check best practices from `references/validation-checklist.md`.
+
+### Example Workflow
+
+```
+User: "validate my-plugin"
+        ↓
+1. Scanner runs (read-only) → finds 2 non-standard files, 1 permission issue
+        ↓
+2. Claude reports errors/warnings clearly
+        ↓
+3. Claude asks: "Delete .claude-plugin/MANIFEST.md and REFINEMENT_SUMMARY.md?"
+        User: "Yes"
+        ↓
+4. Claude shows exact rm commands, waits for implicit approval (no confirmation needed, but visible)
+        ↓
+5. Claude asks: "Make scripts/scan-plugin.sh executable?"
+        User: "Yes"
+        ↓
+6. Claude runs chmod +x
+        ↓
+7. Claude re-runs scanner → clean
+        ↓
+8. Claude runs claude plugin validate → passes
+        ↓
+9. Claude checks best practices from validation-checklist
+        ↓
+10. Final report: "✔ Plugin is ready"
+```
+
+### Safety Guarantee
+
+- **Scanner never modifies files** — read-only only
+- **No silent changes** — every action is explicitly approved by user
+- **Visible execution** — user sees exact bash commands before they run
+- **Reversible process** — user can choose "review individually" to be conservative
+
+---
 
 ### 1. Creating a New Plugin from Scratch
 Interview requirements → create structure → add components → run `claude plugin validate` → test locally
@@ -122,7 +283,7 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 ```
 
 **Add components:**
-- Slash commands: `.md` files in `commands/` (see `references/slash-command-format.md`)
+- Agent Skills: `.md` files in `skills/` (recommended approach)
 - Other components: See "Component Overview" section below
 - Test: `claude --plugin-dir /path/to/my-plugin`
 
@@ -143,8 +304,8 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 - `references/plugin-caching.md` — Plugin caching, file resolution, symlinks, path traversal
 
 **Components & Configuration:**
-- `references/slash-command-format.md` — Command file format, metadata, arguments
-- `references/agent-skills.md` — Packaging Skills in plugins
+- `references/agent-skills.md` — Packaging Skills in plugins (recommended)
+- `references/slash-command-format.md` — Command file format (DEPRECATED: for legacy support only)
 - `references/subagents-in-plugins.md` — Packaging subagents in plugins with delegation
 - `references/hooks-in-plugins.md` — Packaging hooks in plugins (use `hook-creator` skill for creation/validation)
 - `references/hooks.md` — Hook event reference (events, formats, matchers, patterns)
@@ -162,19 +323,19 @@ See `references/quick-reference.md` for component templates, formats, and metada
 
 | Component | Use Case |
 |-----------|----------|
-| **Slash Commands** (`commands/`) | User-facing commands via `/plugin-name:command` |
+| **Agent Skills** (`skills/`) | Capabilities Claude uses automatically or via `/skill-name` (recommended) |
 | **Subagents** (`agents/`) | Isolated execution environments with custom prompts, tools, and permissions (use `subagent-creator` skill) |
-| **Agent Skills** (`skills/`) | Capabilities Claude uses automatically |
-| **Hooks** (`hooks.json`) | Event handlers (tool use, permissions, sessions). (use `hook-creator` skill) |
+| **Hooks** (`hooks.json`) | Event handlers (tool use, permissions, sessions) (use `hook-creator` skill) |
 | **MCP Servers** (`.mcp.json`) | External service integration (APIs, databases) |
 | **LSP Servers** (`.lsp.json`) | Language-specific code intelligence |
+| **Commands** (`commands/`) | DEPRECATED: Use Agent Skills instead |
 
 ## Key Notes
 
 **Plugin naming conventions:**
 - Hyphen-separated lowercase: `code-reviewer`, `pdf-processor`, `test-runner`
 - Include action/domain: prefer `test-runner` over `runner`
-- Becomes slash command namespace: `/code-reviewer:validate`
+- Becomes plugin namespace: `/plugin-name` for skills, commands, hooks
 
 **CLI commands:** `claude plugin install|uninstall|enable|disable|update <name>@<marketplace> [--scope user|project|local]`
 
@@ -200,6 +361,12 @@ See `references/installation-scopes.md` for scope details and use cases.
 
 ## Validation Checklist
 
+**Step 0 (AUTOMATED SCANNING):** For existing plugins, run the automated scanner first to catch common issues:
+```bash
+bash /path/to/plugin-creator/scripts/scan-plugin.sh /path/to/plugin /tmp/plugin-scan.json
+```
+Review the JSON output and use AskUserQuestion to handle any decisions (file cleanup, permissions, etc.). See "Automated Scanning Phase" section above for details.
+
 **Step 1 (REQUIRED):** Run the validation command directly:
 ```bash
 claude plugin validate /path/to/plugin
@@ -209,6 +376,8 @@ Do NOT create wrapper scripts. Run this command directly and review its output.
 **Step 2:** If validation passes, check best practices from `references/validation-checklist.md`:
 - Manifest description includes specific trigger phrases
 - Component metadata is clear and complete
+- Security: No hardcoded secrets, safe shell patterns, proper permissions
+- Documentation: README.md, CHANGELOG.md present for distributed plugins
 - Test locally with `claude --plugin-dir /path/to/plugin`
 
 ## Advanced Topics

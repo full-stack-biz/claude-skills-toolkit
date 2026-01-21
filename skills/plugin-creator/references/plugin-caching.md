@@ -2,6 +2,35 @@
 
 Understanding how Claude Code handles plugin caching and file paths is essential for plugins that reference external files or need reliable path resolution after installation.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [How Plugin Caching Works](#how-plugin-caching-works)
+  - [Installation and Copying](#installation-and-copying)
+  - [Cache Locations by Scope](#cache-locations-by-scope)
+  - [Marketplace Source Copying](#marketplace-source-copying)
+  - [Plugin Root Directory Copying](#plugin-root-directory-copying)
+- [Path Traversal Limitations](#path-traversal-limitations)
+  - [Critical Rule: No External File Access](#critical-rule-no-external-file-access)
+  - [Example Path Traversal Problem](#example-path-traversal-problem)
+- [Solutions: Working with External Files](#solutions-working-with-external-files)
+  - [Solution 1: Copy Files into Plugin](#solution-1-copy-files-into-plugin)
+  - [Solution 2: Use Symlinks (Recommended for Development)](#solution-2-use-symlinks-recommended-for-development)
+  - [Solution 3: Restructure Marketplace Entry (For Marketplace Plugins)](#solution-3-restructure-marketplace-entry-for-marketplace-plugins)
+- [Path Resolution at Runtime](#path-resolution-at-runtime)
+  - [Absolute vs. Relative Paths](#absolute-vs-relative-paths)
+  - [Variable Expansion](#variable-expansion)
+- [File Resolution Order](#file-resolution-order)
+- [Caching and Development Workflow](#caching-and-development-workflow)
+  - [Development Mode (--plugin-dir)](#development-mode---plugin-dir)
+  - [Testing Before Installation](#testing-before-installation)
+  - [Debugging Path Issues](#debugging-path-issues)
+- [Common Path Issues and Fixes](#common-path-issues-and-fixes)
+- [Security Implications](#security-implications)
+  - [What Plugins Can Access](#what-plugins-can-access)
+- [Best Practices](#best-practices)
+- [See Also](#see-also)
+
 ## Overview
 
 When you install a plugin, Claude Code copies it to a cache directory rather than using it in-place. This provides security, verification, and isolation benefits but creates important implications for how plugins reference files.

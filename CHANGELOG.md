@@ -2,6 +2,20 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.4.0] - 2026-01-21
+
+### Added
+- **plugin-creator:** Automated scanning phase for plugin validation
+  - Read-only scanner detects non-standard files, orphaned directories, security issues, and naming violations
+  - User-approved cleanup workflows via AskUserQuestion (file deletion, permission fixes, structural decisions)
+  - Deprecation warnings for legacy `commands/` directory, guiding migration to Agent Skills
+
+### Changed
+- **plugin-creator:** Migrated to Agent Skills architecture
+  - Plugin structure examples now prioritize Agent Skills over deprecated commands
+  - Enhanced reference documentation with table of contents for all 14 large files
+  - Removed external URLs; improved self-containment
+
 ## [1.3.2] - 2026-01-21
 
 ### Changed
