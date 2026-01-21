@@ -5,7 +5,7 @@ description: >-
   validating an existing skill against best practices, or improving a skill's
   clarity and execution. Handles skill structure, frontmatter, activation,
   references, tool scoping, and production readiness.
-version: 1.1.1
+version: 1.1.2
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -64,12 +64,15 @@ Examples:
 
 Only ask about scope when there's actual ambiguity. Detect where user is working first.
 
-**Allowed scopes:**
-- **Claude plugin projects** (has `.claude-plugin/plugin.json`): Skills in `skills/` (plugin) or `.claude/skills/` (project-level)
-- **Project-level skills**: `.claude/skills/` at project root (discovered everywhere)
-- **Local (nested) skills**: `.claude/skills/` in any subdirectory (auto-discovered when editing files there, e.g., `packages/frontend/.claude/skills/`)
-- **NEVER** edit skills from installed locations: `~/.claude/plugins/cache/`, `~/.claude/skills/`, or global installations
-- If user provides a path to an installed skill, refuse and explain the difference
+**Allowed scopes (what skill-creator will create/edit):**
+- **Plugin skills**: `skills/` directory in Claude plugin projects (has `.claude-plugin/plugin.json`)
+- **Project-level skills**: `.claude/skills/` at project root (discovered everywhere in project)
+- **Nested skills**: `.claude/skills/` in any subdirectory (auto-discovered when editing files there, e.g., `packages/frontend/.claude/skills/`)
+
+**Forbidden scopes (skill-creator will refuse):**
+- **User-space skills**: `~/.claude/skills/` — REFUSE all creation/editing attempts. Risk: affecting user-space configuration, impacting all projects using these skills
+- **Installed/cached skills**: `~/.claude/plugins/cache/`, plugin installation directories — REFUSE all editing attempts
+- If user provides a path to user-space or installed location, refuse and explain: "This skill-creator only works with project-scoped skills (plugin or `.claude/skills/` directory). User-space skills in `~/.claude/skills/` should not be edited here—they affect all projects in your user space."
 
 **START HERE - Scope Detection & Clarification Flow:**
 
@@ -84,14 +87,14 @@ Only ask about scope when there's actual ambiguity. Detect where user is working
 
 3. **AUTO-DETECT: Is this a Claude plugin project?**
    - Check if `.claude-plugin/plugin.json` exists
-   - If YES: Go to step 4a (ask plugin vs. project scope)
-   - If NO: Go to step 4b (ask local vs. global scope if nested, otherwise default)
+   - If YES: Go to step 4a (ask plugin vs. project-level scope)
+   - If NO: Go to step 4b (ask nested vs. project-level scope if nested, otherwise default)
 
 4a. **IF CLAUDE PLUGIN PROJECT - Ask: Plugin or project-level?**
    ```
    Should this skill be part of the plugin or project-level?
-   - Part of the plugin - Add to `skills/` directory (bundled with plugin)
-   - Project-level - Add to `.claude/skills/` directory (available across project)
+   - Plugin - Add to `skills/` directory (bundled with plugin)
+   - Project-level - Add to `.claude/skills/` at project root (available across project)
    ```
 
 4b. **IF REGULAR PROJECT - Ask about nesting** (only if user is in nested directory)
@@ -99,12 +102,16 @@ Only ask about scope when there's actual ambiguity. Detect where user is working
      - Inform: "Creating project-level skill in `.claude/skills/`"
    - If user is in nested directory (e.g., `packages/frontend/`):
      ```
-     Where should this skill be available?
-     - Local to this directory - Add to `packages/frontend/.claude/skills/` (Recommended)
+     Where should this skill live?
+     - Nested - Add to `packages/frontend/.claude/skills/` (Recommended)
        Claude auto-discovers this when you edit files here.
-     - Global to project - Add to `.claude/skills/`
+     - Project-level - Add to `.claude/skills/` at project root
        Skill available everywhere in the project.
      ```
+
+**CRITICAL: Block user-space scope attempts**
+   - If user asks for user-space scope or mentions `~/.claude/skills/`, REFUSE immediately
+   - Explain: "User-space skills (`~/.claude/skills/`) affect all projects in your user space. This skill-creator only works with project-scoped skills to prevent unintended side effects across your projects. After creation or refinement, you can manually copy the skill directory to `~/.claude/skills/` if you want user-space availability."
 
 5. **Ask: What do you want to call it?** (e.g., `code-analyzer`, `test-runner`)
 
@@ -253,4 +260,11 @@ The description must contain phrases Claude will see in user requests. If the de
 
 **Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
 
-**Deployment:** Global `~/.claude/skills/` or project-local `.claude/skills/`.
+**Allowed creation/editing scopes:**
+- **Plugin skills**: `skills/` directory in Claude plugin projects
+- **Project-level skills**: `.claude/skills/` at project root
+- **Nested skills**: `.claude/skills/` in any subdirectory
+
+**Forbidden creation/editing scopes:**
+- **User-space skills**: `~/.claude/skills/` — Risk of affecting all projects in your user space
+- **Installed/cached skills**: `~/.claude/plugins/cache/` and other installation directories

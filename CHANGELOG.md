@@ -2,6 +2,14 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.3.2] - 2026-01-21
+
+### Changed
+- **skill-creator:** Refined scope terminology and user-space blocking
+  - Consistent terminology: plugin, project-level, nested, and user-space scopes
+  - Enhanced refusal messages for user-space scope requests with clear explanation of side effects
+  - Added guidance that users can manually copy skills to `~/.claude/skills/` after creation or refinement if desired
+
 ## [1.3.1] - 2026-01-21
 
 ### Changed
