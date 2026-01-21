@@ -5,7 +5,7 @@ description: >-
   validating an existing skill against best practices, or improving a skill's
   clarity and execution. Handles skill structure, frontmatter, activation,
   references, tool scoping, and production readiness.
-version: 1.2.0
+version: 1.3.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -74,7 +74,9 @@ Only ask about scope when there's actual ambiguity. Detect where user is working
 - **Installed/cached skills**: `~/.claude/plugins/cache/`, plugin installation directories — REFUSE all editing attempts
 - If user provides a path to user-space or installed location, refuse and explain: "This skill-creator only works with project-scoped skills (plugin or `.claude/skills/` directory). User-space skills in `~/.claude/skills/` should not be edited here—they affect all projects in your user space."
 
-**START HERE - Scope Detection & Clarification Flow:**
+**▶️ START HERE - Scope Detection & Clarification Flow:**
+
+Execute this flowchart for **every create/validate/refine** request. This prevents scope violations and routing errors.
 
 1. **Ask Question 1: Action type**
    - Create a new skill (Recommended)
@@ -109,7 +111,7 @@ Only ask about scope when there's actual ambiguity. Detect where user is working
        Skill available everywhere in the project.
      ```
 
-**CRITICAL: Block user-space scope attempts**
+**🚫 CRITICAL: Block user-space scope attempts**
    - If user asks for user-space scope or mentions `~/.claude/skills/`, REFUSE immediately
    - Explain: "User-space skills (`~/.claude/skills/`) affect all projects in your user space. This skill-creator only works with project-scoped skills to prevent unintended side effects across your projects. After creation or refinement, you can manually copy the skill directory to `~/.claude/skills/` if you want user-space availability."
 
@@ -212,24 +214,58 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 4. **Test activation:** Will Claude recognize this description in real requests? Will it activate when needed?
 5. **Re-validate** using the workflow before considering refinements complete
 
+## ⚠️ CRITICAL: Refinement Preservation Rules
+
+**Refinement is refactoring, not reduction.** Preserve skill functionality while improving clarity. Apply these gates before relocating or deleting content.
+
+**The 80% Rule (core procedural decision):**
+- Will Claude execute this in 80%+ of refinement activations? → STAYS in SKILL.md
+- Will Claude execute this in <20% of cases? → Can move to references/
+- Uncertain? → Defer to operator; keep in SKILL.md by default
+
+**Pre-Refinement Validation Gates:**
+
+1. **Content Audit** — List all existing guidelines, patterns, examples. Classify each as core (80%+ case) or supplementary (edge case).
+
+2. **Capability Assessment** — Will removing content impair execution? If yes, content cannot be deleted. Migrate instead.
+
+3. **Migration Verification** — If moving SKILL.md → references/: verify the reference file exists and is linked from SKILL.md. Verify moved content remains accessible.
+
+4. **Operator Confirmation** — Any deletion (not migration)? Get explicit approval. Ask: "Should I remove this?" Document reason.
+
+**Approval Triggers:**
+- **Auto-approved:** Moving supplementary content to references/ (80% rule applied). Consolidating references/ → SKILL.md. Rewording for clarity. Adding examples.
+- **Requires approval:** Removing ANY guideline/pattern/example. Reducing coverage (e.g., 4 patterns → 2). Changing scope boundaries. Removing error handling.
+
+**Quick Decision Tree:**
+```
+Does content relocate?
+├─ 80%+ execution use → STAYS in SKILL.md (core procedural)
+├─ <20% execution use → Move to references/ (supplementary)
+└─ Being DELETED (not relocated)? → Requires operator approval
+```
+
+See `references/refinement-preservation-policy.md` for detailed rules, case studies, and examples.
+
 ## Reference Guide
 
 **Load when understanding skill fundamentals:**
-- `references/how-skills-work.md` — **Load if:** User asks why descriptions trigger activation, or you need to explain token loading hierarchy, selection mechanism, or skill architecture
+- `references/how-skills-work.md` — **MUST load:** When user asks why descriptions trigger activation, or you need to explain token loading hierarchy, selection mechanism, or skill architecture (enables user understanding)
 
 **Load when creating a new skill:**
-- `references/templates.md` — **Load if:** User describes requirements and you need copy-paste starting points (basic template vs. production template, workflow patterns)
-- `references/content-guidelines.md` — **Load if:** Writing skill descriptions/frontmatter and need to verify trigger phrases work, or checking terminology consistency in existing skill
+- `references/templates.md` — **MUST load:** After requirements interview, to apply requirements to template structure. Provides copy-paste starting points (basic vs. production, workflow patterns)
+- `references/content-guidelines.md` — **MUST load:** When writing skill descriptions/frontmatter, to verify trigger phrases work and check terminology consistency
 
 **Load when validating or improving skills:**
-- `references/validation-workflow.md` — **Load if:** Systematically validating through phases (frontmatter clarity → body clarity → references organization → tool scoping → real-world testing)
-- `references/content-distribution-guide.md` — **Load if:** Deciding what content stays in SKILL.md vs. moves to references, or refining skill organization/length (prevents moving core procedural content unnecessarily)
-- `references/checklist.md` — **Load if:** Assessing skill quality across all dimensions (activation, clarity, token efficiency, error handling, production readiness)
-- `references/advanced-patterns.md` — **Load if:** Skill is production/team-use and needs error handling, version history, risk assessment, security review, or advanced patterns
+- `references/validation-workflow.md` — **MUST load:** To systematically validate through phases (frontmatter clarity → body clarity → references organization → tool scoping → real-world testing)
+- `references/content-distribution-guide.md` — **MUST load:** When refining skill length/organization, to decide what stays in SKILL.md vs. moves to references (prevents incorrectly moving core procedural content)
+- `references/refinement-preservation-policy.md` — **MUST load:** When refining existing skills, to enforce preservation gates and approval triggers. Ensures content migration vs. deletion decisions follow the 80% rule and operator approval requirements
+- `references/checklist.md` — **MAY load:** To assess skill quality across all dimensions (activation, clarity, token efficiency, error handling, production readiness). Use when systematic quality review needed
+- `references/advanced-patterns.md` — **MAY load:** When skill is production/team-use and needs error handling, version history, risk assessment, security review, or advanced patterns
 
 **Load when configuring permissions and structure:**
-- `references/allowed-tools.md` — **Load if:** Determining which tools skill needs, or reviewing security/principle of least privilege
-- `references/self-containment-principle.md` — **Load if:** Deciding whether skill has external dependencies, or troubleshooting self-containment violations
+- `references/allowed-tools.md` — **MUST load:** When determining which tools skill needs or reviewing security/principle of least privilege
+- `references/self-containment-principle.md` — **MAY load:** When deciding whether skill has external dependencies, or troubleshooting self-containment violations
 
 ## Key Notes
 
@@ -262,11 +298,6 @@ The description must contain phrases Claude will see in user requests. If the de
 
 **Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
 
-**Allowed creation/editing scopes:**
-- **Plugin skills**: `skills/` directory in Claude plugin projects
-- **Project-level skills**: `.claude/skills/` at project root
-- **Nested skills**: `.claude/skills/` in any subdirectory
-
-**Forbidden creation/editing scopes:**
-- **User-space skills**: `~/.claude/skills/` — Risk of affecting all projects in your user space
-- **Installed/cached skills**: `~/.claude/plugins/cache/` and other installation directories
+**Scope reference:** See "Implementation Approach" section (lines 67-115) for complete scope detection flowchart. In summary:
+- ✅ **Allowed:** `skills/` (plugin), `.claude/skills/` (project root), `.claude/skills/` (nested directories)
+- ❌ **Forbidden:** `~/.claude/skills/` (user-space), `~/.claude/plugins/cache/` (installed/cached)

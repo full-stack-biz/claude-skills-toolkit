@@ -2,6 +2,21 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.6.0] - 2026-01-21
+
+### Added
+- **skill-creator:** Refinement preservation rules with validation gates
+  - New reference file `references/refinement-preservation-policy.md` with detailed preservation rules, the 80% rule, and operator approval triggers
+  - "Refinement Preservation Rules" section in SKILL.md with 4 pre-refinement validation gates (Content Audit, Capability Assessment, Migration Verification, Operator Confirmation)
+  - Quick decision tree for content relocation (SKILL.md vs. references/)
+  - Prevents function-crippling refinements by enforcing preservation of core procedural content
+
+### Changed
+- **skill-creator:** Enhanced reference guide clarity
+  - Updated all reference loading guidance from "Load if" to explicit "MUST load" / "MAY load" labels
+  - Clarified activation requirements for each reference file based on task context
+  - Improved scope reference in Key Notes section to direct users to implementation flowchart (lines 67-115)
+
 ## [1.5.0] - 2026-01-21
 
 ### Added
