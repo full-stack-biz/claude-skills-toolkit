@@ -236,119 +236,21 @@ When authoring skill examples that show code blocks within code blocks, use thes
 
 ## Version Release Process
 
-**Brackets:** Semantic versioning has three brackets: PATCH (Z in X.Y.Z), MINOR (Y in X.Y.Z), MAJOR (X in X.Y.Z).
-- PATCH bracket: Bug fixes, wording improvements, reference updates (no new capability)
-- MINOR bracket: New features, expanded capabilities, new tools (backward compatible)
-- MAJOR bracket: Breaking changes, incompatible API/behavior changes (requires user action)
+For detailed release process guidance, use the `/dev-flow:release-process` skill.
 
-**Core principle:** Version freezes at its bracket level until commit. Can only jump to higher bracket if scope demands it.
+### Key Principle: Skill Versions Are Independent
 
-**Bracket states:**
-- Refinements only (no new work started): version unchanged
-- Patch changes identified: bump Z (X.Y.Z → X.Y.Z+1), freeze in patch bracket
-- Patch bracket active + minor scope appears: jump to minor (X.Y.Z+1 → X.Y+1.0), freeze in minor bracket
-- Minor bracket active + major scope appears: jump to major (X.Y+1.0 → X+1.0.0), freeze in major bracket
-- Major bracket active + more changes: stay frozen (X+1.0.0 → X+1.0.0)
-- After commit: reset, ready for next cycle
+Each skill in this toolkit maintains its own independent semantic version (in `SKILL.md` frontmatter). Skill versions do NOT automatically sync with the plugin version—they evolve based on the skill's own changes:
 
-**Quick decision tree when making changes:**
+- **Skill version bumps** happen when:
+  - PATCH: Bug fixes, wording improvements, reference updates to that specific skill
+  - MINOR: New capabilities or expanded tool access in that skill
+  - MAJOR: Breaking changes to that skill's behavior or interface
 
-1. **Starting new work after commit?** → Assess scope level
-   - Patch-level (fixes, wording, reference updates)? → Bump patch (Z+1)
-   - Minor-level (new capability, expanded tools)? → Bump minor (Y+1, reset Z to 0)
-   - Major-level (breaking changes)? → Bump major (X+1, reset Y and Z to 0)
-
-2. **Already bumped in current cycle?** → Check current bracket
-   - In patch bracket + still patch-only? → Stay frozen
-   - In patch bracket + discover minor scope? → Jump to minor (reset Z)
-   - In minor bracket + still minor-level? → Stay frozen
-   - In minor bracket + discover major scope? → Jump to major (reset Y and Z)
-   - In major bracket + any other changes? → Stay frozen
-
-3. **Refined without starting new work?** → Version unchanged
-
-**Example workflow:**
-- Last commit: 1.0.1
-- Refining (no new work started): stays 1.0.1
-- After commit, new work: identify patch changes → bump to 1.0.2 (patch frozen)
-- Continue refining: more patch changes → stays 1.0.2 (frozen)
-- Discover minor changes needed: jump to 1.1.0 (minor frozen)
-- Continue: more work → stays 1.1.0 (frozen)
-- Discover breaking changes: jump to 2.0.0 (major frozen)
-- Continue: more work → stays 2.0.0 (frozen)
-- Commit: 2.0.0 committed
-- After commit, new work: identify patch → bump to 2.0.1 (fresh cycle)
-
-### Skill Versions
-
-Skill versions are **independent** from plugin versions. Use the bracket decision tree above.
-
-### Plugin Version
-
-Update `.claude-plugin/plugin.json` `version:` **only when committing changes**:
-
-**PATCH bump** (1.0.X → 1.0.Y) when:
-- Any included skill gets a PATCH version bump
-- Bug fixes to plugin structure or marketplace manifest
-
-**MINOR bump** (1.X.0 → 1.Y.0) when:
-- Any included skill gets a MINOR version bump
-- Adding or removing skills from the plugin
-
-**MAJOR bump** (X.0.0 → Y.0.0) when:
-- Any included skill gets a MAJOR version bump
-- Breaking changes to plugin structure
-
-When committing version changes, also update:
-1. **CHANGELOG.md** - Add new section for version with date, changes categorized (Added/Changed/Fixed/Removed)
-   - **Critical:** Document ONLY user-facing changes. Internal development work (refinements, optimizations, refactoring) is scaffolding, not deliverables
-
-   **⚠️ ABSOLUTE RULE: NEVER document version bumps or internal versioning details**
-   - The version number in the section header (e.g., `## [1.2.3]`) IS the complete documentation that a version change occurred
-   - **BANNED entries:** "Bumped to 1.2.3", "PATCH: improvements", "skill-creator: 1.0.0 → 1.0.1", "Bumped individual skill versions"
-   - Don't explain WHY versions changed (e.g., "Bumped plugin for skill version changes")
-   - Don't list skill version numbers or bumps anywhere in the body
-   - **Circular/redundant examples to avoid:**
-     - "Bumped skill-creator to 1.0.1" ← NO (version is metadata, not a change)
-     - "Updated plugin version for compatibility" ← NO (users don't care about internal versioning)
-     - "Technical: Bumped versions" sections ← NO (version numbers are not user-facing changes)
-
-   **What to document instead: User-facing impact**
-   - New features/skills that users can now use
-   - Behavior changes that affect how users interact with skills
-   - Bug fixes that improve user experience
-   - Breaking changes users need to know about
-   - Enhanced documentation/examples that users will read
-
-   - Examples of what to document: New commands, new skills, behavior changes, bug fixes, feature additions, documentation improvements
-   - Examples of what NOT to document: Version bumps, version numbers, skill versioning, internal improvements, token optimization, code cleanup
-   - **Rationale:** Users care what value changed for them, not metadata about how it was versioned. Version numbers are implementation detail. The section header `## [1.2.3]` tells users a version exists; the body tells them what they need to do/use.
-
-   **⚠️ CRITICAL: Verify changes in git history, NOT from assumptions or context**
-   - Check `git diff` to see exactly what changed in this commit
-   - Do NOT infer or assume what changed based on reasoning or conversation context
-   - Do NOT write "no longer asks X" unless X actually existed in previous committed code
-   - Do NOT write "improved Y" if the improvement is speculative; only document measurable/visible changes
-   - Example of WRONG approach: Assume monorepo support was added because you're implementing it → write changelog claiming old behavior was removed. WRONG. Check git history first.
-   - Example of RIGHT approach: Run `git diff skills/skill-creator/SKILL.md`, read the actual changes, document only what the diff shows was added/changed/removed
-2. **README.md** - Update any version references in installation commands or feature lists
-3. **Marketplace manifest** - `.claude-plugin/marketplace.json`:
-   - `metadata.version`
-   - `plugins[].version` for each plugin entry
-4. **Example versions** - Any `"version": "X.Y.Z"` in SKILL.md body examples only if that skill's version changed
-
-**Verification:**
-```bash
-# Check versions across all components
-grep -rn '"version"' .claude-plugin/
-grep '"version"' skills/*/SKILL.md
-
-# Verify version consistency in documentation
-grep -i 'version' CHANGELOG.md README.md
-
-# Validate plugin structure
-claude plugin validate .
-```
+- **Plugin version bumps** happen when:
+  - PATCH: Any included skill gets a PATCH bump, or bug fixes to plugin manifest/structure
+  - MINOR: Any included skill gets a MINOR bump, or skills are added/removed
+  - MAJOR: Any included skill gets a MAJOR bump, or breaking changes to plugin structure
 
 ## Control who invokes a skill
 
