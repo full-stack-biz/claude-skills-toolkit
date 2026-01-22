@@ -2,6 +2,19 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.6.2] - 2026-01-22
+
+### Changed
+- **plugin-creator:**
+  - Improved marketplace.json documentation with clearer schema examples
+  - Refactored automated scanning phase into separate reference file (`references/automated-scanning-workflow.md`) for better organization
+  - Enhanced tool scoping with specific bash command restrictions (`Bash(find:*,grep:*,...)` instead of broad permissions)
+  - Consolidated workflow documentation for clarity
+
+- **hook-creator, subagent-creator:**
+  - Removed redundant "THE EXACT PROMPT" sections (users can invoke skills directly with natural requests)
+  - Improved scope terminology and user-space blocking guidance
+
 ## [1.6.1] - 2026-01-21
 
 - **skill-creator 1.3.1:**

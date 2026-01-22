@@ -84,20 +84,6 @@ Each event supports specific decision fields for returning control:
 
 See `references/how-hooks-work.md` for execution model, `references/event-reference.md` for event timing, `references/decision-schemas.md` for JSON outputs, `references/exit-code-behavior.md` for command exit behaviors.
 
-## THE EXACT PROMPT
-
-When creating or improving a hook, use this exact request:
-
-```
-Use hook-creator to [create/validate/improve] my [hook-name] hook.
-Focus on: [specific area - e.g., "event matching", "error handling", "performance"]
-```
-
-Examples:
-- "Use hook-creator to create my format-on-write hook"
-- "Use hook-creator to validate my pre-commit-check hook against best practices"
-- "Use hook-creator to improve my post-tool-use hook, focus on performance"
-
 ## Workflow by Action
 
 **⚠️ CRITICAL: Scope Detection First**

@@ -48,31 +48,22 @@ Subagents isolate task execution with custom prompts, tool access, permissions. 
 
 Subagents are isolated execution environments with independent configuration (prompt, tools, permissions). Claude delegates to subagents based on request context using natural language matching against descriptions. For complete architectural details including delegation mechanisms, configuration options, and integration patterns, see `references/how-subagents-work.md`.
 
-## THE EXACT PROMPT
-
-When creating or improving a subagent, use this exact request:
-
-```
-Use subagent-creator to [create/validate/improve] my [subagent-name] subagent.
-Focus on: [specific area - e.g., "delegation triggering", "tool scoping", "permission modes"]
-```
-
-Examples:
-- "Use subagent-creator to create my db-analyzer subagent"
-- "Use subagent-creator to validate my code-reviewer subagent against best practices"
-- "Use subagent-creator to improve my test-runner subagent, focus on permission modes"
-
 ## Implementation Approach
 
 **⚠️ CRITICAL: Scope Detection & Clarification**
 
 Always detect project type first, then clarify scope only when needed:
 
-**Allowed scopes:**
+**Allowed scopes (project-scoped only):**
 - **Claude plugin projects** (has `.claude-plugin/plugin.json`): Subagents in `agents/` (plugin) or `.claude/agents/` (project-level)
 - **Regular projects**: Subagents in `.claude/agents/` only
-- **NEVER** edit subagents from installed locations: `~/.claude/plugins/cache/`, `~/.claude/agents/`, or global installations
-- If user provides a path to an installed subagent, refuse and explain the difference
+
+**🚫 Forbidden scopes (REFUSE all editing attempts):**
+- `~/.claude/plugins/cache/` — Installed/cached plugins
+- `~/.claude/agents/` — User-space subagents (affects all projects)
+- Global installations or outside project root
+
+**If user provides forbidden path:** Refuse with explanation: "Subagent-creator only works with project-scoped subagents. User-space subagents (`~/.claude/agents/`) affect all projects and should not be edited here."
 
 **START HERE - Scope Detection & Clarification Flow:**
 
@@ -240,10 +231,10 @@ For detailed guidance, see references/:
 - `permissionMode`: default|acceptEdits|dontAsk|bypassPermissions|plan
 - `hooks`: PreToolUse, PostToolUse, SubagentStart, SubagentStop for validation/lifecycle
 
-**Scope storage:**
-- Global: `~/.claude/agents/`
-- Project-local: `.claude/agents/`
-- Plugin: `agents/` in plugin directory
+**Scope storage (project-scoped only; subagent-creator refuses user-space):**
+- ✅ Project-local: `.claude/agents/` (recommended)
+- ✅ Plugin: `agents/` in plugin directory (for plugin projects)
+- 🚫 Global/User-space: `~/.claude/agents/` (forbidden; affects all projects — do not edit here)
 
 For complete configuration reference, defaults, field combinations, naming conventions, and permission mode decision matrices, see `configuration-reference.md` and `permission-modes.md`.
 

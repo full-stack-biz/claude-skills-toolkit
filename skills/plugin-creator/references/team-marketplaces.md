@@ -1,6 +1,8 @@
 # Team Marketplaces and Distribution
 
-Share your plugins with your team or community through marketplaces. This guide covers setting up and distributing plugins for team use.
+Share your plugins with your team or community through marketplaces. This guide covers creating marketplace.json, setting up team distribution, versioning, and common patterns for sharing plugins across teams.
+
+Complete marketplace.json schema documented in "Team Marketplace Setup" section below.
 
 ## Table of Contents
 
@@ -68,8 +70,11 @@ Organize your marketplace:
 
 ```
 plugin-marketplace/
+├── .claude-plugin/
+│   ├── plugin.json              # Plugin manifest (required)
+│   └── marketplace.json         # Marketplace manifest (required for marketplace add)
 ├── README.md                    # Marketplace overview
-├── plugins.json                 # Plugin registry (metadata)
+├── plugins.json                 # Optional: external registry (for documentation)
 ├── plugins/                     # Actual plugin directories
 │   ├── code-reviewer/
 │   ├── pdf-processor/
@@ -77,79 +82,94 @@ plugin-marketplace/
 └── CONTRIBUTING.md              # Contribution guidelines
 ```
 
-### Step 3: Create plugins.json Registry
+### Step 3: Create marketplace.json (Required)
 
-The registry file tells Claude Code where to find plugins:
+The `.claude-plugin/marketplace.json` file **MUST** be at `.claude-plugin/marketplace.json` in your repository root for `claude plugin marketplace add` to work.
+
+**CRITICAL schema requirements:**
+
+**Required fields:**
+- `name` (string): Marketplace identifier (kebab-case)
+- `owner` (object): Must be `{"name": "..."}`, NOT a string
+- `plugins` (array): List of plugins (can be empty `[]`)
+
+**Example marketplace.json:**
 
 ```json
 {
-  "version": "1.0.0",
+  "name": "dev-flow",
+  "owner": {
+    "name": "full-stack-biz"
+  },
   "plugins": [
     {
-      "name": "code-reviewer",
-      "description": "Review code for best practices. Use when validating pull requests or before commit.",
-      "version": "1.2.0",
-      "author": "Your Team",
-      "homepage": "https://github.com/your-org/plugin-marketplace/tree/main/plugins/code-reviewer",
-      "repository": "https://github.com/your-org/plugin-marketplace",
-      "installUrl": "https://github.com/your-org/plugin-marketplace/tree/main/plugins/code-reviewer"
-    },
-    {
-      "name": "pdf-processor",
-      "description": "Process PDF files with OCR and extraction. Use when working with PDF documents.",
-      "version": "1.0.5",
-      "author": "Your Team",
-      "homepage": "https://github.com/your-org/plugin-marketplace/tree/main/plugins/pdf-processor",
-      "repository": "https://github.com/your-org/plugin-marketplace",
-      "installUrl": "https://github.com/your-org/plugin-marketplace/tree/main/plugins/pdf-processor"
+      "name": "dev-flow",
+      "source": "./",
+      "description": "Development workflow tools for releases and versioning"
     }
   ]
 }
 ```
 
-**Registry fields:**
-- `name` - Plugin identifier (must match `.claude-plugin/plugin.json`)
-- `description` - What the plugin does (shown in plugin manager)
-- `version` - Current version (semantic versioning)
-- `author` - Attribution
-- `homepage` - Documentation link
-- `repository` - Marketplace repository URL
-- `installUrl` - Direct path to plugin directory
+**Plugin source formats:**
+- **Relative path:** `"source": "./"` (paths MUST start with `./`)
+- **GitHub:** `"source": {"source": "github", "repo": "owner/plugin-repo"}`
+- **Git URL:** `"source": {"source": "url", "url": "https://gitlab.com/team/plugin.git"}`
 
-### Step 4: Add Plugins to Marketplace
+**Common validation errors:**
 
-Copy or organize plugins in the marketplace:
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `owner: Invalid input: expected object, received string` | `owner` is a string | Use `"owner": {"name": "..."}` |
+| `plugins: Invalid input: expected array, received undefined` | Missing `plugins` field | Add `"plugins": []` |
+| `plugins.0.source: Invalid input` | Source path missing `./` | Use `"source": "./path"` not `"source": "path"` |
 
-```
-plugin-marketplace/
-└── plugins/
-    └── code-reviewer/
-        ├── .claude-plugin/
-        │   └── plugin.json
-        ├── commands/
-        │   ├── validate.md
-        │   └── report.md
-        ├── skills/
-        │   └── code-analysis/
-        │       └── SKILL.md
-        └── README.md
-```
+For multi-plugin marketplace example, see section below.
 
-Each plugin should have its own `plugin.json`:
+### Step 4: Multi-Plugin Marketplace Example
+
+If your repository contains multiple plugins, list them all in marketplace.json:
 
 ```json
 {
-  "name": "code-reviewer",
-  "description": "Review code for best practices. Use when validating pull requests or before commit.",
-  "version": "1.2.0",
-  "author": {
-    "name": "Your Team",
-    "email": "team@yourcompany.com"
+  "name": "company-tools",
+  "owner": {
+    "name": "DevTools Team",
+    "email": "devtools@company.com"
   },
-  "homepage": "https://github.com/your-org/plugin-marketplace/tree/main/plugins/code-reviewer",
-  "repository": "https://github.com/your-org/plugin-marketplace",
-  "license": "MIT"
+  "plugins": [
+    {
+      "name": "code-formatter",
+      "source": "./plugins/formatter",
+      "description": "Automatic code formatting",
+      "version": "2.1.0"
+    },
+    {
+      "name": "deployment-tools",
+      "source": {
+        "source": "github",
+        "repo": "company/deploy-plugin"
+      },
+      "description": "Deployment automation"
+    }
+  ]
 }
+```
+
+Plugin directory structure:
+
+```
+plugin-marketplace/
+├── .claude-plugin/
+│   └── marketplace.json
+└── plugins/
+    ├── formatter/
+    │   ├── .claude-plugin/
+    │   │   └── plugin.json
+    │   ├── skills/
+    │   └── README.md
+    └── external-tools/
+        # Hosted elsewhere, referenced in marketplace.json
 ```
 
 ### Step 5: Document in README
@@ -163,32 +183,29 @@ Central repository of plugins for [Your Organization].
 
 ## Available Plugins
 
-### Code Reviewer
-Review code for best practices. [View plugin](plugins/code-reviewer)
+### Code Formatter
+Automatic code formatting. [View plugin](plugins/formatter)
 
-### PDF Processor
-Process PDF files with OCR extraction. [View plugin](plugins/pdf-processor)
-
-### Test Runner
-Run tests and generate reports. [View plugin](plugins/test-runner)
+### Deployment Tools
+Deploy applications. [View plugin docs]
 
 ## Installation
 
 Configure your marketplace:
 
 \`\`\`bash
-claude plugin marketplace configure https://github.com/your-org/plugin-marketplace
+claude plugin marketplace add owner/plugin-marketplace
 \`\`\`
 
-Then browse and install plugins:
+Then install plugins:
 
 \`\`\`bash
-claude plugin discover
+claude plugin install code-formatter@company-tools
 \`\`\`
 
 ## Contributing
 
-Submit new plugins via pull request. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Submit new plugins via pull request.
 ```
 
 ### Step 6: Configure Team Access
@@ -407,7 +424,8 @@ Consider publishing your plugin to a public marketplace when:
 
 ## References
 
-- [Claude Code Plugin Discovery](about:/docs/en/discover-plugins)
-- [Claude Code Plugins Reference](about:/docs/en/plugins-reference)
+- [Claude Code Plugin Discovery](https://code.claude.com/docs/en/discover-plugins)
+- [Claude Code Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
+- [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference)
 - [Semantic Versioning](https://semver.org/)
 - [Keep a Changelog](https://keepachangelog.com/)
