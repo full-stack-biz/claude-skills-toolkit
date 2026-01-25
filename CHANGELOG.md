@@ -2,6 +2,19 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.7.0] - 2026-01-25
+
+### Added
+- **skill-creator 1.4.0:**
+  - New reference file `references/slash-command-conversion.md` — Complete workflow for migrating slash commands to project-scoped skills with detection, mapping, and validation
+
+### Changed
+- **skill-creator 1.4.0:**
+  - Refocused activation description on 3 core use cases (create, validate, refine) with slash-command migration as secondary capability
+  - Consolidated duplicate scope definitions, reducing Implementation Approach from 97 to 24 lines
+  - Simplified scope detection flowchart while preserving all decision logic
+  - Restructured for better progressive disclosure (action type → auto-detect → scope questions only if ambiguous)
+
 ## [1.6.2] - 2026-01-22
 
 ### Changed

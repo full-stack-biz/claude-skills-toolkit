@@ -1,11 +1,12 @@
 ---
 name: skill-creator
 description: >-
-  Create, validate, and refine Claude Code skills. Use when: building a new skill,
-  validating an existing skill against best practices, or improving a skill's
-  clarity and execution. Handles skill structure, frontmatter, activation,
-  references, tool scoping, and production readiness.
-version: 1.3.1
+  Create, validate, and refine Claude Code skills. Use when: building new skills,
+  validating skills against best practices, or improving skill clarity and execution.
+  Handles skill structure, frontmatter, activation, references, tool scoping, and
+  production readiness. Can also migrate slash commands to skills for better context
+  management and subagent support.
+version: 1.4.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -13,21 +14,18 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 **Dual purpose:** Create skills right the first time OR elevate existing skills to best practices.
 
-## Quick Routing
+## Quick Start
 
-Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
-
-1. Ask what the user wants to do (create/validate/refine)
-2. Ask for the skill name or path based on the action
-3. Route to the appropriate workflow section
+Ask what the user wants: create, validate, refine, or convert slash commands. Then route to the section below.
 
 ---
 
-## Use Cases
+## Core Use Cases
 
 **Create new skills** - Build from scratch with correct structure, naming, frontmatter, and validation guidance.
 **Validate existing skills** - Check against best practices (structure, activation clarity, token efficiency, tool scoping).
 **Improve skills** - Refine activation, clarity, organization, or efficiency of existing skills.
+**Convert slash commands** - Migrate existing `~/.claude/commands/` slash commands to project-scoped skills (bonus capability; better context management, subagent support).
 **Team/production skills** - Ensure robustness with error handling, tool scoping, and version tracking.
 
 ## Mindset
@@ -50,68 +48,47 @@ These principles apply to all skill creation and validation work—the foundatio
 
 ## Implementation Approach
 
-**⚠️ CRITICAL: Scope Detection & Clarification**
+**▶️ START HERE - Quick Workflow**
 
-Only ask about scope when there's actual ambiguity. Detect where user is working first.
+1. Ask: What do you want to do? (create / validate / refine)
+2. For create: Gather requirements, then route to "New Skills" section
+3. For validate/refine: Ask for skill path, then route to appropriate section
+4. For slash command migration: Mention as bonus capability, offer conversion support
 
-**Allowed scopes (what skill-creator will create/edit):**
-- **Plugin skills**: `skills/` directory in Claude plugin projects (has `.claude-plugin/plugin.json`)
-- **Project-level skills**: `.claude/skills/` at project root (discovered everywhere in project)
-- **Nested skills**: `.claude/skills/` in any subdirectory (auto-discovered when editing files there, e.g., `packages/frontend/.claude/skills/`)
+**Scope Rules:**
 
-**Forbidden scopes (skill-creator will refuse):**
-- **User-space skills**: `~/.claude/skills/` — REFUSE all creation/editing attempts. Risk: affecting user-space configuration, impacting all projects using these skills
-- **Installed/cached skills**: `~/.claude/plugins/cache/`, plugin installation directories — REFUSE all editing attempts
-- If user provides a path to user-space or installed location, refuse and explain: "This skill-creator only works with project-scoped skills (plugin or `.claude/skills/` directory). User-space skills in `~/.claude/skills/` should not be edited here—they affect all projects in your user space."
+✅ **Allowed scopes:** `skills/` (plugin) | `.claude/skills/` (project-level) | `.claude/skills/` (nested in any subdirectory)
 
-**▶️ START HERE - Scope Detection & Clarification Flow:**
+❌ **Forbidden scopes:** `~/.claude/skills/` (user-space — refuse, explain risk) | `~/.claude/plugins/cache/` (installed — refuse immediately)
 
-Auto-detect context first; only ask when genuinely ambiguous. This prevents unnecessary questions while catching scope violations.
+**For path validation:** If user provides user-space or cached path, refuse with: "This skill-creator only works with project-scoped skills (plugin or `.claude/skills/` directory). User-space skills affect all projects in your user space; edit them separately if needed."
 
-1. **Ask Question 1: Action type**
-   - Create a new skill (Recommended)
-   - Validate an existing skill
-   - Refine a skill
+**Scope Detection Flowchart:**
 
-2. **AUTO-DETECT: Where is user working?**
-   - Determine current working directory
-   - Is user in project root? Or a nested directory (e.g., `packages/frontend/`, `services/api/`)?
+Auto-detect first; only ask when ambiguous:
 
-3. **AUTO-DETECT: Is this a Claude plugin project?**
-   - Check if `.claude-plugin/plugin.json` exists
-   - If YES and only one obvious scope: default to `skills/` (plugin scope)
-   - If NO and at project root: default to `.claude/skills/` (project scope)
-   - Only ask (step 4a/4b) if genuinely ambiguous
+1. **Auto-detect project type:**
+   - Check for `.claude-plugin/plugin.json` (plugin project?)
+   - Identify current working directory
 
-4a. **IF AMBIGUOUS in plugin project - Ask: Plugin or project-level?**
-   ```
-   Should this skill be part of the plugin or project-level?
-   - Plugin - Add to `skills/` directory (bundled with plugin)
-   - Project-level - Add to `.claude/skills/` at project root (available across project)
-   ```
+2. **If plugin project:**
+   - Default: `skills/` directory
+   - Only ask if user is clearly working in `.claude/skills/` location
 
-4b. **IF AMBIGUOUS in regular project** (user in nested directory)
-   - If user is at project root: default to `.claude/skills/` without asking
-   - If user is in nested directory and unclear which scope:
-     ```
-     Where should this skill live?
-     - Nested - Add to `packages/frontend/.claude/skills/` (Recommended)
-       Claude auto-discovers this when you edit files here.
-     - Project-level - Add to `.claude/skills/` at project root
-       Skill available everywhere in the project.
-     ```
+3. **If regular project (no plugin):**
+   - At project root? Default: `.claude/skills/`
+   - In nested directory? Ask only if scope is unclear
 
-**🚫 CRITICAL: Block user-space scope attempts**
-   - If user asks for user-space scope or mentions `~/.claude/skills/`, REFUSE immediately
-   - Explain: "User-space skills (`~/.claude/skills/`) affect all projects in your user space. This skill-creator only works with project-scoped skills to prevent unintended side effects across your projects. After creation or refinement, you can manually copy the skill directory to `~/.claude/skills/` if you want user-space availability."
+4. **Scope selection (ask only if ambiguous):**
+   - Plugin projects: "Plugin (`skills/`) or project-level (`.claude/skills/`)?"
+   - Nested directories: "Nested (`.claude/skills/` here) or project-level (`.claude/skills/` at root)?"
 
-5. **Ask: What do you want to call it?** (e.g., `code-analyzer`, `test-runner`)
+5. **Scope confirmation:**
+   - Ask: "What do you want to call it?" (e.g., `code-analyzer`, `test-runner`)
+   - For validate/refine: "Provide the skill path relative to project root" (e.g., `skills/pdf-processor`, `.claude/skills/pdf-processor`, `packages/frontend/.claude/skills/pdf-processor`)
 
-**For validating/refining:** Ask "Provide the skill path relative to project root"
-- Examples: `skills/pdf-processor`, `.claude/skills/pdf-processor`, `packages/frontend/.claude/skills/pdf-processor`, `api/.claude/skills/test-runner`
-- Paths can be at any directory level where `.claude/skills/` exists
-
-Based on answers, route to the appropriate workflow below.
+**Block user-space attempts immediately:**
+- If user mentions `~/.claude/skills/` or `~/.claude/plugins/cache/`, refuse with: "This skill-creator only works with project-scoped skills (plugin or `.claude/skills/` directory). User-space skills affect all projects in your user space; edit them separately if needed."
 
 ### For New Skills: Requirements Interview First
 
@@ -145,6 +122,38 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 7. **Test activation:** Will Claude recognize this description in real requests?
 8. **Re-validate** using the workflow before considering refinements complete
 9. Make targeted improvements rather than rewriting everything
+
+### For Converting Slash Commands to Skills
+
+**Context:** Slash commands (`~/.claude/commands/`) have been merged into Skills in Claude Code. While existing slash commands continue to work, migrating to skills provides:
+- Better context management via dynamic file loading
+- Access to subagents and context forking
+- Progressive disclosure and references
+- Project-scoped availability (vs. user-space affecting all projects)
+
+**Detection: When to recommend conversion**
+
+Recommend conversion when user:
+- Mentions "slash command" or asks about migrating commands
+- Shows a slash command that would benefit from context isolation or subagent delegation
+- Works in project needing project-scoped automation (not user-space-wide)
+- Wants to use subagents with their command
+
+Recommend user self-convert when they have:
+- Simple slash commands (1-10 lines, no complex logic)
+- Commands they understand well and can easily port
+
+Offer to do conversion when:
+- Complex command logic (control flow, multiple workflows)
+- Unclear command purpose or structure
+- User needs guidance on skill structure
+
+**Migration workflow:** See `references/slash-command-conversion.md` for complete conversion process, including:
+- Detecting command purpose and activation
+- Mapping command → skill frontmatter
+- Converting command logic to skill instructions
+- Restructuring for references/subagents if needed
+- Validation after conversion
 
 ## Outcome Metrics
 
@@ -249,6 +258,9 @@ See `references/refinement-preservation-policy.md` for detailed rules, case stud
 **Load when configuring permissions and structure:**
 - `references/allowed-tools.md` — **MUST load:** When determining which tools skill needs or reviewing security/principle of least privilege
 - `references/self-containment-principle.md` — **MAY load:** When deciding whether skill has external dependencies, or troubleshooting self-containment violations
+
+**Load when converting slash commands to skills:**
+- `references/slash-command-conversion.md` — **MUST load:** When user wants to migrate existing slash commands to skills. Provides detection, mapping, workflow, and validation for conversions
 
 ## Key Notes
 
