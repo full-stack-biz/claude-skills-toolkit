@@ -2,6 +2,20 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.9.0] - 2026-01-26
+
+### Added
+- **skill-creator 1.7.0:**
+  - "Locate Target Skill" workflow — proactive skill discovery searches current project first, then user-space, before asking user
+  - Conditional user-space editing (`~/.claude/skills/`) with warnings and confirmation when skill not found in project
+  - "Base Directory context" note clarifying that skill's base directory is for its own references, not for locating target skills
+
+### Changed
+- **skill-creator 1.7.0:**
+  - Restructured scope rules with explicit search priority: PREFERRED (project) → CONDITIONAL (user-space with confirmation) → FORBIDDEN (cache)
+  - Updated validation and refining workflows to start with "LOCATE the skill first" step
+  - Quick Workflow now references discovery workflow instead of "ask for path"
+
 ## [1.8.0] - 2026-01-26
 
 ### Added

@@ -6,7 +6,7 @@ description: >-
   Handles skill structure, frontmatter, activation, references, tool scoping, and
   production readiness. Can also migrate slash commands to skills for better context
   management and subagent support.
-version: 1.6.0
+version: 1.7.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -52,58 +52,72 @@ These principles apply to all skill creation and validation work—the foundatio
 
 1. Ask: What do you want to do? (create / validate / refine)
 2. For create: Gather requirements, then route to "New Skills" section
-3. For validate/refine: Ask for skill path, then route to appropriate section
+3. For validate/refine: Search project first → user-space second → ask only if not found (see "Locate Target Skill" below)
 4. For slash command migration: Mention as bonus capability, offer conversion support
+
+**BEFORE ANY OPERATION - Locate the Target Skill:**
+
+When user mentions a skill by name (e.g., "refine plugin-creator"):
+
+1. **Search CURRENT PROJECT first (preferred):**
+   ```
+   skills/skill-name/SKILL.md
+   .claude/skills/skill-name/SKILL.md
+   packages/*/skills/skill-name/SKILL.md
+   ```
+
+2. **If found in project** → Use that path (source confirmed)
+
+3. **If NOT found in project** → Search user-space:
+   ```
+   ~/.claude/skills/skill-name/SKILL.md
+   ```
+
+4. **If found in user-space** → Warn and confirm:
+   > "I found `skill-name` in `~/.claude/skills/` (user-space, affects all projects).
+   > It's not in this project. Do you want to:
+   > - Edit the user-space copy directly?
+   > - Copy it to this project first, then edit?"
+
+5. **If NOT found anywhere** → Ask user:
+   > "I couldn't find `skill-name` in this project or user-space. Where is the source?"
+
+6. **NEVER search or use:**
+   - `~/.claude/plugins/cache/*` (installed copies - read-only)
+   - Skill's own base directory (that's for THIS skill's references only)
+
+**Note:** The "Base directory" shown when this skill loads points to THIS skill's location for accessing its own references. Never use it to locate target skills.
+
+---
 
 **Scope Rules: Source Code Only (NO CACHE EDITS)**
 
-✅ **ALLOWED - Edit these paths:**
-- `skills/skill-name/` in plugin projects (source in working repository)
-- `.claude/skills/skill-name/` in any project (source in working repository)
-- Nested: `packages/*/claude/skills/skill-name/` (source in working repository)
+✅ **PREFERRED - Project paths (search first):**
+- `skills/skill-name/` in plugin projects
+- `.claude/skills/skill-name/` in any project
+- `packages/*/skills/skill-name/` (monorepo patterns)
 
-❌ **FORBIDDEN - REFUSE IMMEDIATELY:**
-- `~/.claude/plugins/cache/*` (installed cache—never edit)
-- `~/.claude/skills/*` (user-space—affects all projects)
-- Any path containing `/cache/` (Claude's managed cache)
-- Any path NOT in current working directory or parent project root
+⚠️ **CONDITIONAL - User-space (only if not in project):**
+- `~/.claude/skills/skill-name/` - Warn: "Affects all projects"
+- Requires explicit user confirmation before editing
+- Offer to copy to project instead
 
-**CRITICAL: Source vs. Installed Detection**
+❌ **FORBIDDEN - Never edit (REFUSE IMMEDIATELY):**
+- `~/.claude/plugins/cache/*` (installed plugins - Claude-managed)
+- Any path containing `/cache/` (always read-only)
 
-Before ANY edit operation:
+**Search Priority:**
+```
+1. Current project     → Edit directly (preferred)
+2. User-space          → Warn + confirm (conditional)
+3. Cache               → REFUSE (never)
+4. Not found           → Ask user for source path
+```
 
-1. **Check the path user provides:**
-   - Does it contain `/cache/`? → REFUSE: "Edits must be in source, not cache"
-   - Does it start with `~/.claude/`? → REFUSE: "User-space skills affect all projects. Edit source in project instead"
-   - Is it an absolute path outside project? → REFUSE: "Skill must be in current project or working directory"
-
-2. **Always verify real location:**
-   - Get the absolute path of what user wants to edit
-   - Check if it's in current working directory tree
-   - If skill is installed, find the SOURCE (usually in same project or parent)
-   - Example: User says "fix skill-creator" → check if `/cache/` appears → if yes, stop and ask for SOURCE path
-
-3. **Recovery if user gives installed path:**
-   - "I see you're pointing to `/path/to/.claude/plugins/cache/skills-toolkit/skill-creator/`. That's the installed copy. Do you want to edit the SOURCE instead?"
-   - Ask: "Where is the original skill-creator source? (e.g., `skills/skill-creator/` in your project?)"
-   - Only proceed once user provides source path
-
-**Scope Detection (for new/validation/refine):**
-
-Auto-detect; only ask when ambiguous:
-
-1. **Verify working directory** - Confirm we're in a valid project (not random location)
-
-2. **For NEW skills:**
-   - Plugin project? → Default: `skills/skill-name/`
-   - Regular project? → Default: `.claude/skills/skill-name/`
-   - Ask only if ambiguous
-
-3. **For VALIDATE/REFINE (existing skills):**
-   - User provides path → Validate path is NOT in cache/`~/.claude/`
-   - Extract relative path (e.g., `skills/pdf-processor` not `/Users/.../skills/pdf-processor`)
-   - Before opening: Verify real location with `realpath` or `ls` to confirm it's source
-   - If path goes through cache: STOP and ask for source
+**For NEW skills (scope detection):**
+- Plugin project? → Default: `skills/skill-name/`
+- Regular project? → Default: `.claude/skills/skill-name/`
+- Ask only if ambiguous
 
 ### For New Skills: Requirements Interview First
 
@@ -120,10 +134,11 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 ### For Existing Skills (Validating)
 
-1. **Verify scope first (MANDATORY):** Use "Scope Rules: Source Code Only" section above
-   - Check path for `/cache/` → REFUSE if found
-   - Check path for `~/.claude/` → REFUSE if found
-   - Only proceed if path is in project source (working directory or parent)
+1. **LOCATE the skill first (MANDATORY):** Follow "Locate the Target Skill" workflow above
+   - Search current project: `skills/X/`, `.claude/skills/X/`
+   - If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
+   - If not found anywhere → ask user for source path
+   - Cache path? → REFUSE and ask for source
 2. **Important:** If user wants to refine the skill after validation, you will follow `references/refinement-preservation-policy.md` (not just validation workflow)
 3. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
 4. Use `references/checklist.md` to identify gaps during Phase 3-6
@@ -134,11 +149,11 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 **CRITICAL: Follow `references/refinement-preservation-policy.md` strictly when refining—this skill models the policy it teaches.**
 
-1. **Verify scope first (MANDATORY):** Use "Scope Rules: Source Code Only" section above
-   - Check path for `/cache/` → REFUSE if found
-   - Check path for `~/.claude/` → REFUSE if found
-   - Only proceed if path is in project source (working directory or parent)
-   - **Example check:** Before editing, verify with `realpath skill-path` to confirm location
+1. **LOCATE the skill first (MANDATORY):** Follow "Locate the Target Skill" workflow above
+   - Search current project: `skills/X/`, `.claude/skills/X/`
+   - If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
+   - If not found anywhere → ask user for source path
+   - Cache path? → REFUSE and ask for source
 2. Ask user which aspects need improvement (structure, length, triggering, etc.)
 3. **GATE 1 - Content Audit:** List ALL existing guidelines, patterns, workflows, examples. Classify each as core (80%+ use) or supplementary (<20% use).
 4. **GATE 2 - Capability Assessment:** Will removing/moving content impair execution? If YES, content cannot be deleted—only migrate. If UNCERTAIN, defer to operator.
@@ -298,3 +313,5 @@ The description must contain phrases Claude will see in user requests. If the de
 **Team/Production considerations:** For skills used in team environments or with production data, ensure robust error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/team-production-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
 
 **Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
+
+**Base Directory context:** When skill-creator loads, the system shows a "Base directory" path. This points to THIS skill's installed location—use it ONLY for loading skill-creator's own references (`references/templates.md`, etc.). Never use it to locate target skills you're asked to work on. Target skills must be discovered via the "Locate the Target Skill" workflow.
