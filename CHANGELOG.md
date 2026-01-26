@@ -2,6 +2,26 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.10.0] - 2026-01-26
+
+### Added
+- **skill-creator 1.8.0:**
+  - Unified skill workflow (`references/skill-workflow.md`) — single authoritative workflow for creating, validating, and refining skills
+  - Consolidated content distribution (80% rule), preservation gates (4 gates), and validation phases (7 phases) into one file
+- **docs/skill-testing.md** — Unit testing methodology for skill changes using isolated `/tmp` environments and `--print` flag
+
+### Changed
+- **skill-creator 1.8.0:**
+  - Replaced three separate reference files with unified workflow (prevents skipping preservation gates during refinement)
+  - Simplified Reference Guide section to highlight primary workflow reference
+  - Streamlined refinement instructions to explicitly load and follow `skill-workflow.md`
+
+### Removed
+- **skill-creator:**
+  - `references/refinement-preservation-policy.md` (consolidated into skill-workflow.md)
+  - `references/validation-workflow.md` (consolidated into skill-workflow.md)
+  - `references/content-distribution-guide.md` (consolidated into skill-workflow.md)
+
 ## [1.9.0] - 2026-01-26
 
 ### Added
