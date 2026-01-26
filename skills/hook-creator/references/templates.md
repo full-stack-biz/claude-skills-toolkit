@@ -13,6 +13,7 @@ Copy-paste starting points for common hook patterns. Adapt these templates to yo
 - [Multiple Matchers on Same Event](#multiple-matchers-on-same-event)
 - [Format on Write Hook](#format-on-write-hook)
 - [Validate Before Commit Hook](#validate-before-commit-hook)
+- [Async Logging and Notifications Hook](#async-logging-and-notifications-hook)
 - [Cleanup on Session End Hook](#cleanup-on-session-end-hook)
 - [Hook File Organization](#hook-file-organization)
 - [Common Matcher Patterns](#common-matcher-patterns)
@@ -380,9 +381,78 @@ exit 0
 
 ---
 
+## Async Logging and Notifications Hook
+
+**Complete example:** Log tool usage to external service asynchronously without blocking Claude Code.
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "^(Write|Edit|Bash)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/log-to-service.sh",
+            "timeout": 5000,
+            "onError": "warn",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Script (log-to-service.sh):**
+```bash
+#!/bin/bash
+
+# Extract event data from environment variables
+TOOL_NAME="${TOOL_NAME:-unknown}"
+FILE_PATH="${FILE_PATH:-}"
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+USER="${USER:-unknown}"
+
+# Build log entry as JSON
+LOG_ENTRY=$(cat <<EOF
+{
+  "timestamp": "$TIMESTAMP",
+  "user": "$USER",
+  "tool": "$TOOL_NAME",
+  "file": "$FILE_PATH",
+  "session_id": "${SESSION_ID:-}"
+}
+EOF
+)
+
+# Send to logging service (doesn't block if it fails)
+curl -s -X POST "https://logs.example.com/api/events" \
+  -H "Content-Type: application/json" \
+  -d "$LOG_ENTRY" \
+  --max-time 4 \
+  --connect-timeout 2 || true
+
+# Or append to local log (faster)
+echo "$LOG_ENTRY" >> "${PLUGIN_ROOT}/logs/tool-usage.jsonl"
+
+exit 0
+```
+
+**Notes:**
+- `async: true` means hook runs in background; Claude continues immediately
+- `onError: "warn"` is appropriate (logging failures shouldn't block execution)
+- `timeout: 5000` prevents hanging (curl has shorter internal timeout)
+- Script uses `|| true` to prevent failures from blocking
+- Great for audit logging, metrics, notifications without performance impact
+
+---
+
 ## Cleanup on Session End Hook
 
-**Complete example:** Run cleanup tasks when Claude Code session ends.
+**Complete example:** Run cleanup tasks asynchronously when Claude Code session ends.
 
 ```json
 {
@@ -395,7 +465,8 @@ exit 0
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/cleanup.sh",
             "timeout": 3000,
-            "onError": "warn"
+            "onError": "warn",
+            "async": true
           }
         ]
       }
@@ -424,8 +495,9 @@ exit 0
 
 **Notes:**
 - `SessionEnd` runs when session closes (safe for cleanup)
+- `async: true` allows cleanup to run in background (doesn't block session close)
 - `matcher: ".*"` matches all sessions
-- `onError: "warn"` is appropriate for cleanup (shouldn't block session close)
+- `onError: "warn"` is appropriate for async (doesn't affect execution)
 
 ---
 

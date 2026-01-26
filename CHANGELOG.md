@@ -2,6 +2,25 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.7.1] - 2026-01-26
+
+### Added
+- **skill-creator 1.5.0:**
+  - Explicit enforcement of refinement-preservation-policy.md when refining skills — all 4 validation gates (Content Audit, Capability Assessment, Migration Verification, Operator Confirmation) now mandatory in refining workflow
+  - New requirement to document reasoning explaining which gate applies to each content decision
+
+### Changed
+- **skill-creator 1.5.0:**
+  - Condensed slash command conversion section (supplementary content moved to reference with link)
+  - Removed duplicate scope reference at end of Key Notes section
+  - Added explicit reminder in validation section that refinement follows preservation policy
+
+- **hook-creator 2.2.1:**
+  - Restored core procedural decision trees (Command vs Prompt, detailed Async vs Synchronous) to SKILL.md following refinement-preservation-policy
+  - Properly migrated supplementary content (detailed slash command workflow, edge cases) to references with clear links
+  - Added summary production requirements checklist with links to advanced-patterns.md for detailed guidance
+  - Improved instruction clarity by condensing Hook System Essentials while maintaining all core decision logic
+
 ## [1.7.0] - 2026-01-25
 
 ### Added

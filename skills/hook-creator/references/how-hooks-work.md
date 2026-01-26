@@ -403,7 +403,7 @@ Claude continues or fails based on onError
 
 ### Asynchronous (Non-blocking)
 
-Hook executes in background, Claude continues immediately.
+Hook executes in background, Claude continues immediately. Enable with `async: true` in hook config.
 
 ```
 User submits prompt
@@ -419,9 +419,26 @@ Claude continues immediately
 Hook result processed (logged, etc.)
 ```
 
-**Good for:** Slow operations (network, complex verification), don't need result before proceeding
+**Configuration:**
+```json
+{
+  "type": "command",
+  "command": "...",
+  "async": true,      // Enable background execution
+  "onError": "warn"   // Recommended for async (doesn't affect execution)
+}
+```
 
-**Bad for:** Critical validation that must pass/fail
+**Good for:**
+- Slow operations (network, file I/O, complex verification)
+- Logging/auditing (doesn't need to block execution)
+- Notifications (Slack, email, webhooks)
+- Telemetry/metrics collection
+- Cleanup tasks (don't need result before proceeding)
+
+**Bad for:** Critical validation that must pass/fail (use sync for that)
+
+**Important:** Async hooks don't return decision data; use only for side-effects, not for validation/blocking.
 
 ## Hook Result & onError
 

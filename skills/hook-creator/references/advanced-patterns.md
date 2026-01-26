@@ -377,7 +377,7 @@ exit 0  # All checks passed
 
 ## Pattern 9: Async Hook for Slow Operations
 
-**Scenario:** LLM-based validation that can be slow.
+**Scenario:** Operations that take time and shouldn't block Claude Code execution.
 
 ```json
 {
@@ -387,10 +387,11 @@ exit 0  # All checks passed
         "matcher": "^(Write|Edit)$",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "This file was just modified: ${ARGUMENTS}. Does the change look correct? Answer PASS or FAIL.",
-            "timeout": 30000,
-            "onError": "continue"  // Don't block on slow LLM
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/log-and-analyze.sh",
+            "timeout": 5000,
+            "async": true,
+            "onError": "warn"
           }
         ]
       }
@@ -400,9 +401,11 @@ exit 0  # All checks passed
 ```
 
 **Characteristics:**
-- Long timeout (30s for LLM)
-- `onError: "continue"` so slow response doesn't block Claude
-- Post-operation (doesn't block file write)
+- `async: true` ensures hook runs in background without blocking Claude
+- `onError: "warn"` is appropriate (background failures don't affect execution)
+- Timeout still enforced but doesn't slow Claude Code
+- Perfect for: logging, metrics, webhooks, notifications, file I/O
+- Alternative: LLM-based validation with `onError: "continue"` (slower but returns result)
 
 ---
 
@@ -484,7 +487,7 @@ exit 0
 
 ## Pattern 12: Logging & Monitoring Integration
 
-**Scenario:** Track hook execution for debugging and monitoring.
+**Scenario:** Track hook execution for debugging and monitoring asynchronously.
 
 ```json
 {
@@ -497,6 +500,7 @@ exit 0
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/scripts/format-with-logging.sh",
             "timeout": 2000,
+            "async": true,
             "onError": "warn",
             "env": {
               "LOG_FILE": "${CLAUDE_PLUGIN_ROOT}/logs/hook-format.log",
@@ -509,6 +513,8 @@ exit 0
   }
 }
 ```
+
+**Note:** `async: true` allows logging/metrics to run in background without slowing Claude Code execution.
 
 **Script (format-with-logging.sh):**
 ```bash

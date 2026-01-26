@@ -6,7 +6,7 @@ description: >-
   Handles skill structure, frontmatter, activation, references, tool scoping, and
   production readiness. Can also migrate slash commands to skills for better context
   management and subagent support.
-version: 1.4.0
+version: 1.5.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -106,54 +106,33 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 ### For Existing Skills (Validating)
 
 1. **Verify scope:** Use scope detection rules from "Allowed scopes" and "Forbidden scopes" subsections above. Refuse if path is from `~/.claude/plugins/cache/` or `~/.claude/`
-2. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
-3. Use `references/checklist.md` to identify gaps during Phase 3-6
-4. Check `references/allowed-tools.md` if tool scoping is involved
-5. Validate: Complete workflow + checklist before considering the skill complete
+2. **Important:** If user wants to refine the skill after validation, you will follow `references/refinement-preservation-policy.md` (not just validation workflow)
+3. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
+4. Use `references/checklist.md` to identify gaps during Phase 3-6
+5. Check `references/allowed-tools.md` if tool scoping is involved
+6. Complete workflow + checklist before considering the skill validated
 
 ### For Improvements (Refining)
 
+**CRITICAL: Follow `references/refinement-preservation-policy.md` strictly when refining—this skill models the policy it teaches.**
+
 1. **Verify scope:** Use scope detection rules from "Allowed scopes" and "Forbidden scopes" subsections above. Refuse if installed/cached
 2. Ask user which aspects need improvement (structure, length, triggering, etc.)
-3. **Follow validation workflow** (`references/validation-workflow.md`) to identify all issues systematically
-4. **For length/organization:** Use `references/content-distribution-guide.md` to decide what stays in SKILL.md vs. moves to references. Core procedural content (80%+ cases) stays; supplementary content moves.
-5. **Review against checklist** (`references/checklist.md`) during validation; check `references/allowed-tools.md` if tool scoping is involved
-6. **Improve systematically:** frontmatter clarity (activation) → instruction clarity → examples → separate detailed content
-7. **Test activation:** Will Claude recognize this description in real requests?
-8. **Re-validate** using the workflow before considering refinements complete
-9. Make targeted improvements rather than rewriting everything
+3. **GATE 1 - Content Audit:** List ALL existing guidelines, patterns, workflows, examples. Classify each as core (80%+ use) or supplementary (<20% use).
+4. **GATE 2 - Capability Assessment:** Will removing/moving content impair execution? If YES, content cannot be deleted—only migrate. If UNCERTAIN, defer to operator.
+5. **GATE 3 - Migration Verification:** If moving SKILL.md → references/: verify reference file exists and SKILL.md links to it. If moving references/ → SKILL.md: verify content is core procedural. All moved content must remain accessible.
+6. **GATE 4 - Operator Confirmation:** Any content deletion (not migration)? Get explicit operator approval. Rewording/relocation is auto-approved; deletion requires "Should I remove this?" confirmation.
+7. **Follow validation workflow** (`references/validation-workflow.md`) to identify all issues systematically
+8. **Improve systematically:** frontmatter clarity (activation) → instruction clarity → examples → separate detailed content
+9. **Test activation:** Will Claude recognize this description in real requests?
+10. **Re-validate** using validation workflow before sign-off
+11. **Document reasoning:** Explain which gate applied to each content decision (core procedural vs supplementary)
 
 ### For Converting Slash Commands to Skills
 
-**Context:** Slash commands (`~/.claude/commands/`) have been merged into Skills in Claude Code. While existing slash commands continue to work, migrating to skills provides:
-- Better context management via dynamic file loading
-- Access to subagents and context forking
-- Progressive disclosure and references
-- Project-scoped availability (vs. user-space affecting all projects)
+**Shorthand:** Recommend skill migration for complex commands or team/project-scoped automation. Self-convert simple commands (1-10 lines); offer help for complex logic or unclear structure.
 
-**Detection: When to recommend conversion**
-
-Recommend conversion when user:
-- Mentions "slash command" or asks about migrating commands
-- Shows a slash command that would benefit from context isolation or subagent delegation
-- Works in project needing project-scoped automation (not user-space-wide)
-- Wants to use subagents with their command
-
-Recommend user self-convert when they have:
-- Simple slash commands (1-10 lines, no complex logic)
-- Commands they understand well and can easily port
-
-Offer to do conversion when:
-- Complex command logic (control flow, multiple workflows)
-- Unclear command purpose or structure
-- User needs guidance on skill structure
-
-**Migration workflow:** See `references/slash-command-conversion.md` for complete conversion process, including:
-- Detecting command purpose and activation
-- Mapping command → skill frontmatter
-- Converting command logic to skill instructions
-- Restructuring for references/subagents if needed
-- Validation after conversion
+**Full conversion workflow:** See `references/slash-command-conversion.md` for detection, mapping, conversion logic, and validation process.
 
 ## Outcome Metrics
 
@@ -292,7 +271,3 @@ The description must contain phrases Claude will see in user requests. If the de
 **Team/Production considerations:** For skills used in team environments or with production data, ensure robust error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/team-production-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
 
 **Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
-
-**Scope reference:** See "Implementation Approach" section for complete scope detection flowchart. In summary:
-- ✅ **Allowed:** `skills/` (plugin), `.claude/skills/` (project root), `.claude/skills/` (nested directories)
-- ❌ **Forbidden:** `~/.claude/skills/` (user-space), `~/.claude/plugins/cache/` (installed/cached)
