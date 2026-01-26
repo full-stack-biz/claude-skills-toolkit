@@ -6,7 +6,7 @@ description: >-
   Handles skill structure, frontmatter, activation, references, tool scoping, and
   production readiness. Can also migrate slash commands to skills for better context
   management and subagent support.
-version: 1.5.0
+version: 1.6.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -55,40 +55,55 @@ These principles apply to all skill creation and validation work—the foundatio
 3. For validate/refine: Ask for skill path, then route to appropriate section
 4. For slash command migration: Mention as bonus capability, offer conversion support
 
-**Scope Rules:**
+**Scope Rules: Source Code Only (NO CACHE EDITS)**
 
-✅ **Allowed scopes:** `skills/` (plugin) | `.claude/skills/` (project-level) | `.claude/skills/` (nested in any subdirectory)
+✅ **ALLOWED - Edit these paths:**
+- `skills/skill-name/` in plugin projects (source in working repository)
+- `.claude/skills/skill-name/` in any project (source in working repository)
+- Nested: `packages/*/claude/skills/skill-name/` (source in working repository)
 
-❌ **Forbidden scopes:** `~/.claude/skills/` (user-space — refuse, explain risk) | `~/.claude/plugins/cache/` (installed — refuse immediately)
+❌ **FORBIDDEN - REFUSE IMMEDIATELY:**
+- `~/.claude/plugins/cache/*` (installed cache—never edit)
+- `~/.claude/skills/*` (user-space—affects all projects)
+- Any path containing `/cache/` (Claude's managed cache)
+- Any path NOT in current working directory or parent project root
 
-**For path validation:** If user provides user-space or cached path, refuse with: "This skill-creator only works with project-scoped skills (plugin or `.claude/skills/` directory). User-space skills affect all projects in your user space; edit them separately if needed."
+**CRITICAL: Source vs. Installed Detection**
 
-**Scope Detection Flowchart:**
+Before ANY edit operation:
 
-Auto-detect first; only ask when ambiguous:
+1. **Check the path user provides:**
+   - Does it contain `/cache/`? → REFUSE: "Edits must be in source, not cache"
+   - Does it start with `~/.claude/`? → REFUSE: "User-space skills affect all projects. Edit source in project instead"
+   - Is it an absolute path outside project? → REFUSE: "Skill must be in current project or working directory"
 
-1. **Auto-detect project type:**
-   - Check for `.claude-plugin/plugin.json` (plugin project?)
-   - Identify current working directory
+2. **Always verify real location:**
+   - Get the absolute path of what user wants to edit
+   - Check if it's in current working directory tree
+   - If skill is installed, find the SOURCE (usually in same project or parent)
+   - Example: User says "fix skill-creator" → check if `/cache/` appears → if yes, stop and ask for SOURCE path
 
-2. **If plugin project:**
-   - Default: `skills/` directory
-   - Only ask if user is clearly working in `.claude/skills/` location
+3. **Recovery if user gives installed path:**
+   - "I see you're pointing to `/path/to/.claude/plugins/cache/skills-toolkit/skill-creator/`. That's the installed copy. Do you want to edit the SOURCE instead?"
+   - Ask: "Where is the original skill-creator source? (e.g., `skills/skill-creator/` in your project?)"
+   - Only proceed once user provides source path
 
-3. **If regular project (no plugin):**
-   - At project root? Default: `.claude/skills/`
-   - In nested directory? Ask only if scope is unclear
+**Scope Detection (for new/validation/refine):**
 
-4. **Scope selection (ask only if ambiguous):**
-   - Plugin projects: "Plugin (`skills/`) or project-level (`.claude/skills/`)?"
-   - Nested directories: "Nested (`.claude/skills/` here) or project-level (`.claude/skills/` at root)?"
+Auto-detect; only ask when ambiguous:
 
-5. **Scope confirmation:**
-   - Ask: "What do you want to call it?" (e.g., `code-analyzer`, `test-runner`)
-   - For validate/refine: "Provide the skill path relative to project root" (e.g., `skills/pdf-processor`, `.claude/skills/pdf-processor`, `packages/frontend/.claude/skills/pdf-processor`)
+1. **Verify working directory** - Confirm we're in a valid project (not random location)
 
-**Block user-space attempts immediately:**
-- If user mentions `~/.claude/skills/` or `~/.claude/plugins/cache/`, refuse with: "This skill-creator only works with project-scoped skills (plugin or `.claude/skills/` directory). User-space skills affect all projects in your user space; edit them separately if needed."
+2. **For NEW skills:**
+   - Plugin project? → Default: `skills/skill-name/`
+   - Regular project? → Default: `.claude/skills/skill-name/`
+   - Ask only if ambiguous
+
+3. **For VALIDATE/REFINE (existing skills):**
+   - User provides path → Validate path is NOT in cache/`~/.claude/`
+   - Extract relative path (e.g., `skills/pdf-processor` not `/Users/.../skills/pdf-processor`)
+   - Before opening: Verify real location with `realpath` or `ls` to confirm it's source
+   - If path goes through cache: STOP and ask for source
 
 ### For New Skills: Requirements Interview First
 
@@ -105,7 +120,10 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 ### For Existing Skills (Validating)
 
-1. **Verify scope:** Use scope detection rules from "Allowed scopes" and "Forbidden scopes" subsections above. Refuse if path is from `~/.claude/plugins/cache/` or `~/.claude/`
+1. **Verify scope first (MANDATORY):** Use "Scope Rules: Source Code Only" section above
+   - Check path for `/cache/` → REFUSE if found
+   - Check path for `~/.claude/` → REFUSE if found
+   - Only proceed if path is in project source (working directory or parent)
 2. **Important:** If user wants to refine the skill after validation, you will follow `references/refinement-preservation-policy.md` (not just validation workflow)
 3. Follow the systematic workflow in `references/validation-workflow.md` (Phase 1-7)
 4. Use `references/checklist.md` to identify gaps during Phase 3-6
@@ -116,11 +134,20 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 **CRITICAL: Follow `references/refinement-preservation-policy.md` strictly when refining—this skill models the policy it teaches.**
 
-1. **Verify scope:** Use scope detection rules from "Allowed scopes" and "Forbidden scopes" subsections above. Refuse if installed/cached
+1. **Verify scope first (MANDATORY):** Use "Scope Rules: Source Code Only" section above
+   - Check path for `/cache/` → REFUSE if found
+   - Check path for `~/.claude/` → REFUSE if found
+   - Only proceed if path is in project source (working directory or parent)
+   - **Example check:** Before editing, verify with `realpath skill-path` to confirm location
 2. Ask user which aspects need improvement (structure, length, triggering, etc.)
 3. **GATE 1 - Content Audit:** List ALL existing guidelines, patterns, workflows, examples. Classify each as core (80%+ use) or supplementary (<20% use).
 4. **GATE 2 - Capability Assessment:** Will removing/moving content impair execution? If YES, content cannot be deleted—only migrate. If UNCERTAIN, defer to operator.
-5. **GATE 3 - Migration Verification:** If moving SKILL.md → references/: verify reference file exists and SKILL.md links to it. If moving references/ → SKILL.md: verify content is core procedural. All moved content must remain accessible.
+5. **GATE 3 - Migration Verification (NO GAPS ALLOWED):** See `references/refinement-preservation-policy.md` Gate 3 for mandatory verification checklist. Before moving ANY content:
+   - Identify exact text being removed (copy/paste section)
+   - Read destination file completely (don't just search)
+   - Compare: Is the destination complete? If NOT FOUND in destination, add it NOW before deleting from source
+   - Verify links exist and accessibility is preserved
+   - Re-read both files after move to ensure no broken references
 6. **GATE 4 - Operator Confirmation:** Any content deletion (not migration)? Get explicit operator approval. Rewording/relocation is auto-approved; deletion requires "Should I remove this?" confirmation.
 7. **Follow validation workflow** (`references/validation-workflow.md`) to identify all issues systematically
 8. **Improve systematically:** frontmatter clarity (activation) → instruction clarity → examples → separate detailed content

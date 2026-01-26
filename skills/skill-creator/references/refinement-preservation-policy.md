@@ -104,10 +104,38 @@ All existing behaviors Claude performs must remain equally accessible. If conten
 - [ ] If YES: Content cannot be deleted (must stay or migrate)
 - [ ] If UNCERTAIN: Defer to operator
 
-### Gate 3: Migration Verification
-- [ ] If SKILL.md → references/: Verify reference file exists and is referenced in SKILL.md
-- [ ] If references/ → SKILL.md: Verify moved content belongs in core procedural
-- [ ] All moved content must remain accessible without additional manual steps
+### Gate 3: Migration Verification (NO GAPS ALLOWED)
+
+**⚠️ CRITICAL: Do NOT move content without explicit verification. Incomplete migrations cripple skill execution.**
+
+**Before moving ANY content:**
+
+1. **Identify content to move** - Exact text you're removing from source file (copy/paste the section)
+
+2. **Locate destination** - If moving SKILL.md → references/:
+   - [ ] Reference file exists AND is readable
+   - [ ] Reference file path matches what SKILL.md will link to
+   - **Read the destination file completely** (use Read tool, not search)
+
+3. **Content Comparison (MANDATORY):**
+   - [ ] Copy exact text being removed (section, examples, diagrams, all)
+   - [ ] Search destination file for matching content (keyword search, pattern match)
+   - [ ] IF NOT FOUND: You have a gap. Either:
+     - Add missing content to destination file NOW (before removing from source), OR
+     - Keep content in source file (don't move)
+   - [ ] IF FOUND: Verify it's complete and identical in meaning/context
+
+4. **Verify accessibility:**
+   - [ ] SKILL.md links to destination file with full path (e.g., `references/filename.md`)
+   - [ ] Link appears before or near where content was removed (so Claude finds it)
+   - [ ] No broken references after move
+
+5. **Re-read both files after move** (final audit):
+   - [ ] Source file still makes sense without moved content
+   - [ ] Destination file still makes sense with moved content added
+   - [ ] No orphaned references or dangling links
+
+**If ANY step fails:** Do NOT proceed. Ask operator for guidance.
 
 ### Gate 4: Operator Confirmation
 - [ ] If ANY content marked for deletion (not migration): Get explicit operator approval

@@ -2,6 +2,22 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.8.0] - 2026-01-26
+
+### Added
+- **skill-creator 1.6.0:**
+  - Comprehensive cache detection and source verification workflow — prevents editing installed skills from cache
+  - Mandatory scope validation for ALL skill operations (new, validate, refine) with explicit `/cache/` and `~/.claude/` path rejection
+  - Recovery workflow for users providing installed paths — redirects to source location
+  - Strengthened Gate 3 (Migration Verification) in refinement-preservation-policy with explicit content comparison checklist (no gaps allowed)
+
+### Changed
+- **skill-creator 1.6.0:**
+  - Rewrote "Scope Rules" section with detailed source vs. installed detection logic
+  - Enhanced validation sections (Validating & Refining) with mandatory scope verification as STEP 1
+  - Updated refinement workflow to include example cache detection check (`realpath skill-path`)
+  - Expanded scope detection section with explicit cache path rejection rules
+
 ## [1.7.1] - 2026-01-26
 
 ### Added

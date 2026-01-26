@@ -238,19 +238,39 @@ When authoring skill examples that show code blocks within code blocks, use thes
 
 For detailed release process guidance, use the `/dev-flow:release-process` skill.
 
-### Key Principle: Skill Versions Are Independent
+### CRITICAL: Skill Versions Are Independent From Plugin Version
 
-Each skill in this toolkit maintains its own independent semantic version (in `SKILL.md` frontmatter). Skill versions do NOT automatically sync with the plugin version—they evolve based on the skill's own changes:
+**⚠️ NEVER compare plugin version numbers to skill version numbers. They track different things.**
 
-- **Skill version bumps** happen when:
-  - PATCH: Bug fixes, wording improvements, reference updates to that specific skill
-  - MINOR: New capabilities or expanded tool access in that skill
-  - MAJOR: Breaking changes to that skill's behavior or interface
+Each skill maintains its own independent semantic version (in `SKILL.md` frontmatter):
 
-- **Plugin version bumps** happen when:
-  - PATCH: Any included skill gets a PATCH bump, or bug fixes to plugin manifest/structure
-  - MINOR: Any included skill gets a MINOR bump, or skills are added/removed
-  - MAJOR: Any included skill gets a MAJOR bump, or breaking changes to plugin structure
+- **skill-creator**: 1.6.0
+- **plugin-creator**: 1.3.0
+- **subagent-creator**: 1.1.0
+- **hook-creator**: 2.2.1
+- **Plugin**: 1.8.0
+
+These are independent tracking systems, NOT a hierarchy.
+
+**Skill version bumps** (happen to individual skills):
+- PATCH: Bug fixes, wording improvements, reference updates to that specific skill
+- MINOR: New capabilities or expanded tool access in that skill
+- MAJOR: Breaking changes to that skill's behavior or interface
+
+**Plugin version bumps** (happen to the whole plugin):
+- PATCH: Any skill gets PATCH bump + plugin receives it
+- MINOR: Any skill gets MINOR bump + plugin receives it (or skills added/removed)
+- MAJOR: Any skill gets MAJOR bump + plugin receives it (or breaking plugin structure changes)
+
+**Example workflow (correct):**
+1. skill-creator changes detected → MINOR bump (1.5.0 → 1.6.0)
+2. Plugin receives MINOR bump (1.7.1 → 1.8.0)
+3. ✅ CORRECT: Plugin 1.8.0 reflects "one of my skills had a minor change"
+
+**Example workflow (WRONG - never do this):**
+1. skill-creator 1.6.0, hook-creator 2.2.1
+2. "Plugin is 1.8.0 which is LESS than hook-creator's 2.2.1, so bump plugin"
+3. ❌ WRONG: Comparing version numbers across independent systems creates nonsense
 
 ## Control who invokes a skill
 
