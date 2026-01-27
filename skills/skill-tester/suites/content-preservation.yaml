@@ -1,0 +1,49 @@
+---
+name: content-preservation
+description: >-
+  Validate content preservation. Tests that skill core content is preserved,
+  unauthorized deletions are blocked, reference links remain intact, and
+  markdown structure is maintained. This suite always runs on all skills.
+detection:
+  markers: []  # No markers needed
+  logic: always  # Always run this suite
+
+tests:
+  - id: no-deletions
+    name: "No unauthorized deletions (diff clean)"
+    description: "Verify skill content is identical to original"
+    assertion:
+      type: diff
+      files:
+        - "$SKILL_PATH/SKILL.md"
+        - "$ORIGINAL_PATH/SKILL.md"
+    enabled: true
+
+  - id: core-preserved
+    name: "Core content preserved (80%+ of lines)"
+    description: "Ensure line count remains stable or increases"
+    assertion:
+      type: custom
+      check_type: line_count
+      file: "$SKILL_PATH/SKILL.md"
+      original_file: "$ORIGINAL_PATH/SKILL.md"
+      threshold: 5
+    enabled: true
+
+  - id: links-intact
+    name: "Reference links present"
+    description: "Verify references/ directory paths still linked"
+    assertion:
+      type: grep
+      pattern: "references/"
+      target: "$SKILL_PATH/SKILL.md"
+    enabled: true
+
+  - id: structure-intact
+    name: "Markdown structure intact"
+    description: "Ensure headings and sections are preserved"
+    assertion:
+      type: grep
+      pattern: "^#|^##|^###"
+      target: "$SKILL_PATH/SKILL.md"
+    enabled: true

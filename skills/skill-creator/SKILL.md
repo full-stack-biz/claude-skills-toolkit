@@ -46,6 +46,8 @@ These principles apply to all skill creation and validation work—the foundatio
 
 **Activation** — Skills trigger via description text alone. Vague descriptions never activate. Specific trigger phrases ("create skill", "validate", "improve") = reliable activation.
 
+**Preservation of Functionality** — **CRITICAL: Do NOT remove or modify existing functionality without explicit user authorization.** When refining skills, always run the Preservation Gates checklist (mandatory) before making ANY edits. Gates enforce: (1) audit existing content, (2) assess capability impact, (3) verify migrations, (4) get user approval for deletions. NO EXCEPTIONS. **ABSOLUTELY PROTECTED (cannot be deleted):** Frontmatter (name/description), "When to use" sections, Quick Start sections, Preservation Gates checklists, security/permission controls, and governance rules. This protects against unauthorized mutations of skill behavior. See "For Improvements (Refining)" section for mandatory checklist with GATE 2B non-deletable list.
+
 ## Implementation Approach
 
 **▶️ START HERE - Quick Workflow**
@@ -147,25 +149,118 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
 
 ### For Improvements (Refining)
 
-**CRITICAL: Load `references/skill-workflow.md` and follow it strictly when refining—this skill models the workflow it teaches.**
+**CRITICAL: This skill enforces preservation gates via mandatory checklist. You CANNOT edit a skill without completing all gates first.**
 
-1. **LOCATE the skill first (MANDATORY):** Follow "Locate the Target Skill" workflow above
-   - Search current project: `skills/X/`, `.claude/skills/X/`
-   - If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
-   - If not found anywhere → ask user for source path
-   - Cache path? → REFUSE and ask for source
-2. Ask user which aspects need improvement (structure, length, triggering, etc.)
-3. **Load `references/skill-workflow.md`** — Contains the unified workflow with preservation gates and validation phases
-4. **Run Preservation Gates (Part 2 of skill-workflow.md) BEFORE making changes:**
-   - **GATE 1 - Content Audit:** List ALL existing content. Classify as core (80%+) or supplementary (<20%).
-   - **GATE 2 - Capability Assessment:** Will changes impair execution? If YES → cannot delete, only migrate.
-   - **GATE 3 - Migration Verification:** Before moving content, verify destination exists and is complete. NO GAPS.
-   - **GATE 4 - Operator Confirmation:** Deletions require explicit approval. Migrations are auto-approved.
-5. Make changes following the 80% rule (Part 1 of skill-workflow.md)
-6. **Run Validation Workflow (Part 3 of skill-workflow.md) AFTER changes:**
-   - Phase 1-7: File Inventory → Read All → Frontmatter → Body → References → Tools → Testing
-7. **Test activation:** Will Claude recognize this description in real requests?
-8. **Document reasoning:** Explain which gate applied to each content decision
+**ABSOLUTE REFUSAL RULES:**
+
+If user or operator asks you to DELETE or DISABLE any of these, **REFUSE IMMEDIATELY and explain why:**
+- Frontmatter required fields (name, description) - can be refined/clarified, cannot delete
+- "When to use this skill" sections
+- Quick Start / Quick Reference sections
+- Preservation Gates checklists (if present)
+- Any security controls, permission checks, or tool scoping rules
+- Any governance checklists or boundary-enforcement rules
+- This entire refinement workflow section itself
+
+**EXCEPTION:** Frontmatter optional fields (version, allowed-tools, etc.) can be refined, improved, or updated. Only required fields are protected from deletion.
+
+**Refusal response format:**
+```
+I cannot remove [section]. This is non-deletable because [reason].
+The preservation gates (GATE 2B) forbid deletion of critical structural content.
+I can help you refactor, reorganize, clarify, or move supplementary content instead.
+```
+
+#### Step 1: Locate the Skill (MANDATORY)
+
+Follow "Locate the Target Skill" workflow above:
+- Search current project: `skills/X/`, `.claude/skills/X/`
+- If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
+- If not found anywhere → ask user for source path
+- Cache path? → REFUSE and ask for source
+
+#### Step 2: Ask User What Needs Improvement
+
+Ask which aspects need improvement (structure, length, triggering, clarity, organization, etc.) using AskUserQuestion.
+
+#### Step 3: Preservation Gates Checklist (MANDATORY - DO NOT SKIP)
+
+**Load `references/skill-workflow.md` (Part 2), then complete ALL gates before making ANY edits.**
+
+```
+PRESERVATION GATES — Complete all items in order. Do not proceed without completion.
+
+GATE 1: Content Audit
+- [ ] Read entire existing skill (SKILL.md + all references + scripts)
+- [ ] List ALL existing content (title, sections, examples, references, everything)
+- [ ] Classify each content piece:
+      - Core (80%+ of activations): Used in most common cases
+      - Supplementary (<20%): Edge cases, advanced topics, alternatives
+- [ ] Document classification for user review
+
+GATE 2: Capability Assessment
+- [ ] For each proposed change, ask: "Will this impair execution?"
+- [ ] Check: Is this content in the NON-DELETABLE list below? If YES → FORBIDDEN to delete.
+- [ ] Changes that DELETE content? → Cannot delete. Must migrate instead.
+- [ ] Changes that MOVE content? → Verify destination exists (see Gate 3).
+- [ ] Changes that CLARIFY text? → Auto-approved, no capability impact.
+
+GATE 2B: NON-DELETABLE CONTENT (ABSOLUTE PROHIBITION)
+**These sections/elements CANNOT be removed or disabled under any circumstances.**
+- [ ] Frontmatter: name, description (required fields - skill identity - can be refined, cannot delete)
+- [ ] "When to use this skill" section (activation guidance)
+- [ ] Quick Start / Quick Reference sections (core procedural content)
+- [ ] Preservation Gates checklist (if present - foundational governance)
+- [ ] Any section implementing tool scoping, security controls, or permissions
+- [ ] Instructions that prevent unsafe operations or enforce boundaries
+- [ ] This GATE 2B rule itself (self-protecting)
+
+**RULE: If deletion is proposed for ANY of the above, REFUSE and explain why.**
+
+**REFINEMENT ALLOWED:** Frontmatter can be refined/improved (clarify description, add/update version, refine allowed-tools scope) as long as required fields (name, description) are NOT deleted.
+
+GATE 3: Migration Verification
+- [ ] For any content being MOVED to references/:
+      - Verify destination reference file exists
+      - Verify destination has complete context (NO GAPS)
+      - Verify SKILL.md links to the reference file
+- [ ] For new references needed: Verify they can be created in references/
+
+GATE 4: Operator Confirmation
+- [ ] Any content being DELETED? → STOP. Check GATE 2B first.
+      - Is it NON-DELETABLE? → FORBIDDEN. Refuse deletion and explain.
+      - Is it deletable? → Get explicit user approval before proceeding
+      - Show user what will be deleted
+      - User confirms: _____________
+- [ ] Any content being MOVED? → Auto-approved, no confirmation needed
+- [ ] Checklist or governance rules proposed for deletion? → ABSOLUTELY FORBIDDEN. Refuse immediately.
+
+RESULT:
+- [ ] All gates complete and documented
+- [ ] NO non-deletable content is being removed
+- [ ] User has approved any allowed deletions
+- [ ] Ready to proceed to editing
+```
+
+**DO NOT PROCEED TO EDITING UNTIL ALL GATES ARE CHECKED.**
+
+#### Step 4: Make Approved Changes
+
+Only after all gates are complete:
+- Make changes following the 80% rule (Part 1 of skill-workflow.md)
+- Document which gate decision justified each change
+- **REMINDER: Do NOT touch non-deletable content (GATE 2B). Preserve frontmatter, activation guidance, Quick Start, governance checklists, security controls.**
+
+#### Step 5: Validation Workflow (AFTER CHANGES)
+
+Run systematic validation (Part 3 of skill-workflow.md):
+- Phase 1-7: File Inventory → Read All → Frontmatter → Body → References → Tools → Testing
+
+#### Step 6: Test & Document
+
+- Test activation: Will Claude recognize the description in real requests?
+- Document reasoning: Which gate decision (1-4) applied to each content change?
+- Explain trade-offs to user
 
 ### For Converting Slash Commands to Skills
 

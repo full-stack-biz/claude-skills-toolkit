@@ -12,11 +12,21 @@ allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(find:*,grep:*,head:*,jq
 
 ## Quick Routing
 
-Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
+Always begin by asking the user to clarify their intent using AskUserQuestion:
 
-1. Ask what the user wants to do (create/convert/validate)
-2. Ask for the plugin name or path based on the action
-3. Route to the appropriate workflow section
+```
+Question 1: What would you like to do?
+- Create a new plugin (Recommended) - Build from scratch
+- Convert a project - Transform existing project into a plugin
+- Validate a plugin - Check against Claude Code standards
+- Publish to marketplace - Make plugin installable via `marketplace add`
+
+Question 2: What is the plugin name or path?
+- If creating/validating: Provide the plugin name (e.g., `code-reviewer`, `api-tools`)
+- If converting/publishing: Provide the path to the existing project
+```
+
+Based on their answers, route to the appropriate section below.
 
 ---
 
@@ -82,23 +92,9 @@ my-plugin/
 - **Directory structure** must be exact (Claude Code uses path conventions to discover components)
 - **Component metadata** must be clear (descriptions tell Claude what each command/agent/skill does)
 
-## Choose Your Workflow
+## Workflow Paths
 
-**START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
-
-```
-Question 1: What would you like to do?
-- Create a new plugin (Recommended) - Build from scratch
-- Convert a project - Transform existing project into a plugin
-- Validate a plugin - Check against Claude Code standards
-- Publish to marketplace - Make plugin installable via `marketplace add`
-
-Question 2: What is the plugin name or path?
-- If creating/validating: Provide the plugin name (e.g., `code-reviewer`, `api-tools`)
-- If converting/publishing: Provide the path to the existing project
-```
-
-Based on their answers, route to the appropriate workflow below:
+Ask what the user wants to do, then follow the matching path below:
 
 ---
 
@@ -180,37 +176,36 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 - Other components: See "Component Overview" section below
 - Test: `claude --plugin-dir /path/to/my-plugin`
 
-## Complete Reference Documentation
+## Reference Documentation by Path
 
-**Implementation & Validation:**
-- `references/implementation-workflow.md` — Step-by-step procedures for creating, converting, and validating plugins
-- `references/automated-scanning-workflow.md` — Scanning phase for validating existing plugins (errors, warnings, decisions)
-- `references/validation-checklist.md` — Comprehensive validation phases and checklists
+**Core Workflows (Choose one path):**
+- `references/implementation-workflow.md` — Creating, converting, validating plugins
+- `references/automated-scanning-workflow.md` — Validate existing plugins (errors, warnings)
+- `references/validation-checklist.md` — Best-practices validation phases
 
-**Installation & Scopes:**
-- `references/installation-scopes.md` — User/project/local/managed scopes and use cases
-- `references/cli-commands.md` — Plugin install/uninstall/enable/disable/update commands
+**Understanding Plugin Architecture:**
+- `references/plugin-json-schema.md` — Manifest format (required/optional fields)
+- `references/directory-structure.md` — Standard layout and file organization
+- `references/how-plugins-work.md` — Token loading, activation signals, design patterns
+- `references/plugin-caching.md` — Caching behavior, file resolution, path traversal
 
-**Plugin Architecture:**
-- `references/directory-structure.md` — Standard plugin layout, file organization, validation
-- `references/plugin-json-schema.md` — Plugin manifest (plugin.json) format, required/optional fields
-- `references/team-marketplaces.md` — Marketplace setup, marketplace.json schema, team distribution
-- `references/plugin-paths-variables.md` — Relative paths, ${CLAUDE_PLUGIN_ROOT} variable
-- `references/plugin-caching.md` — Plugin caching, file resolution, symlinks, path traversal
-
-**Components & Configuration:**
-- `references/agent-skills.md` — Packaging Skills in plugins (recommended)
-- `references/slash-command-format.md` — Command file format (DEPRECATED: for legacy support only)
-- `references/subagents-in-plugins.md` — Packaging subagents in plugins with delegation
-- `references/hooks-in-plugins.md` — Packaging hooks in plugins (use `hook-creator` skill for creation/validation)
-- `references/hooks.md` — Hook event reference (events, formats, matchers, patterns)
+**Adding Components to Your Plugin:**
+- `references/agent-skills.md` — Package Skills (recommended for new plugins)
+- `references/subagents-in-plugins.md` — Package subagents with delegation
+- `references/hooks-in-plugins.md` — Package hooks (use `hook-creator` skill for creation)
+- `references/hooks.md` — Hook event reference and patterns
 - `references/mcp-servers.md` — External service integration
 - `references/lsp-servers.md` — Language-specific code intelligence
+- `references/slash-command-format.md` — Legacy command format (deprecated)
 
-**Deployment & Troubleshooting:**
-- `references/versioning-and-distribution.md` — Semantic versioning, changelog, distribution
-- `references/debugging-troubleshooting.md` — Debug mode, common issues, error messages
+**Installation, Distribution & Deployment:**
+- `references/installation-scopes.md` — User/project/local/managed scopes
+- `references/cli-commands.md` — Install, uninstall, enable, disable, update commands
+- `references/team-marketplaces.md` — Marketplace setup and team distribution
+- `references/plugin-paths-variables.md` — Relative paths and ${CLAUDE_PLUGIN_ROOT}
+- `references/versioning-and-distribution.md` — Semantic versioning and distribution
 - `references/best-practices.md` — Production patterns, security, performance
+- `references/debugging-troubleshooting.md` — Common issues and error handling
 
 ## Component Overview
 
@@ -275,31 +270,10 @@ Do NOT create wrapper scripts. Run this command directly and review its output.
 - Documentation: README.md, CHANGELOG.md present for distributed plugins
 - Test locally with `claude --plugin-dir /path/to/plugin`
 
-## Advanced Topics
+## Delegating to Specialist Skills
 
-**Publishing & Distribution:**
-- `references/team-marketplaces.md` — **MUST read** for marketplace.json schema, common errors, team distribution patterns, and multi-plugin registries
+This skill focuses on plugin structure and validation. For creating specific plugin components, use these specialist skills:
 
-**Language Servers (LSP):**
-See `references/lsp-servers.md` for LSP configuration and language-specific integration examples.
-
-**Hooks & Events:**
-See `references/hooks.md` for event handler configuration and common automation patterns.
-
-**Agent Skills in Plugins:**
-See `references/agent-skills.md` for packaging Skills in plugins. (Note: To create new Skills, use the `skill-creator` skill.)
-
-**Subagents in Plugins:**
-See `references/subagents-in-plugins.md` for packaging subagents in plugins. (Note: To create new subagents, use the `subagent-creator` skill.)
-
-**External Service Integration (MCP):**
-See `references/mcp-servers.md` for MCP server configuration and testing.
-
-**Team Plugins:**
-- Use `.claude/skills/` (project-local) for team-shared plugins
-- Use `~/.claude/skills/` (global) for organization-wide plugins
-- Document dependencies in plugin description
-- Version track releases in plugin.json
-- Peer review before team deployment
-
-See `references/team-marketplaces.md` for multi-plugin registries and marketplace setup.
+- **Creating Agent Skills?** → Use `/skills-toolkit:skill-creator` (dedicated skill creation workflow)
+- **Creating Subagents?** → Use `/skills-toolkit:subagent-creator` (isolated execution, custom prompts)
+- **Creating Hooks?** → Use `/skills-toolkit:hook-creator` (event automation, decision logic)

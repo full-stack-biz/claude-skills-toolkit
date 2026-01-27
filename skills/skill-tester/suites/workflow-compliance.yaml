@@ -1,0 +1,59 @@
+---
+name: workflow-compliance
+description: >-
+  Validate skill-creator workflow compliance. Tests that the skill follows
+  the standardized workflow documented in skill-workflow.md, including
+  preservation gates, 80% rule, approval requirements, and validation phases.
+detection:
+  markers:
+    - pattern: "skill-workflow.md"
+    - pattern: "80%"
+  logic: and  # Both markers required
+
+tests:
+  - id: loads-workflow
+    name: "Loads unified workflow"
+    description: "Verify skill references skill-workflow.md"
+    assertion:
+      type: grep
+      pattern: "skill-workflow.md"
+      target: "$SKILL_MD"
+    enabled: true
+
+  - id: gates-first
+    name: "Runs gates first"
+    description: "Ensure gates (Step 1-3) execute before editing (Step 4)"
+    assertion:
+      type: custom
+      check_type: line_order
+      file: "$SKILL_MD"
+      first_pattern: "GATE 1|GATE 2B|preservation.*gate"
+      second_pattern: "Make.*Approved Changes|^#### Step 4"
+    enabled: true
+
+  - id: applies-80-percent
+    name: "Applies 80% rule language"
+    description: "Verify core/supplementary classification present"
+    assertion:
+      type: grep
+      pattern: "80%|Core.*Supplementary|core.*supplementary"
+      target: "$SKILL_MD"
+    enabled: true
+
+  - id: requires-approval
+    name: "Gate 4 requires explicit approval"
+    description: "Ensure deletions require user approval"
+    assertion:
+      type: grep
+      pattern: "explicit.*approval|user.*approval|operator.*approval"
+      target: "$SKILL_MD"
+    enabled: true
+
+  - id: validation-phases
+    name: "Validation phases documented"
+    description: "Verify Phase 1-7 validation methodology present"
+    assertion:
+      type: grep
+      pattern: "Phase 1|Phase 2|Phase 3|File Inventory.*Read All.*Frontmatter"
+      target: "$SKILL_MD"
+    enabled: true
