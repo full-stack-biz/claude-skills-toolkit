@@ -6,8 +6,52 @@ description: >-
   Handles skill structure, frontmatter, activation, references, tool scoping, and
   production readiness. Can also migrate slash commands to skills for better context
   management and subagent support.
-version: 1.8.0
+version: 1.9.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
+hooks:
+  PreToolUse:
+    - matcher: "^(Write|Edit)$"
+      hooks:
+        - type: command
+          command: "${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/backup-skill.sh"
+          args:
+            - "${FILE_PATH}"
+          timeout: 3000
+  PostToolUse:
+    - matcher: "^(Write|Edit)$"
+      hooks:
+        - type: prompt
+          prompt: |
+            You are validating a skill refinement. Compare the original skill content with the refined version to detect if important content was completely dropped without being preserved elsewhere.
+
+            ORIGINAL CONTENT:
+            ```
+            ${ORIGINAL_CONTENT}
+            ```
+
+            REFINED CONTENT:
+            ```
+            ${REFINED_CONTENT}
+            ```
+
+            Analyze:
+            1. Was any content completely dropped (not moved to references/, not reorganized)?
+            2. If duplication was removed: This is OK.
+            3. If content moved to references/: This is OK.
+            4. If sections reorganized: This is OK.
+            5. If content is just gone with no preservation: This is NOT OK.
+
+            Respond with JSON only (no additional text):
+            {
+              "dropped": true/false,
+              "what": "description of what was dropped (or 'none' if ok)",
+              "why_matters": "explanation of impact if dropped (or 'n/a' if ok)",
+              "ok": true/false
+            }
+          timeout: 15000
+        - type: command
+          command: "${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/cleanup-backup.sh"
+          timeout: 2000
 ---
 
 # Skill Creator
