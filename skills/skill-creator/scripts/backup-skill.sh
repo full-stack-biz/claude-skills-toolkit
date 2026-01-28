@@ -4,9 +4,19 @@ set -e
 # Parse file path from PreToolUse arguments
 FILE_PATH="$1"
 SKILL_DIR=$(dirname "$FILE_PATH")
+
+# Only back up if this is an existing skill (SKILL.md exists)
+# Skip for new skill creation
+if [ ! -f "$SKILL_DIR/SKILL.md" ]; then
+  # New skill being created - nothing to back up
+  echo "" > /tmp/skill-backup-location.txt
+  echo "" > /tmp/original-skill.txt
+  exit 0
+fi
+
 BACKUP_DIR="${SKILL_DIR}.backup"
 
-# Create backup using cp -r
+# Back up existing skill
 cp -r "$SKILL_DIR" "$BACKUP_DIR"
 
 # Capture content for prompt hook comparison
