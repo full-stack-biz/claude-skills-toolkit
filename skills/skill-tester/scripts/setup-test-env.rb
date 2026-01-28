@@ -34,11 +34,16 @@ class TestEnvSetup
     skill_dest = File.join(@test_dir, 'skill')
     FileUtils.cp_r(skill_path, skill_dest)
 
-    # Store original path for comparison
+    # Create a static copy for comparison (so we don't depend on source dir not changing)
+    original_copy = File.join(@test_dir, 'original_copy')
+    FileUtils.cp_r(skill_path, original_copy)
+
+    # Store original path for metadata
     File.write(File.join(@test_dir, 'original_path.txt'), skill_path)
 
     puts "✓ Test environment created at: #{@test_dir}"
     puts "✓ Skill copied to: #{skill_dest}"
+    puts "✓ Static original copy: #{original_copy}"
     puts "✓ Original at: #{skill_path}"
 
     # Output skill path for use by other scripts (last line)
@@ -51,6 +56,7 @@ class TestEnvSetup
     # Search project paths
     candidates = [
       File.join(@source_dir, 'skills', name),
+      File.join(@source_dir, 'tests', 'fixtures', name),
       File.join(@source_dir, '.claude', 'skills', name),
       File.join(Dir.home, '.claude', 'skills', name)
     ]

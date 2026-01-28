@@ -6,26 +6,26 @@ Complete documentation of skill-tester scripts.
 
 Three main scripts work together:
 
-1. **setup-test-env.sh** — Create isolated test environment
-2. **run-test-suite.sh** — Execute assertions and generate results
-3. **generate-test-report.sh** — Create markdown test report
+1. **setup-test-env.rb** — Create isolated test environment
+2. **run-test-suite.rb** — Execute assertions and generate results
+3. **generate-test-report.rb** — Create markdown test report
 
 All scripts are generalizable and work with any skill in the project.
 
 ---
 
-## setup-test-env.sh
+## setup-test-env.rb
 
 **Purpose:** Create isolated test directory with skill copy.
 
 **Usage:**
 ```bash
-bash setup-test-env.sh SKILL_NAME [--source-dir PATH]
+ruby setup-test-env.rb SKILL_NAME [SOURCE_DIR]
 ```
 
 **Parameters:**
 - `SKILL_NAME` — Name of skill to test (required)
-- `--source-dir PATH` — Project root (default: current directory)
+- `SOURCE_DIR` — Project root (default: current directory)
 
 **Returns:** Test directory path (e.g., `/tmp/skill-test/skill-creator`)
 
@@ -38,14 +38,15 @@ bash setup-test-env.sh SKILL_NAME [--source-dir PATH]
 
 **Example:**
 ```bash
-TEST_DIR=$(bash scripts/setup-test-env.sh plugin-creator)
-# Output: /tmp/skill-test/plugin-creator
+TEST_DIR=$(ruby scripts/setup-test-env.rb plugin-creator)
+# Output: /tmp/skill-test/plugin-creator/skill
 ```
 
 **Search Order:**
 1. `./skills/SKILL_NAME/` (project-local, preferred)
-2. `./.claude/skills/SKILL_NAME/`
-3. `~/.claude/skills/SKILL_NAME/` (user-space)
+2. `./tests/fixtures/SKILL_NAME/` (test fixtures)
+3. `./.claude/skills/SKILL_NAME/`
+4. `~/.claude/skills/SKILL_NAME/` (user-space)
 
 **Error Handling:**
 - Exits if skill not found
@@ -54,13 +55,13 @@ TEST_DIR=$(bash scripts/setup-test-env.sh plugin-creator)
 
 ---
 
-## run-test-suite.sh
+## run-test-suite.rb
 
 **Purpose:** Execute assertion suite and validate skill.
 
 **Usage:**
 ```bash
-bash run-test-suite.sh SKILL_NAME [TEST_TYPE] [--report]
+ruby run-test-suite.rb SKILL_NAME [TEST_TYPE] [--report]
 ```
 
 **Parameters:**
@@ -98,18 +99,18 @@ Failed: 0
 **Example:**
 ```bash
 # Test preservation gates only
-bash scripts/run-test-suite.sh skill-creator --gates-only
+ruby scripts/run-test-suite.rb skill-creator --gates-only
 
 # Full validation with report
-bash scripts/run-test-suite.sh plugin-creator --full --report
+ruby scripts/run-test-suite.rb plugin-creator --full --report
 ```
 
 **Test Execution:**
-1. Sets up test environment via `setup-test-env.sh`
+1. Sets up test environment via `setup-test-env.rb`
 2. Reads skill SKILL.md
 3. Runs assertions based on TEST_TYPE
 4. Counts pass/fail
-5. Optionally generates report via `generate-test-report.sh`
+5. Optionally generates report via `generate-test-report.rb`
 
 **Exit Codes:**
 - `0` — All tests passed
@@ -117,21 +118,22 @@ bash scripts/run-test-suite.sh plugin-creator --full --report
 
 ---
 
-## generate-test-report.sh
+## generate-test-report.rb
 
 **Purpose:** Create markdown test report for documentation.
 
 **Usage:**
 ```bash
-bash generate-test-report.sh TEST_DIR SKILL_NAME TEST_TYPE PASSED TOTAL
+ruby generate-test-report.rb TEST_DIR SKILL_NAME TEST_TYPE PASSED TOTAL SKIPPED
 ```
 
 **Parameters:**
-- `TEST_DIR` — Test directory from setup-test-env.sh
+- `TEST_DIR` — Test directory from setup-test-env.rb
 - `SKILL_NAME` — Name of tested skill
 - `TEST_TYPE` — Test type used (gates-only, workflow-only, etc.)
 - `PASSED` — Number of passed tests
 - `TOTAL` — Total tests run
+- `SKIPPED` — Number of skipped tests
 
 **Output:** Creates `TEST_DIR/TEST_REPORT.md`
 
@@ -174,26 +176,26 @@ bash generate-test-report.sh TEST_DIR SKILL_NAME TEST_TYPE PASSED TOTAL
 
 ### Test Preservation Gates (skill-creator style)
 ```bash
-bash scripts/run-test-suite.sh my-skill --gates-only --report
+ruby scripts/run-test-suite.rb my-skill --gates-only --report
 ```
 
 ### Validate No Content Was Deleted
 ```bash
-bash scripts/run-test-suite.sh my-skill --preservation-only --report
+ruby scripts/run-test-suite.rb my-skill --preservation-only --report
 ```
 
 ### Full Pre-Deployment Check
 ```bash
-bash scripts/run-test-suite.sh my-skill --full --report
+ruby scripts/run-test-suite.rb my-skill --full --report
 ```
 
 ### Compare Skill Before/After Refinement
 ```bash
 # Before changes
-bash scripts/setup-test-env.sh my-skill
+ruby scripts/setup-test-env.rb my-skill
 
 # After changes (manually edit skill)
-bash scripts/run-test-suite.sh my-skill --full
+ruby scripts/run-test-suite.rb my-skill --full
 
 # Inspect diff
 diff /tmp/skill-test/my-skill/SKILL.md [original-path]
@@ -202,7 +204,7 @@ diff /tmp/skill-test/my-skill/SKILL.md [original-path]
 ### Batch Test Multiple Skills
 ```bash
 for skill in skill-creator plugin-creator my-skill; do
-    bash scripts/run-test-suite.sh $skill --full --report
+    ruby scripts/run-test-suite.rb $skill --full --report
     echo "---"
 done
 ```
@@ -221,17 +223,17 @@ All scripts work with any skill because:
 
 ### Adding Support for New Skill Locations
 
-Edit `setup-test-env.sh` `find_skill()` function:
-```bash
-find_skill() {
-    local name=$1
-    # Add custom search path here
-    if [ -d "$SOURCE_DIR/custom/path/$name" ]; then
-        echo "$SOURCE_DIR/custom/path/$name"
-        return 0
-    fi
-    # ... rest of search
-}
+Edit `setup-test-env.rb` `find_skill` method:
+```ruby
+def find_skill(name)
+  # Add custom search path here
+  candidates = [
+    File.join(@source_dir, 'custom/path', name),
+    File.join(@source_dir, 'skills', name),
+    # ...
+  ]
+  # ...
+end
 ```
 
 ---
@@ -263,8 +265,7 @@ For large test suites (20+ skills), batch testing is efficient (~1s per skill af
 To validate skill-tester itself:
 
 ```bash
-bash scripts/run-test-suite.sh skill-tester --full --report
+ruby scripts/run-test-suite.rb skill-tester --full --report
 ```
 
 Expected: All tests pass (skill-tester implements preservation gates and workflow compliance).
-

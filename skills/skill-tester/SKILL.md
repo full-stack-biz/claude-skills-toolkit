@@ -156,17 +156,17 @@ find /Users/sergeymoiseev/full-stack.biz/claude-skills-toolkit -name "SKILL.md" 
 
 **Setup (automated):**
 ```bash
-bash scripts/setup-test-env.sh SKILL_NAME
+ruby scripts/setup-test-env.rb SKILL_NAME
 ```
 
 **Run test suite:**
 ```bash
-bash scripts/run-test-suite.sh SKILL_NAME TEST_SUITE_TYPE
+ruby scripts/run-test-suite.rb SKILL_NAME TEST_SUITE_TYPE
 ```
 
 **Generate report:**
 ```bash
-bash scripts/generate-test-report.sh TEST_RESULTS_JSON
+ruby scripts/generate-test-report.rb TEST_RESULTS_JSON
 ```
 
 ---
@@ -184,9 +184,9 @@ See `references/test-assertions.md` for complete assertion definitions with:
 ### Test Scripts
 
 See `references/script-reference.md` for detailed documentation of:
-- `setup-test-env.sh` — Create isolated test environment
-- `run-test-suite.sh` — Execute assertion suite
-- `generate-test-report.sh` — Generate markdown report
+- `setup-test-env.rb` — Create isolated test environment
+- `run-test-suite.rb` — Execute assertion suite
+- `generate-test-report.rb` — Generate markdown report
 
 ### Example Test Reports
 
