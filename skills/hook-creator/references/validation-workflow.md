@@ -108,13 +108,23 @@ Systematic 7-phase process to validate hooks for correctness, reliability, and p
 **Validation steps:**
 1. What can fail? (Command timeout, network error, script crash, invalid input)
 2. Is there validation before action executes?
-3. What happens if action fails? (Warn, block, continue?)
-4. Is error message useful? (Can user debug?)
-5. Can plugin recover?
+3. **Does script use correct exit codes?** (Critical: 0=success, 2=blocking error, 1=non-blocking)
+4. What happens if action fails? (Warn, block, continue?)
+5. Is error message useful? (Can user debug?)
+6. Can plugin recover?
+
+**Exit code validation (CRITICAL):**
+- **Does script need to communicate errors to Claude?** (e.g., validation hook, permission hook)
+  - YES → Must use `exit 2` for errors so Claude sees stderr message
+  - NO → Use `exit 0` for success, `exit 1` for ignorable failures
+- **Is exit code matched to hook purpose?**
+  - Blocking validation → exit 2 (shows error to Claude)
+  - Optional logging → exit 0 or 1 (errors don't matter)
+  - Async background work → exit 0 or 1 (failures don't block execution)
 
 **Error scenarios to consider:**
 - Command timeout (script hangs)
-- Command exits with error (non-zero exit code)
+- Command exits with correct exit code (0, 1, or 2?)
 - Matcher fails to evaluate (invalid syntax)
 - Hook configuration error (wrong JSON)
 - Missing script/resource (path doesn't exist)
@@ -220,11 +230,15 @@ Systematic 7-phase process to validate hooks for correctness, reliability, and p
 **Question:** Has hook been tested? Is it documented?
 
 **Validation steps:**
-1. Hook tested with real plugin scenarios? (Not just config validation)
-2. Tested matcher with multiple cases? (True positives and negatives)
-3. Tested failure case? (What if action fails?)
-4. Tested performance? (Reasonable execution time?)
-5. Is hook documented? (Comments explaining matcher, action, failure mode)
+1. **Command hook script passes shellcheck** (if using command hooks)
+   - Run: `shellcheck /path/to/script.sh`
+   - Fix all warnings (SC2086 unquoted vars, SC2005 useless echo, etc.)
+   - This prevents runtime errors and best practices violations
+2. Hook tested with real plugin scenarios? (Not just config validation)
+3. Tested matcher with multiple cases? (True positives and negatives)
+4. Tested failure case? (What if action fails?)
+5. Tested performance? (Reasonable execution time?)
+6. Is hook documented? (Comments explaining matcher, action, failure mode)
 
 **Test scenarios for format-on-write hook:**
 ```
@@ -248,7 +262,11 @@ Systematic 7-phase process to validate hooks for correctness, reliability, and p
 }
 ```
 
-**Pass criteria:** Hook tested with real scenarios, handles both success and failure cases, documented clearly.
+**Pass criteria:**
+- Command hooks pass shellcheck with no warnings
+- Hook tested with real scenarios
+- Handles both success and failure cases
+- Documented clearly with inline comments
 
 ---
 
@@ -260,9 +278,17 @@ Use this checklist for each phase:
 - [ ] Phase 2: Matcher is precise and syntactically valid
 - [ ] Phase 3: Hook type matches action, action is safe, timeout exists
 - [ ] Phase 4: Error handling defined, hook fails gracefully
+  - [ ] **CRITICAL: Exit codes correct** (0=success, 2=blocking errors Claude sees, 1=non-blocking)
+  - [ ] If blocking validation: uses `exit 2` for errors
+  - [ ] If optional logging: uses `exit 0` or `exit 1`
+  - [ ] onError behavior matches exit code strategy
 - [ ] Phase 5: Hook executes quickly, doesn't trigger excessively
 - [ ] Phase 6: Hook is idempotent, safe with concurrent execution
 - [ ] Phase 7: Hook tested with real scenarios, documented
+  - [ ] **Command hook script passes shellcheck** (run: `shellcheck script.sh`)
+  - [ ] No unquoted variables (SC2086)
+  - [ ] No useless echo/pipes (SC2005)
+  - [ ] Proper exit codes used
 
 ---
 

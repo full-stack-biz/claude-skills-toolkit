@@ -57,16 +57,18 @@ Then hook-creator will:
 - Some events don't need matchers: Stop, SessionEnd, UserPromptSubmit, SessionStart (omit field)
 - MCP tools: `mcp__<server>__<tool>` (e.g., `mcp__memory__create_entities`)
 
-**Error handling:**
-- Command exit code 0 = success
-- Exit code 2 = blocking error (stderr shown to Claude)
-- Other exit codes = non-blocking (stderr in verbose mode only)
+**Error handling (CRITICAL - this makes or breaks hooks):**
+- `exit 0` = success (no error output)
+- `exit 2` = blocking error (stderr shown DIRECTLY TO CLAUDE - he can fix it)
+- `exit 1` = non-blocking error (stderr only in verbose mode, Claude never sees it)
+- RULE: If hook needs to communicate errors to Claude, use `exit 2`. Otherwise use 0 or 1.
 - Always set `onError` behavior (warn/fail/continue)
 
 **Critical constraints:**
 - Matchers must be precise (overly broad = performance impact)
 - Commands must be fast (<1s synchronous, up to 10s asynchronous)
 - All hooks need timeout + onError handling
+- **Command hook scripts must pass shellcheck** (run: `shellcheck script.sh`)
 
 **For detailed execution model, event timing, and decision schemas:** See `references/how-hooks-work.md`, `references/event-reference.md`, and `references/decision-schemas.md`.
 

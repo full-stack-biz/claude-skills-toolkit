@@ -1,7 +1,8 @@
 #!/bin/bash
-set -e
 
-# Parse file path from PreToolUse arguments
+# Backup skill before refinement (PreToolUse hook)
+# Non-critical: failures should not block the write operation
+
 FILE_PATH="$1"
 SKILL_DIR=$(dirname "$FILE_PATH")
 
@@ -9,23 +10,33 @@ SKILL_DIR=$(dirname "$FILE_PATH")
 # Skip for new skill creation
 if [ ! -f "$SKILL_DIR/SKILL.md" ]; then
   # New skill being created - nothing to back up
-  echo "" > /tmp/skill-backup-location.txt
-  echo "" > /tmp/original-skill.txt
+  echo "" > /tmp/skill-backup-location.txt 2>/dev/null || true
+  echo "" > /tmp/original-skill.txt 2>/dev/null || true
   exit 0
 fi
 
 BACKUP_DIR="${SKILL_DIR}.backup"
 
-# Back up existing skill
-cp -r "$SKILL_DIR" "$BACKUP_DIR"
+# Back up existing skill (non-critical failure)
+if ! cp -r "$SKILL_DIR" "$BACKUP_DIR" 2>/dev/null; then
+  echo "Warning: Could not back up skill (continuing anyway)" >&2
+  exit 1  # Non-blocking error
+fi
 
 # Capture content for prompt hook comparison
-{
-  cat "$SKILL_DIR/SKILL.md"
-  [ -d "$SKILL_DIR/references" ] && find "$SKILL_DIR/references" -type f -exec cat {} \;
-} > /tmp/original-skill.txt
+# Gracefully handle missing directories
+if ! {
+  cat "$SKILL_DIR/SKILL.md" 2>/dev/null
+  [ -d "$SKILL_DIR/references" ] && find "$SKILL_DIR/references" -type f -exec cat {} \; 2>/dev/null || true
+} > /tmp/original-skill.txt 2>/dev/null; then
+  echo "Warning: Could not capture original skill content" >&2
+  exit 1  # Non-blocking error
+fi
 
 # Store backup location for cleanup
-echo "$BACKUP_DIR" > /tmp/skill-backup-location.txt
+if ! echo "$BACKUP_DIR" > /tmp/skill-backup-location.txt 2>/dev/null; then
+  echo "Warning: Could not store backup location" >&2
+  exit 1  # Non-blocking error
+fi
 
 exit 0

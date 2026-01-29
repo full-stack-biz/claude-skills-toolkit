@@ -17,6 +17,8 @@ hooks:
           args:
             - "${FILE_PATH}"
           timeout: 3000
+          onError: "warn"  # Backup failure doesn't block refinement
+          async: false     # Backup must complete before write proceeds
   PostToolUse:
     - matcher: "^(Write|Edit)$"
       hooks:
@@ -49,9 +51,12 @@ hooks:
               "ok": true/false
             }
           timeout: 15000
+          onError: "warn"  # Validation failure logged but doesn't crash
         - type: command
           command: "${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/cleanup-backup.sh"
           timeout: 2000
+          onError: "warn"  # Cleanup failure doesn't affect execution
+          async: true      # Safe to background; doesn't block session
 ---
 
 # Skill Creator

@@ -129,14 +129,14 @@ if [ -f "$LOCK_FILE" ]; then
   NOW=$(date +%s)
   ELAPSED=$((NOW - LAST_RUN))
 
-  if [ $ELAPSED -lt $LOCKOUT_DURATION ]; then
+  if [ "$ELAPSED" -lt "$LOCKOUT_DURATION" ]; then
     echo "Rate limited: last run $ELAPSED seconds ago" >&2
     exit 0  # Skip this run
   fi
 fi
 
 # Update lock file
-echo $(date +%s) > "$LOCK_FILE"
+date +%s > "$LOCK_FILE"
 
 # Do the expensive operation
 prettier --write . 2>/dev/null || true
@@ -159,7 +159,6 @@ exit 0
 FILE_PATH="$1"
 CACHE_DIR="${CACHE_DIR:-$HOME/.cache/hook-cache}"
 CACHE_FILE="$CACHE_DIR/$(echo "$FILE_PATH" | md5sum | cut -d' ' -f1).cache"
-CACHE_TTL=3600  # 1 hour
 
 mkdir -p "$CACHE_DIR"
 
@@ -297,7 +296,7 @@ done
 
 # Create lock
 touch "$LOCK_FILE"
-trap "rm -f '$LOCK_FILE'" EXIT
+trap 'rm -f "$LOCK_FILE"' EXIT
 
 # Idempotent update: read, check, write
 CURRENT=$(cat "$FILE_PATH")
@@ -362,7 +361,7 @@ done
 # Size check
 if [ -f "$FILE_PATH" ]; then
   SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH")
-  if [ $SIZE -gt 104857600 ]; then  # 100MB
+  if [ "$SIZE" -gt 104857600 ]; then  # 100MB
     echo "File too large: $SIZE bytes" >&2
     exit 1
   fi
@@ -467,7 +466,7 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 TIME=$(date +%H)
 
 # Block deployments after 5 PM
-if [[ "$1" == "deploy" ]] && [ $TIME -ge 17 ]; then
+if [[ "$1" == "deploy" ]] && [ "$TIME" -ge 17 ]; then
   echo "Deployment blocked: after business hours" >&2
   exit 1
 fi
@@ -532,7 +531,7 @@ prettier --write "$@" 2>> "$LOG_FILE"
 RESULT=$?
 
 END_TIME=$(date +%s%N)
-DURATION=$((($END_TIME - $START_TIME) / 1000000))  # Convert to ms
+DURATION=$(((END_TIME - START_TIME) / 1000000))  # Convert to ms
 
 if [ "$RESULT" -eq 0 ]; then
   echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] SUCCESS ($DURATION ms)" >> "$LOG_FILE"
@@ -609,21 +608,21 @@ exit 0
 ```bash
 #!/bin/bash
 
-COMMAND="$@"
+COMMAND=("$@")
 MAX_RETRIES=3
 RETRY_DELAY=1
 
-for attempt in $(seq 1 $MAX_RETRIES); do
-  echo "Attempt $attempt/$MAX_RETRIES: $COMMAND" >&2
+for attempt in $(seq 1 "$MAX_RETRIES"); do
+  echo "Attempt $attempt/$MAX_RETRIES: ${COMMAND[*]}" >&2
 
-  if $COMMAND; then
+  if "${COMMAND[@]}"; then
     echo "Success on attempt $attempt" >&2
     exit 0
   fi
 
-  if [ $attempt -lt $MAX_RETRIES ]; then
+  if [ "$attempt" -lt "$MAX_RETRIES" ]; then
     echo "Failed, retrying in ${RETRY_DELAY}s..." >&2
-    sleep $RETRY_DELAY
+    sleep "$RETRY_DELAY"
   fi
 done
 
@@ -695,7 +694,7 @@ debug() {
   fi
 }
 
-debug "Starting with args: $@"
+debug "Starting with args: $*"
 debug "Environment: $(env | grep CLAUDE)"
 
 # ... rest of script
