@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(Write|Edit)$",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are validating changes to a Claude Code skill during refinement. Enforce the Movement Pattern.\n\nFile being modified: $ARGUMENTS\n\n**MOVEMENT PATTERN (Enforce strictly for ANY content relocation):**\nWhen content is removed, it must appear in a destination (same file reorganized, or moved to another file).\nSequence: CREATE/UPDATE destination FIRST → THEN REMOVE from source.\n\nWhen content is being REMOVED:\n- REJECT if: Deleted with no corresponding content appearing in destination\n- REJECT if: Destination unclear (where did it go?)\n- ACCEPT only if: Content clearly relocated to another location in same session\n\nAppplies to:\n- SKILL.md → references/ moves\n- references/ → SKILL.md moves  \n- Between references/ files\n- Reorganizing within same file\n\n**Additional validations:**\n1. Is removed content critical to skill's core purpose?\n2. Is description losing scope, qualifiers, or use cases?\n3. Breaking activation or execution capability?\n\nRespond with {\"ok\": true} if valid, or {\"ok\": false, \"reason\": \"specific issue\"} if pattern violated.\n\nDefault: REJECT if content fate is unclear or movement pattern broken.",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

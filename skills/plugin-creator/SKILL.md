@@ -207,10 +207,13 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 - `references/mcp-servers.md` — External service integration
 - `references/lsp-servers.md` — Language-specific code intelligence
 
-**Deployment & Troubleshooting:**
-- `references/versioning-and-distribution.md` — Semantic versioning, changelog, distribution
+**Development & Troubleshooting:**
+- `references/local-development.md` — Testing plugins locally with `--plugin-dir`, debugging hooks/skills/agents
 - `references/debugging-troubleshooting.md` — Debug mode, common issues, error messages
 - `references/best-practices.md` — Production patterns, security, performance
+
+**Deployment:**
+- `references/versioning-and-distribution.md` — Semantic versioning, changelog, distribution
 
 ## Component Overview
 

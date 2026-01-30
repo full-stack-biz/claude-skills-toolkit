@@ -6,62 +6,13 @@ description: >-
   Handles skill structure, frontmatter, activation, references, tool scoping, and
   production readiness. Can also migrate slash commands to skills for better context
   management and subagent support.
-version: 1.9.0
+version: 1.9.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
-hooks:
-  PreToolUse:
-    - matcher: "^(Write|Edit)$"
-      hooks:
-        - type: command
-          command: "${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/backup-skill.sh"
-          args:
-            - "${FILE_PATH}"
-          timeout: 3000
-          onError: "warn"  # Backup failure doesn't block refinement
-          async: false     # Backup must complete before write proceeds
-  PostToolUse:
-    - matcher: "^(Write|Edit)$"
-      hooks:
-        - type: prompt
-          prompt: |
-            You are validating a skill refinement. Compare the original skill content with the refined version to detect if important content was completely dropped without being preserved elsewhere.
-
-            ORIGINAL CONTENT:
-            ```
-            ${ORIGINAL_CONTENT}
-            ```
-
-            REFINED CONTENT:
-            ```
-            ${REFINED_CONTENT}
-            ```
-
-            Analyze:
-            1. Was any content completely dropped (not moved to references/, not reorganized)?
-            2. If duplication was removed: This is OK.
-            3. If content moved to references/: This is OK.
-            4. If sections reorganized: This is OK.
-            5. If content is just gone with no preservation: This is NOT OK.
-
-            Respond with JSON only (no additional text):
-            {
-              "dropped": true/false,
-              "what": "description of what was dropped (or 'none' if ok)",
-              "why_matters": "explanation of impact if dropped (or 'n/a' if ok)",
-              "ok": true/false
-            }
-          timeout: 15000
-          onError: "warn"  # Validation failure logged but doesn't crash
-        - type: command
-          command: "${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/cleanup-backup.sh"
-          timeout: 2000
-          onError: "warn"  # Cleanup failure doesn't affect execution
-          async: true      # Safe to background; doesn't block session
 ---
 
 # Skill Creator
 
-**Dual purpose:** Create skills right the first time OR elevate existing skills to best practices.
+**Dual purpose:** Create and refine Claude Code skills to meet production-ready standards.
 
 ## Quick Start
 
@@ -203,17 +154,41 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
    - If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
    - If not found anywhere → ask user for source path
    - Cache path? → REFUSE and ask for source
-2. Ask user which aspects need improvement (structure, length, triggering, etc.)
+
+2. **MANDATORY - Use AskUserQuestion tool NOW:** Before proceeding to any changes, you MUST use the AskUserQuestion tool to gather operator approval. Ask which aspects need improvement. Do not skip this step.
+   ```
+   Questions:
+   - Aspect 1: "Structure" (reorganize sections/workflow)
+   - Aspect 2: "Clarity" (wording/procedural steps)
+   - Aspect 3: "Length" (content distribution)
+   - Aspect 4: "Triggering" (description activation)
+   - Aspect 5: "Other" (custom feedback)
+   ```
+   → User responds with selections → Document approval → Proceed only with approved aspects
+
+2.5. **VERIFY APPROVAL RECEIVED (Execution Gate):**
+   - [ ] Operator has provided feedback via AskUserQuestion tool
+   - [ ] You have received and documented the selected aspects
+   - [ ] If approval is NOT complete → STOP and return to step 2
+   - [ ] If approval is complete → You are cleared to proceed to step 3
+
 3. **Load `references/skill-workflow.md`** — Contains the unified workflow with preservation gates and validation phases
+
 4. **Run Preservation Gates (Part 2 of skill-workflow.md) BEFORE making changes:**
    - **GATE 1 - Content Audit:** List ALL existing content. Classify as core (80%+) or supplementary (<20%).
    - **GATE 2 - Capability Assessment:** Will changes impair execution? If YES → cannot delete, only migrate.
    - **GATE 3 - Migration Verification:** Before moving content, verify destination exists and is complete. NO GAPS.
    - **GATE 4 - Operator Confirmation:** Deletions require explicit approval. Migrations are auto-approved.
-5. Make changes following the 80% rule (Part 1 of skill-workflow.md)
+
+5. **Make changes** following the 80% rule (Part 1 of skill-workflow.md)
+   - Hooks automatically: backup original before writes, validate + report after
+
 6. **Run Validation Workflow (Part 3 of skill-workflow.md) AFTER changes:**
    - Phase 1-7: File Inventory → Read All → Frontmatter → Body → References → Tools → Testing
+   - Review hook validation output (what changed, line count reduction, warnings)
+
 7. **Test activation:** Will Claude recognize this description in real requests?
+
 8. **Document reasoning:** Explain which gate applied to each content decision
 
 ### For Converting Slash Commands to Skills
@@ -272,7 +247,7 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 
 ## ⚠️ CRITICAL: Refinement Preservation Rules
 
-**Refinement is refactoring, not reduction.** Preserve skill functionality while improving clarity. Load `references/skill-workflow.md` for the complete unified workflow.
+**Refinement is refactoring, not reduction.** Preserve skill functionality while improving clarity. **Critical pattern: For ANY content movement (within file, between files, skill ↔ refs), create/update destination FIRST, then remove from source.** See `references/refinement-guardrails.md` for what NEVER gets cut and the Movement Pattern. Load `references/skill-workflow.md` for the complete unified workflow.
 
 **The 80% Rule (core procedural decision):**
 - Will Claude execute this in 80%+ of skill activations? → STAYS in SKILL.md
@@ -310,6 +285,7 @@ Is content used in 80%+ of activations?
 
 **Load when validating or improving skills:**
 - `references/checklist.md` — Additional quality assessment across all dimensions
+- `references/refinement-guardrails.md` — **Critical:** What NEVER gets cut during refinement (scope, descriptions, capabilities)
 - `references/advanced-patterns.md` — When skill needs production patterns (error handling, version history, security)
 
 **Load for team/production skill patterns:**

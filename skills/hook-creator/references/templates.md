@@ -562,7 +562,7 @@ exit 0
 
 **Alternative: Separate hooks.json file**
 
-If hooks are complex, create `.claude-plugin/hooks.json`:
+If hooks are complex, create `hooks/hooks.json` at the plugin root:
 
 ```json
 {
@@ -579,7 +579,7 @@ Then reference in `plugin.json`:
 {
   "name": "my-plugin",
   "version": "1.0.0",
-  "hooks": "./.claude-plugin/hooks.json"
+  "hooks": "./hooks/hooks.json"
 }
 ```
 

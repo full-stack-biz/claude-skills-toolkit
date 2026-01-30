@@ -6,7 +6,7 @@ description: >-
   or improving hook quality. Supports command hooks (shell scripts), prompt hooks (LLM decisions),
   event matching, decision schemas, and production safety validation. Claude auto-activates when
   you ask to build a hook, check hook reliability, improve hook configurations, or validate hooks for production.
-version: 2.2.1
+version: 2.2.2
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -31,12 +31,28 @@ Use AskUserQuestion to gather requirements, then proceed to the appropriate sect
 Then hook-creator will:
 1. Ask clarifying questions about your goal (hook purpose, events, scope)
 2. Detect your project type (Claude plugin or regular project)
-3. Ensure hooks go to the right location (`.claude/hooks.json` or `hooks.json`)
+3. Ensure hooks go to the right location:
+   - **Plugin project**: `hooks/hooks.json` (at plugin root)
+   - **Regular project**: `.claude/hooks.json` (in .claude directory)
 4. Guide you through the workflow with templates and validation checklists
 
 **What this skill does:** Ensures hooks trigger reliably, execute safely, and follow production best practices. Wrong events cause missed triggers. Loose matchers waste resources. Poor error handling breaks plugins. This skill prevents all of that.
 
 **NOT for:** Debugging specific hook failures in running plugins, or writing hook scripts directly.
+
+---
+
+## ⚠️ CRITICAL: Hook File Location
+
+**Most common hook mistake:** Placing hooks in `.claude-plugin/hooks.json` (WRONG)
+
+✅ **CORRECT locations:**
+- **Plugin projects** (has `.claude-plugin/plugin.json`): Create `hooks/hooks.json` at plugin root
+- **Regular projects** (no `.claude-plugin/`): Create `.claude/hooks.json` in .claude directory
+
+❌ **WRONG location:** `.claude-plugin/hooks.json` (only plugin.json belongs in .claude-plugin/)
+
+If your hooks aren't firing, check the file location first.
 
 ## Hook System Essentials (Quick Reference)
 
@@ -64,6 +80,13 @@ Then hook-creator will:
 - RULE: If hook needs to communicate errors to Claude, use `exit 2`. Otherwise use 0 or 1.
 - Always set `onError` behavior (warn/fail/continue)
 
+**HOW COMMAND HOOKS RECEIVE DATA (CRITICAL - most common mistake):**
+- ❌ Environment variable substitution DOES NOT WORK: `"env": {"FILE_PATH": "${arguments.file_path}"}`
+- ✓ Command hooks receive ALL event data via **stdin as JSON**, not environment variables
+- ✓ Read from stdin: `INPUT=$(cat)` then parse: `jq '.tool_input.file_path'`
+- See `references/command-hook-input-parsing.md` for correct patterns and examples
+- This is the #1 reason command hooks appear to do nothing (scripts get no arguments)
+
 **Critical constraints:**
 - Matchers must be precise (overly broad = performance impact)
 - Commands must be fast (<1s synchronous, up to 10s asynchronous)
@@ -78,8 +101,8 @@ Then hook-creator will:
 
 **Step 2: Scope detection (automatic)**
 - Check for `.claude-plugin/plugin.json` — If exists, you're in a plugin project; if not, regular project
-- If plugin project: Ask whether hook should be plugin-level (`hooks.json`) or project-level (`.claude/hooks.json`)
-- If regular project: Hooks always go to `.claude/hooks.json` (no choice needed)
+- If plugin project: Hooks go to `hooks/hooks.json` at plugin root (or inline in plugin.json)
+- If regular project: Hooks go to `.claude/hooks.json` in project's .claude directory
 - **Refuse installed paths:** If user points to `~/.claude/plugins/cache/` or `~/.claude/`, refuse—only work with project-scoped hooks
 
 **Step 3: Route to appropriate workflow below**
@@ -92,7 +115,10 @@ Then hook-creator will:
 5. Complete and deploy
 
 ### Validate Existing Hooks
-1. Verify hook path is project-scoped (`.claude/hooks.json` or `hooks.json` relative to project root). Refuse installed paths (`~/.claude/plugins/cache/` or `~/.claude/`).
+1. Verify hook path is project-scoped:
+   - **Plugin project**: `hooks/hooks.json` at plugin root
+   - **Regular project**: `.claude/hooks.json` in .claude directory
+   - **Refuse installed paths** (`~/.claude/plugins/cache/` or `~/.claude/`)
 2. Load `references/validation-workflow.md` — follow 7-phase validation (event → matcher → type → error handling → performance → integration → testing)
 3. Use `references/checklist.md` to verify completeness at each phase
 4. Report issues and sign off
@@ -123,6 +149,7 @@ Measure success by whether the hook will execute reliably and safely:
 |------|---------|
 | `how-hooks-work.md` | Hook lifecycle, event timing, matcher evaluation, execution model |
 | `event-reference.md` | Event documentation (when events fire, available data, timing constraints) |
+| `command-hook-input-parsing.md` | **CRITICAL:** How command hooks receive tool arguments via stdin, not env vars. Common mistake & correct pattern. |
 | `decision-schemas.md` | JSON output formats for each event (PreToolUse, PermissionRequest, Stop, etc.) |
 | `exit-code-behavior.md` | Command hook exit codes (0, 2, other) and error handling |
 | `validation-workflow.md` | 7-phase validation process (event, matcher, action, error handling, performance) |
