@@ -34,6 +34,7 @@ Use this checklist when creating a new hook from scratch.
 - [ ] **Action is specified** - Command path, prompt text, or agent reference
 
 ### Command Hooks Specific
+- [ ] **Script passes shellcheck** - Run `shellcheck script.sh`, fix all warnings
 - [ ] **Script exists** - File path is correct and file exists
 - [ ] **Script executable** - Has execute permissions on Unix/Linux
 - [ ] **Uses ${CLAUDE_PLUGIN_ROOT}** - Relative path, not hardcoded
@@ -225,6 +226,7 @@ Use when creating or validating agent hooks.
 Use when creating hooks for production or team use.
 
 ### Code Quality
+- [ ] **Shellcheck passes** - Command scripts run `shellcheck script.sh` with no errors
 - [ ] **Version tracked** - Version field in hook metadata
 - [ ] **Changelog maintained** - Document changes between versions
 - [ ] **Code reviewed** - Peer review before deployment

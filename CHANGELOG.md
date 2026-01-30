@@ -2,6 +2,51 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.12.0] - 2026-01-30
+
+### Added
+- **skill-creator 1.9.3:**
+  - Refined refinement workflow with progressive disclosure (Batch 1: core definition, Batch 2: team/complexity)
+  - Enhanced requirement interview with explicit batching for better UX
+  - Mandatory approval workflow before refinement changes using progressive scope selection
+  - New reference file `references/refinement-guardrails.md` for preservation rules during refinement
+  - New reference file `references/skill-workflow.md` for unified content distribution workflow
+
+- **hook-creator 2.2.2:**
+  - Clarified hook file location documentation with explicit examples (plugin vs regular projects)
+  - Critical section warning against `.claude-plugin/hooks.json` (wrong location) with correct alternatives
+  - Enhanced error handling documentation with exit code semantics (0=success, 2=blocking, 1=non-blocking)
+  - New reference file `references/command-hook-input-parsing.md` with correct stdin/JSON patterns for command hooks
+  - Added critical note about passing shellcheck validation for command hook scripts
+  - Corrected documentation showing environment variable substitution doesn't work; hooks receive data via stdin
+
+- **plugin-creator 1.4.0:**
+  - Completely reorganized reference files for clearer structure and better navigation
+  - New unified reference `references/components-in-plugins.md` consolidating Agent Skills, Subagents, and Hooks guidance
+  - New `references/plugin-architecture.md` explaining how plugins work and token loading
+  - New `references/local-development.md` for testing plugins locally with `--plugin-dir` and debugging hooks/skills/agents
+  - New `references/troubleshooting-and-production.md` consolidating debugging, common issues, best practices, production checklist
+  - New `references/quick-reference.md` with fast lookup tables, templates, and common patterns
+  - Replaced `references/installation-scopes.md` with `references/installation-and-cli.md` (combined with CLI reference)
+  - Enhanced description to clarify delegation to component-specific skills (hook-creator, subagent-creator, skill-creator)
+
+### Changed
+- **plugin-creator 1.4.0:**
+  - Simplified plugin naming conventions and description formula sections
+  - Reorganized Complete Reference Documentation section with better categorization (Implementation & Validation, Installation & Operations, Components & Configuration, Troubleshooting & Production, Deployment)
+  - Removed duplicate content that was consolidated into unified components reference
+
+### Removed
+- **plugin-creator:**
+  - `references/agent-skills.md` (consolidated into components-in-plugins.md)
+  - `references/best-practices.md` (consolidated into troubleshooting-and-production.md)
+  - `references/debugging-troubleshooting.md` (consolidated into troubleshooting-and-production.md)
+  - `references/hooks-in-plugins.md` (consolidated into components-in-plugins.md)
+  - `references/how-plugins-work.md` (consolidated into plugin-architecture.md)
+  - `references/plugin-templates.md` (consolidated into plugin-architecture.md)
+  - `references/subagents-in-plugins.md` (consolidated into components-in-plugins.md)
+  - `references/installation-scopes.md` (merged into installation-and-cli.md)
+
 ## [1.10.0] - 2026-01-26
 
 ### Added

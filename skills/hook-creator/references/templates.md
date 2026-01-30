@@ -93,6 +93,31 @@ Copy-paste starting points for common hook patterns. Adapt these templates to yo
 - `"fail"` - Fail hook but don't crash plugin
 - `"continue"` - Silently continue (only if errors are expected)
 
+**CRITICAL: Exit Code Strategy**
+
+Choose your exit codes based on whether Claude needs to see errors:
+
+```bash
+#!/bin/bash
+
+# Case 1: Claude needs to see this error (blocking validation)
+if some_critical_check fails; then
+  echo "Error message for Claude" >&2
+  exit 2  # ← Shows stderr to Claude, he can fix it
+fi
+
+# Case 2: Optional check, Claude doesn't need to know
+if some_optional_check fails; then
+  echo "Debug info" >&2
+  exit 1  # ← Hidden from Claude (verbose mode only)
+fi
+
+# Case 3: Success
+exit 0
+```
+
+This is non-negotiable: **Exit 2 is the ONLY way to communicate hook failures to Claude**.
+
 ---
 
 ## Prompt Hook (UserPromptSubmit)
@@ -362,22 +387,27 @@ exit 0
 # Run linting
 if ! npm run lint --silent 2>/dev/null; then
   echo "Linting failed. Fix errors before committing." >&2
-  exit 1
+  exit 2  # Exit 2: blocking error, shows stderr to Claude
 fi
 
 # Run tests
 if ! npm test --silent 2>/dev/null; then
   echo "Tests failed. Fix failures before committing." >&2
-  exit 1
+  exit 2  # Exit 2: blocking error, shows stderr to Claude
 fi
 
-exit 0
+exit 0  # Exit 0: success
 ```
 
-**Behavior:**
-- If script exits with code 0 (success): commit proceeds
-- If script exits with non-zero code (error): commit is blocked
-- `onError: "fail"` means validation failure blocks the operation
+**Critical exit code behavior:**
+- `exit 0` = success (no error shown)
+- `exit 2` = blocking error (stderr shown to Claude, he can understand and fix)
+- `exit 1` = non-blocking error (stderr only in verbose mode, Claude never sees it)
+
+**For this hook:**
+- Exit 2 tells Claude the validation failed and why
+- `onError: "fail"` ensures the prompt is blocked
+- Without exit 2, Claude gets no feedback and can't fix the issue
 
 ---
 
@@ -532,7 +562,7 @@ exit 0
 
 **Alternative: Separate hooks.json file**
 
-If hooks are complex, create `.claude-plugin/hooks.json`:
+If hooks are complex, create `hooks/hooks.json` at the plugin root:
 
 ```json
 {
@@ -549,7 +579,7 @@ Then reference in `plugin.json`:
 {
   "name": "my-plugin",
   "version": "1.0.0",
-  "hooks": "./.claude-plugin/hooks.json"
+  "hooks": "./hooks/hooks.json"
 }
 ```
 
@@ -653,6 +683,47 @@ claude plugin install .
 
 ---
 
+## Shellcheck: Validating Hook Scripts
+
+**Why:** Hook scripts must be bulletproof. Shellcheck catches common shell mistakes that cause runtime failures.
+
+**Install shellcheck (macOS):**
+```bash
+brew install shellcheck
+```
+
+**Install shellcheck (Linux):**
+```bash
+apt install shellcheck  # Debian/Ubuntu
+yum install shellcheck  # CentOS/RHEL
+```
+
+**Validate your hook scripts:**
+```bash
+# Single script
+shellcheck scripts/format.sh
+
+# All scripts in directory
+shellcheck scripts/*.sh
+
+# Show only warnings (not info)
+shellcheck -S warning scripts/format.sh
+```
+
+**Common issues shellcheck catches:**
+
+| Issue | Example | Fix |
+|-------|---------|-----|
+| Unquoted variables | `[ $SIZE -gt 100 ]` | `[ "$SIZE" -gt 100 ]` |
+| Useless echo | `echo $(date +%s)` | `date +%s` |
+| Word splitting | `for file in $FILES` | `for file in $FILES_ARRAY` |
+| Trap expansion | `trap "rm $file" EXIT` | `trap 'rm "$file"' EXIT` |
+| Array in string | `ARGS="$@"` | `ARGS=("$@")` |
+
+**Production rule:** All command hook scripts must pass `shellcheck` before deployment.
+
+---
+
 ## Migration: From Script-Based to Hook-Based
 
 If migrating from manual scripts to hooks:
@@ -710,6 +781,7 @@ Before deploying to production:
 ```
 
 Verify:
+- [ ] **Command script passes shellcheck** (`shellcheck scripts/format.sh`)
 - [ ] Timeout reasonable (<5s for sync operations)
 - [ ] onError behavior appropriate (warn for safe ops, fail for critical)
 - [ ] Matcher tested with real scenarios

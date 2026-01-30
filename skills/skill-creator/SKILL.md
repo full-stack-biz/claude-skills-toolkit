@@ -1,22 +1,22 @@
 ---
 name: skill-creator
 description: >-
-  Create, validate, and refine Claude Code skills. Use when: building new skills,
-  validating skills against best practices, or improving skill clarity and execution.
-  Handles skill structure, frontmatter, activation, references, tool scoping, and
-  production readiness. Can also migrate slash commands to skills for better context
-  management and subagent support.
-version: 1.8.0
+  Create and refine Claude Code skills following best practices. Use when: building new
+  skills from scratch, validating existing skills against quality standards, or improving
+  skill structure and clarity. Handles frontmatter (name/description), body organization
+  (progressive disclosure), reference files, tool scoping, production readiness, and
+  preservation rules during refinement. Also converts slash commands to skills.
+version: 1.9.3
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
 # Skill Creator
 
-**Dual purpose:** Create skills right the first time OR elevate existing skills to best practices.
+**Dual purpose:** Create and refine Claude Code skills to meet production-ready standards.
 
 ## Quick Start
 
-Ask what the user wants: create, validate, refine, or convert slash commands. Then route to the section below.
+Ask the user: **"What do you want to do: create a new skill, validate an existing one, refine a skill, or convert a slash command?"** Then route to the appropriate section below.
 
 ---
 
@@ -40,11 +40,11 @@ These principles apply to all skill creation and validation work—the foundatio
 
 **Progressive Disclosure** — Essential execution instructions first (Quick Start), detailed guidance second (references/), advanced topics last. Quick reference patterns solve 80% of task variants without loading auxiliary files.
 
-**Token Efficiency** — Every token Claude loads must justify its cost. Keep SKILL.md body <500 lines (non-negotiable). Use code examples over prose, tables over lists. Minimize only supplementary content (<20% cases); core procedural content (80%+ cases) must stay. Follow `references/skill-workflow.md` for content distribution and preservation rules; never delete content to reduce line count if it impairs execution.
+**Token Efficiency** — Every token Claude loads must justify its cost for execution. Keep SKILL.md body <500 lines (non-negotiable). Use code examples before prose, tables instead of lists. Core procedural content (80%+ cases) stays in SKILL.md; supplementary content (<20% cases) moves to references/. Never delete content to reduce line count if it impairs execution. See `references/skill-workflow.md` for content distribution rules and preservation gates.
 
 **Token Loading** — Metadata (~100 tokens) always loads. SKILL.md body (~1-5k tokens) loads on trigger. References load on-demand only (zero penalty until needed). Full details: `references/how-skills-work.md`.
 
-**Activation** — Skills trigger via description text alone. Vague descriptions never activate. Specific trigger phrases ("create skill", "validate", "improve") = reliable activation.
+**Activation** — Skills trigger via description text alone. Vague descriptions never activate. Include specific trigger phrases Claude will recognize in user requests (e.g., "create skill", "validate skill", "improve", "refine skill").
 
 ## Implementation Approach
 
@@ -121,16 +121,21 @@ When user mentions a skill by name (e.g., "refine plugin-creator"):
 
 ### For New Skills: Requirements Interview First
 
-After routing to "create", **interview the user to gather requirements** using AskUserQuestion. This ensures the skill will activate correctly and Claude will execute it effectively:
+After routing to "create", **interview the user to gather requirements** using progressive disclosure (AskUserQuestion, one batch at a time). This ensures the skill will activate correctly and Claude will execute it effectively.
 
-1. **Skill purpose** - What domain-specific task should Claude execute? What problem does this solve?
-2. **Trigger phrases** - What phrases will Claude see in requests when this skill should activate?
-3. **Scope & constraints** - What's IN scope for Claude to execute? What's OUT of scope?
-4. **Tool needs** - Which tools will Claude need (file operations, Bash, network access)?
-5. **Team/production** - Will multiple Claude instances use this? Production data involved?
-6. **Complexity** - Will Claude need scripts to reference? Reference files? Multiple workflows?
+**🔴 BATCH 1: Core Definition** (Ask these 4 together):
+1. **Skill purpose** — What domain-specific task should Claude execute? What problem does this solve?
+2. **Trigger phrases** — What phrases will Claude see in user requests when this skill should activate?
+3. **Scope & constraints** — What's IN scope? What's OUT of scope?
+4. **Tool needs** — Which tools will Claude need (file operations, Bash, web access)?
 
-Then use `references/templates.md` to apply requirements to the appropriate template structure.
+⏸️ Wait for all 4 responses.
+
+**🟢 BATCH 2: Team & Complexity** (Then ask these 2):
+5. **Team/production** — Will multiple Claude instances use this? Production data involved?
+6. **Complexity** — Will Claude need scripts or reference files? Multiple workflows?
+
+After gathering ALL responses, use `references/templates.md` to apply requirements to the appropriate skill template.
 
 ### For Existing Skills (Validating)
 
@@ -154,18 +159,63 @@ Then use `references/templates.md` to apply requirements to the appropriate temp
    - If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
    - If not found anywhere → ask user for source path
    - Cache path? → REFUSE and ask for source
-2. Ask user which aspects need improvement (structure, length, triggering, etc.)
-3. **Load `references/skill-workflow.md`** — Contains the unified workflow with preservation gates and validation phases
-4. **Run Preservation Gates (Part 2 of skill-workflow.md) BEFORE making changes:**
+
+2. **MANDATORY - Get Approval FIRST (Wizard Approach - Progressive Disclosure):**
+
+   **🔴 STEP 1: Ask high-level scope FIRST. Use AskUserQuestion with this question ONLY:**
+
+   > What's the primary focus for refining [skill-name]?
+   >
+   > Options (single select):
+   > - Structure & clarity — Reorganize sections, improve activation, clarify flow
+   > - Content & efficiency — Reduce tokens, consolidate content, improve 80% rule
+   > - Everything — Refine all aspects systematically
+
+   **⏸️ WAIT FOR RESPONSE before proceeding.**
+
+   **🟢 STEP 2: Then (and only then) ask follow-up CONDITIONALLY:**
+
+   If operator chose "Structure & clarity" or "Content & efficiency" (NOT "Everything"), ask:
+
+   > Any additional areas to review?
+   >
+   > [Open-ended text response - they type what they want]
+
+   **If operator chose "Everything"**: Skip Step 2. All aspects are approved.
+
+   **📋 Document** which aspects operator approved. Proceed only with those approved changes.
+
+3. **Load `references/skill-workflow.md`** — Contains the unified workflow with preservation gates and validation phases. Study Parts 1-3: content distribution (80% rule), preservation gates (4 gates), and validation phases (7 phases).
+
+4. **Identify Consolidation Opportunities (BEFORE changes):**
+   - List ALL files in `references/` directory with line counts
+   - Group files by topic/purpose (what do they cover?)
+   - Identify related files that could merge: 2-4 files on same topic → 1 consolidated file
+   - Calculate potential savings (redundant headers, overlapping content)
+   - Flag for operator: "These N files could consolidate into M files, saving X lines"
+   - **Only proceed if operator approves consolidation targets**
+
+5. **Run Preservation Gates (Part 2 of skill-workflow.md) BEFORE making changes:**
    - **GATE 1 - Content Audit:** List ALL existing content. Classify as core (80%+) or supplementary (<20%).
    - **GATE 2 - Capability Assessment:** Will changes impair execution? If YES → cannot delete, only migrate.
    - **GATE 3 - Migration Verification:** Before moving content, verify destination exists and is complete. NO GAPS.
    - **GATE 4 - Operator Confirmation:** Deletions require explicit approval. Migrations are auto-approved.
-5. Make changes following the 80% rule (Part 1 of skill-workflow.md)
-6. **Run Validation Workflow (Part 3 of skill-workflow.md) AFTER changes:**
+
+6. **Make changes** following the 80% rule (Part 1 of skill-workflow.md):
+   - **For consolidations:** STRICT SEQUENCE: CREATE → LINK → DELETE (never delete first!)
+     1. CREATE destination file(s) with merged content
+     2. LINK - Update SKILL.md pointers to new destination(s)
+     3. DELETE old source files (only after links verified)
+   - Apply Movement Pattern: create/update destination FIRST, then remove from source
+   - Hooks validate automatically (backup before writes, validate + report after)
+
+7. **Run Validation Workflow (Part 3 of skill-workflow.md) AFTER all changes:**
    - Phase 1-7: File Inventory → Read All → Frontmatter → Body → References → Tools → Testing
-7. **Test activation:** Will Claude recognize this description in real requests?
-8. **Document reasoning:** Explain which gate applied to each content decision
+   - Review hook validation (what changed, line counts, warnings)
+
+8. **Final verification:**
+   - Test activation: Will Claude recognize the description in real requests?
+   - Document reasoning: Explain which gates applied to each content decision
 
 ### For Converting Slash Commands to Skills
 
@@ -223,7 +273,7 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 
 ## ⚠️ CRITICAL: Refinement Preservation Rules
 
-**Refinement is refactoring, not reduction.** Preserve skill functionality while improving clarity. Load `references/skill-workflow.md` for the complete unified workflow.
+**Refinement is refactoring, not reduction.** Preserve skill functionality while improving clarity. **Critical pattern: For ANY content movement (within file, between files, skill ↔ refs), create/update destination FIRST, then remove from source.** See `references/refinement-guardrails.md` for what NEVER gets cut and the Movement Pattern. Load `references/skill-workflow.md` for the complete unified workflow.
 
 **The 80% Rule (core procedural decision):**
 - Will Claude execute this in 80%+ of skill activations? → STAYS in SKILL.md
@@ -261,6 +311,7 @@ Is content used in 80%+ of activations?
 
 **Load when validating or improving skills:**
 - `references/checklist.md` — Additional quality assessment across all dimensions
+- `references/refinement-guardrails.md` — **Critical:** What NEVER gets cut during refinement (scope, descriptions, capabilities)
 - `references/advanced-patterns.md` — When skill needs production patterns (error handling, version history, security)
 
 **Load for team/production skill patterns:**
@@ -274,6 +325,12 @@ Is content used in 80%+ of activations?
 - `references/slash-command-conversion.md` — Detection, mapping, and conversion workflow
 
 ## Key Notes
+
+**Wizard Pattern (this skill models the pattern it teaches) - CRITICAL EXECUTION RULE:**
+Progressive disclosure ALWAYS means: ask ONE question, wait for response, then ask next. Never combine questions into a single AskUserQuestion call.
+- ❌ WRONG: Ask 2 questions in one AskUserQuestion (looks like a form)
+- ✅ RIGHT: Ask question 1 → wait for response → then ask question 2 (if conditional)
+When tool has constraints (maxItems: 4), this pattern is mandatory. Applied in "For Improvements (Refining)" section's approval workflow. Claude must follow this pattern when implementing guided user interactions in skills.
 
 **Frontmatter (Claude reads this to discover and activate skills):**
 - YAML syntax (use triple dashes: `---`)
@@ -292,13 +349,15 @@ Is content used in 80%+ of activations?
 - Include action/domain: `test-runner`, `skill-creator`, `code-reviewer`
 - Avoid generic: prefer `log-analyzer` over `analyzer`
 
-**Description formula (Claude uses this to decide whether to activate the skill):**
+**Description formula (Claude uses this to decide whether to activate):**
 ```
 [Action]. Use when [trigger contexts]. [Scope/constraints].
 ```
-Example: "Run tests and generate reports. Use when validating code before commit. Supports PHPUnit and Jest."
+**Example:** "Run tests and generate reports. Use when validating code before commit. Supports PHPUnit and Jest."
 
-The description must contain phrases Claude will see in user requests. If the description is vague, Claude won't activate the skill when needed.
+✅ **Good descriptions** include specific trigger phrases Claude will recognize in user requests (e.g., "create", "validate", "improve", "refine").
+
+❌ **Vague descriptions** (e.g., "Process things") never activate the skill when users need it.
 
 **Team/Production considerations:** For skills used in team environments or with production data, ensure robust error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/team-production-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
 
