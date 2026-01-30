@@ -1,8 +1,8 @@
 ---
 name: plugin-creator
 description: >-
-  Create, validate, and refine Claude Code plugins with Agent Skills, hooks, agents, and servers. Use when: building plugins from scratch, converting projects to plugins, improving plugin structure, or publishing to marketplace. Includes automated scanning, manifest generation, marketplace.json creation, and validation guidance (use hook-creator and subagent-creator skills for those components).
-version: 1.3.0
+  Create, convert, validate, and publish Claude Code plugins with Agent Skills, hooks, agents, and servers. Use when building plugins from scratch, converting projects to plugins, improving plugin structure, or publishing to marketplace. Includes automated scanning, manifest generation, marketplace.json creation, and validation guidance. Component-specific work delegates to hook-creator, subagent-creator, and skill-creator skills.
+version: 1.4.0
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(find:*,grep:*,head:*,jq:*,du:*,xargs:*)
 ---
 
@@ -182,16 +182,18 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 
 ## Complete Reference Documentation
 
+**Quick lookup:** Fast tables, templates, and common patterns are in `references/quick-reference.md`.
+
 **Implementation & Validation:**
 - `references/implementation-workflow.md` — Step-by-step procedures for creating, converting, and validating plugins
 - `references/automated-scanning-workflow.md` — Scanning phase for validating existing plugins (errors, warnings, decisions)
 - `references/validation-checklist.md` — Comprehensive validation phases and checklists
 
-**Installation & Scopes:**
-- `references/installation-scopes.md` — User/project/local/managed scopes and use cases
-- `references/cli-commands.md` — Plugin install/uninstall/enable/disable/update commands
+**Installation & Operations:**
+- `references/installation-and-cli.md` — Installation scopes, CLI commands (install/uninstall/enable/disable/update)
 
 **Plugin Architecture:**
+- `references/plugin-architecture.md` — How plugins work, token loading, templates for common patterns
 - `references/directory-structure.md` — Standard plugin layout, file organization, validation
 - `references/plugin-json-schema.md` — Plugin manifest (plugin.json) format, required/optional fields
 - `references/team-marketplaces.md` — Marketplace setup, marketplace.json schema, team distribution
@@ -199,18 +201,15 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 - `references/plugin-caching.md` — Plugin caching, file resolution, symlinks, path traversal
 
 **Components & Configuration:**
-- `references/agent-skills.md` — Packaging Skills in plugins (recommended)
+- `references/components-in-plugins.md` — Packaging Agent Skills, Subagents, and Hooks in plugins
 - `references/slash-command-format.md` — Command file format (DEPRECATED: for legacy support only)
-- `references/subagents-in-plugins.md` — Packaging subagents in plugins with delegation
-- `references/hooks-in-plugins.md` — Packaging hooks in plugins (use `hook-creator` skill for creation/validation)
 - `references/hooks.md` — Hook event reference (events, formats, matchers, patterns)
 - `references/mcp-servers.md` — External service integration
 - `references/lsp-servers.md` — Language-specific code intelligence
 
-**Development & Troubleshooting:**
+**Troubleshooting & Production:**
+- `references/troubleshooting-and-production.md` — Debugging plugins, common issues, best practices, production checklist
 - `references/local-development.md` — Testing plugins locally with `--plugin-dir`, debugging hooks/skills/agents
-- `references/debugging-troubleshooting.md` — Debug mode, common issues, error messages
-- `references/best-practices.md` — Production patterns, security, performance
 
 **Deployment:**
 - `references/versioning-and-distribution.md` — Semantic versioning, changelog, distribution
@@ -230,32 +229,25 @@ See `references/quick-reference.md` for component templates, formats, and metada
 
 ## Key Notes
 
-**Plugin naming conventions:**
-- Hyphen-separated lowercase: `code-reviewer`, `pdf-processor`, `test-runner`
-- Include action/domain: prefer `test-runner` over `runner`
-- Becomes plugin namespace: `/plugin-name` for skills, commands, hooks
-
-**CLI commands:** `claude plugin install|uninstall|enable|disable|update <name>@<marketplace> [--scope user|project|local]`
-
-**Important paths note:**
-- Plugins are cached (copied, not used in-place) for security
-- External paths won't work after installation; use `${CLAUDE_PLUGIN_ROOT}` variable in hooks/scripts
-- See `references/plugin-paths-variables.md` for complete path behavior and variable usage
+**Plugin naming conventions:** Hyphen-separated lowercase (`code-reviewer`, `pdf-processor`, `test-runner`). Include action/domain; becomes plugin namespace `/plugin-name` for skills, commands, hooks.
 
 **Description formula (Claude's activation signal):**
 ```
 [Action]. Use when [trigger contexts]. [Components/scope].
 ```
+Example: "Review code for best practices. Use when validating pull requests. Includes validate, report, and export commands."
 
-Example: "Review code for best practices. Use when validating pull requests or before commit. Includes validate, report, and export commands."
+**CLI commands:** `claude plugin install|uninstall|enable|disable|update <name>@<marketplace> [--scope user|project|local]`
+
+**Important paths note:** Plugins are cached (not in-place) for security. Use `${CLAUDE_PLUGIN_ROOT}` variable in hooks/scripts for paths. See `references/plugin-paths-variables.md` for details.
 
 **Installation scopes:**
-- **`user` scope (global)**: `~/.claude/skills/` (available in all projects)
-- **`project` scope**: `.claude/skills/` (shared via git)
-- **`local` scope**: `.claude/skills/` (personal, not shared)
-- **`managed` scope**: System cache (marketplace plugins, read-only)
+- **`user` (global)**: `~/.claude/skills/` (all projects)
+- **`project` (shared)**: `.claude/skills/` (via git)
+- **`local` (personal)**: `.claude/skills/` (not shared)
+- **`managed` (read-only)**: System cache (marketplace plugins)
 
-See `references/installation-scopes.md` for scope details and use cases.
+See `references/installation-and-cli.md` for scope and CLI details.
 
 ## Validation Checklist
 
@@ -289,11 +281,8 @@ See `references/lsp-servers.md` for LSP configuration and language-specific inte
 **Hooks & Events:**
 See `references/hooks.md` for event handler configuration and common automation patterns.
 
-**Agent Skills in Plugins:**
-See `references/agent-skills.md` for packaging Skills in plugins. (Note: To create new Skills, use the `skill-creator` skill.)
-
-**Subagents in Plugins:**
-See `references/subagents-in-plugins.md` for packaging subagents in plugins. (Note: To create new subagents, use the `subagent-creator` skill.)
+**Components in Plugins:**
+See `references/components-in-plugins.md` for packaging Agent Skills, Subagents, and Hooks in plugins. (Note: To create these components, use `skill-creator`, `subagent-creator`, or `hook-creator` skills.)
 
 **External Service Integration (MCP):**
 See `references/mcp-servers.md` for MCP server configuration and testing.

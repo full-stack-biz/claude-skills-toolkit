@@ -137,6 +137,16 @@ For each item you plan to move or remove:
 
 **⚠️ CRITICAL: Do NOT move content without explicit verification. Incomplete migrations cripple skill execution.**
 
+**⚠️ CRITICAL SEQUENCE: CREATE → LINK → DELETE (NEVER DELETE FIRST)**
+
+Refinements fail when files are deleted before links are updated. Always follow this order:
+1. **CREATE** destination file with all merged content
+2. **LINK** - Update SKILL.md pointers to new destination
+3. **DELETE** - Remove old source files ONLY after links verified
+
+**❌ WRONG:** Create destination → Delete sources → Update links (links now broken!)
+**✅ CORRECT:** Create destination → Update links → Delete sources (links work, no gaps)
+
 Before moving ANY content:
 
 **Step 1: Identify content to move**
@@ -175,6 +185,30 @@ For ANY content deletion (not migration):
 - [ ] Operator must confirm: "Yes, remove this" with reasoning
 - [ ] Document deletion reason in commit message
 
+### The CREATE → LINK → DELETE Sequence (Critical for Refinements)
+
+When consolidating or moving content files, follow this strict sequence to prevent broken links:
+
+**Phase 1: CREATE**
+- [ ] Write new destination file with merged content (complete, not empty)
+- [ ] Verify all source content is present in destination
+- [ ] Read destination file completely to confirm
+
+**Phase 2: LINK**
+- [ ] Update SKILL.md pointers to new destination file
+- [ ] Remove old source file references from SKILL.md
+- [ ] Verify all links in SKILL.md now point to destination files
+- [ ] No broken or orphaned references
+
+**Phase 3: DELETE**
+- [ ] Delete old source files ONLY after Phase 2 links verified
+- [ ] Confirm file count reduction
+- [ ] Final verification: SKILL.md reads without errors
+
+**Why this sequence matters:**
+- ❌ Create → Delete → Link = Links point to deleted files (broken!)
+- ✅ Create → Link → Delete = Links work, then old files gone (correct!)
+
 ### Approval Triggers
 
 **Auto-approved (no operator decision needed):**
@@ -199,6 +233,31 @@ For ANY content deletion (not migration):
 | Move supplementary SKILL.md → references/ | ✅ YES | Apply 80% rule |
 | Move content references/ → SKILL.md | ✅ YES | Consolidate for clarity |
 | **DELETE content entirely** | ❌ NO | **Requires explicit operator approval** |
+| **Consolidate multiple files** | ✅ YES | **Follow CREATE → LINK → DELETE sequence** |
+
+### Consolidation Sequence (for multiple files)
+
+When consolidating multiple reference files into one:
+
+**ALWAYS in this order:**
+
+1. **CREATE** destination file
+   - Write new file with merged content from all sources
+   - Include content from all source files completely
+   - Verify by reading the new file
+
+2. **LINK** in SKILL.md
+   - Update all references to point to new destination
+   - Remove old source file references
+   - Verify no broken links
+
+3. **DELETE** old source files
+   - Delete source files ONLY after links updated
+   - Verify file count decreased
+   - Confirm no orphaned references
+
+**Never:** Create → Delete → Link (breaks links!)
+**Always:** Create → Link → Delete (preserves functionality)
 
 ### Case Study: Correct Refinement ✅
 

@@ -187,21 +187,33 @@ After gathering ALL responses, use `references/templates.md` to apply requiremen
 
 3. **Load `references/skill-workflow.md`** — Contains the unified workflow with preservation gates and validation phases. Study Parts 1-3: content distribution (80% rule), preservation gates (4 gates), and validation phases (7 phases).
 
-4. **Run Preservation Gates (Part 2 of skill-workflow.md) BEFORE making changes:**
+4. **Identify Consolidation Opportunities (BEFORE changes):**
+   - List ALL files in `references/` directory with line counts
+   - Group files by topic/purpose (what do they cover?)
+   - Identify related files that could merge: 2-4 files on same topic → 1 consolidated file
+   - Calculate potential savings (redundant headers, overlapping content)
+   - Flag for operator: "These N files could consolidate into M files, saving X lines"
+   - **Only proceed if operator approves consolidation targets**
+
+5. **Run Preservation Gates (Part 2 of skill-workflow.md) BEFORE making changes:**
    - **GATE 1 - Content Audit:** List ALL existing content. Classify as core (80%+) or supplementary (<20%).
    - **GATE 2 - Capability Assessment:** Will changes impair execution? If YES → cannot delete, only migrate.
    - **GATE 3 - Migration Verification:** Before moving content, verify destination exists and is complete. NO GAPS.
    - **GATE 4 - Operator Confirmation:** Deletions require explicit approval. Migrations are auto-approved.
 
-5. **Make changes** following the 80% rule (Part 1 of skill-workflow.md):
+6. **Make changes** following the 80% rule (Part 1 of skill-workflow.md):
+   - **For consolidations:** STRICT SEQUENCE: CREATE → LINK → DELETE (never delete first!)
+     1. CREATE destination file(s) with merged content
+     2. LINK - Update SKILL.md pointers to new destination(s)
+     3. DELETE old source files (only after links verified)
    - Apply Movement Pattern: create/update destination FIRST, then remove from source
    - Hooks validate automatically (backup before writes, validate + report after)
 
-6. **Run Validation Workflow (Part 3 of skill-workflow.md) AFTER all changes:**
+7. **Run Validation Workflow (Part 3 of skill-workflow.md) AFTER all changes:**
    - Phase 1-7: File Inventory → Read All → Frontmatter → Body → References → Tools → Testing
    - Review hook validation (what changed, line counts, warnings)
 
-7. **Final verification:**
+8. **Final verification:**
    - Test activation: Will Claude recognize the description in real requests?
    - Document reasoning: Explain which gates applied to each content decision
 

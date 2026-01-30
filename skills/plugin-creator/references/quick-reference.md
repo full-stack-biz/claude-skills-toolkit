@@ -257,3 +257,12 @@ More text with examples.
 | Ask user questions | `AskUserQuestion` | Gather requirements |
 
 **NOT allowed:** `Bash` (git operations reserved for user)
+
+## Skill Delegation (hook-creator, subagent-creator)
+
+For complex plugin components:
+- **Creating/improving hooks?** → Use `hook-creator` skill for hook-specific guidance
+- **Creating/refining subagents?** → Use `subagent-creator` skill for agent-specific guidance
+- **Creating/improving skills?** → Use `skill-creator` skill for skill-specific guidance
+
+plugin-creator handles plugin structure and organization. Component-specific skills provide deeper guidance for each type.
