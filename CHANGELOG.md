@@ -2,6 +2,11 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [1.12.1] - 2026-02-01
+
+### Fixed
+- **skill-creator 1.9.4:** Movement Pattern validation hook now only triggers during skill refinement (component-scoped to skill-creator instead of global)
+
 ## [1.12.0] - 2026-01-30
 
 ### Added
