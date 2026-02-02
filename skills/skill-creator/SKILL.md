@@ -1,7 +1,7 @@
 ---
 name: skill-creator
 description: >-
-  Create NEW Claude Code skills from scratch following best practices. Use when: building new
+  Create NEW Claude Code skills from scratch following best practices. Use when building new
   skills, interviewing for requirements, applying templates, organizing frontmatter and body
   content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
   progressive disclosure, reference organization, and tool scoping.
@@ -11,7 +11,7 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 # Skill Creator
 
-**Dual purpose:** Create and refine Claude Code skills to meet production-ready standards.
+**Purpose:** Create new Claude Code skills from scratch following best practices.
 
 ## Quick Start
 

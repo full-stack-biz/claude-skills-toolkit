@@ -15,6 +15,8 @@ All notable changes to the skills-toolkit plugin are documented here.
 
 ### Changed
 - **skill-creator 2.0.0:**
+  - Extracted skill refinement capability to new **skill-refiner** skill
+  - Now focuses solely on creating new skills (removed refinement workflows, validation phases, and preservation gates)
   - Removed backup scripts (now handled by skill-refiner's movement pattern validation)
 
 ### Fixed
