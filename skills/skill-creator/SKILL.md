@@ -1,38 +1,28 @@
 ---
 name: skill-creator
 description: >-
-  Create and refine Claude Code skills following best practices. Use when: building new
-  skills from scratch, validating existing skills against quality standards, or improving
-  skill structure and clarity. Handles frontmatter (name/description), body organization
-  (progressive disclosure), reference files, tool scoping, production readiness, and
-  preservation rules during refinement. Also converts slash commands to skills.
-version: 1.9.4
+  Create NEW Claude Code skills from scratch following best practices. Use when building new
+  skills, interviewing for requirements, applying templates, organizing frontmatter and body
+  content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
+  progressive disclosure, reference organization, and tool scoping.
+version: 2.0.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
-hooks:
-  PreToolUse:
-    - matcher: "^(Write|Edit)$"
-      hooks:
-        - type: prompt
-          prompt: "You are validating changes to a Claude Code skill during refinement. Enforce the Movement Pattern.\n\nFile being modified: $ARGUMENTS\n\n**MOVEMENT PATTERN (Enforce strictly for ANY content relocation):**\nWhen content is removed, it must appear in a destination (same file reorganized, or moved to another file).\nSequence: CREATE/UPDATE destination FIRST → THEN REMOVE from source.\n\nWhen content is being REMOVED:\n- REJECT if: Deleted with no corresponding content appearing in destination\n- REJECT if: Destination unclear (where did it go?)\n- ACCEPT only if: Content clearly relocated to another location in same session\n\nAppplies to:\n- SKILL.md → references/ moves\n- references/ → SKILL.md moves  \n- Between references/ files\n- Reorganizing within same file\n\n**Additional validations:**\n1. Is removed content critical to skill's core purpose?\n2. Is description losing scope, qualifiers, or use cases?\n3. Breaking activation or execution capability?\n\nRespond with JSON (no markdown, no extra text): {\"ok\": true, \"reason\": \"content is clearly relocated\"} if valid, or {\"ok\": false, \"reason\": \"specific reason why pattern violated\"} if invalid.\n\nDefault: false if content fate is unclear or movement pattern broken."
-          timeout: 30
 ---
 
 # Skill Creator
 
-**Dual purpose:** Create and refine Claude Code skills to meet production-ready standards.
+**Purpose:** Create new Claude Code skills from scratch following best practices.
 
 ## Quick Start
 
-Ask the user: **"What do you want to do: create a new skill, validate an existing one, refine a skill, or convert a slash command?"** Then route to the appropriate section below.
+Ask the user: **"What do you want to do: create a new skill or convert a slash command?"** Then route to the appropriate section below.
 
 ---
 
 ## Core Use Cases
 
 **Create new skills** - Build from scratch with correct structure, naming, frontmatter, and validation guidance.
-**Validate existing skills** - Check against best practices (structure, activation clarity, token efficiency, tool scoping).
-**Improve skills** - Refine activation, clarity, organization, or efficiency of existing skills.
-**Convert slash commands** - Migrate existing `~/.claude/commands/` slash commands to project-scoped skills (bonus capability; better context management, subagent support).
+**Convert slash commands** - Migrate existing `~/.claude/commands/` slash commands to project-scoped skills (better context management, subagent support).
 **Team/production skills** - Ensure robustness with error handling, tool scoping, and version tracking.
 
 ## Mindset
@@ -57,10 +47,9 @@ These principles apply to all skill creation and validation work—the foundatio
 
 **▶️ START HERE - Quick Workflow**
 
-1. Ask: What do you want to do? (create / validate / refine)
-2. For create: Gather requirements, then route to "New Skills" section
-3. For validate/refine: Search project first → user-space second → ask only if not found (see "Locate Target Skill" below)
-4. For slash command migration: Mention as bonus capability, offer conversion support
+1. Ask: What do you want to do? (create / convert slash command)
+2. For create: Gather requirements interview, then route to "New Skills" section
+3. For slash command conversion: Offer conversion support following conversion workflow
 
 **BEFORE ANY OPERATION - Locate the Target Skill:**
 
@@ -144,85 +133,6 @@ After routing to "create", **interview the user to gather requirements** using p
 
 After gathering ALL responses, use `references/templates.md` to apply requirements to the appropriate skill template.
 
-### For Existing Skills (Validating)
-
-1. **LOCATE the skill first (MANDATORY):** Follow "Locate the Target Skill" workflow above
-   - Search current project: `skills/X/`, `.claude/skills/X/`
-   - If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
-   - If not found anywhere → ask user for source path
-   - Cache path? → REFUSE and ask for source
-2. **Load `references/skill-workflow.md`** — Contains unified validation workflow (Part 3) and preservation gates
-3. Follow the systematic workflow: Phase 1-7 (File Inventory → Read All → Frontmatter → Body → References → Tools → Testing)
-4. Use `references/checklist.md` for additional quality assessment
-5. Check `references/allowed-tools.md` if tool scoping is involved
-6. Complete workflow before considering the skill validated
-
-### For Improvements (Refining)
-
-**CRITICAL: Load `references/skill-workflow.md` and follow it strictly when refining—this skill models the workflow it teaches.**
-
-1. **LOCATE the skill first (MANDATORY):** Follow "Locate the Target Skill" workflow above
-   - Search current project: `skills/X/`, `.claude/skills/X/`
-   - If not in project → check `~/.claude/skills/X/` (warn and confirm if found)
-   - If not found anywhere → ask user for source path
-   - Cache path? → REFUSE and ask for source
-
-2. **MANDATORY - Get Approval FIRST (Wizard Approach - Progressive Disclosure):**
-
-   **🔴 STEP 1: Ask high-level scope FIRST. Use AskUserQuestion with this question ONLY:**
-
-   > What's the primary focus for refining [skill-name]?
-   >
-   > Options (single select):
-   > - Structure & clarity — Reorganize sections, improve activation, clarify flow
-   > - Content & efficiency — Reduce tokens, consolidate content, improve 80% rule
-   > - Everything — Refine all aspects systematically
-
-   **⏸️ WAIT FOR RESPONSE before proceeding.**
-
-   **🟢 STEP 2: Then (and only then) ask follow-up CONDITIONALLY:**
-
-   If operator chose "Structure & clarity" or "Content & efficiency" (NOT "Everything"), ask:
-
-   > Any additional areas to review?
-   >
-   > [Open-ended text response - they type what they want]
-
-   **If operator chose "Everything"**: Skip Step 2. All aspects are approved.
-
-   **📋 Document** which aspects operator approved. Proceed only with those approved changes.
-
-3. **Load `references/skill-workflow.md`** — Contains the unified workflow with preservation gates and validation phases. Study Parts 1-3: content distribution (80% rule), preservation gates (4 gates), and validation phases (7 phases).
-
-4. **Identify Consolidation Opportunities (BEFORE changes):**
-   - List ALL files in `references/` directory with line counts
-   - Group files by topic/purpose (what do they cover?)
-   - Identify related files that could merge: 2-4 files on same topic → 1 consolidated file
-   - Calculate potential savings (redundant headers, overlapping content)
-   - Flag for operator: "These N files could consolidate into M files, saving X lines"
-   - **Only proceed if operator approves consolidation targets**
-
-5. **Run Preservation Gates (Part 2 of skill-workflow.md) BEFORE making changes:**
-   - **GATE 1 - Content Audit:** List ALL existing content. Classify as core (80%+) or supplementary (<20%).
-   - **GATE 2 - Capability Assessment:** Will changes impair execution? If YES → cannot delete, only migrate.
-   - **GATE 3 - Migration Verification:** Before moving content, verify destination exists and is complete. NO GAPS.
-   - **GATE 4 - Operator Confirmation:** Deletions require explicit approval. Migrations are auto-approved.
-
-6. **Make changes** following the 80% rule (Part 1 of skill-workflow.md):
-   - **For consolidations:** STRICT SEQUENCE: CREATE → LINK → DELETE (never delete first!)
-     1. CREATE destination file(s) with merged content
-     2. LINK - Update SKILL.md pointers to new destination(s)
-     3. DELETE old source files (only after links verified)
-   - Apply Movement Pattern: create/update destination FIRST, then remove from source
-   - Hooks validate automatically (backup before writes, validate + report after)
-
-7. **Run Validation Workflow (Part 3 of skill-workflow.md) AFTER all changes:**
-   - Phase 1-7: File Inventory → Read All → Frontmatter → Body → References → Tools → Testing
-   - Review hook validation (what changed, line counts, warnings)
-
-8. **Final verification:**
-   - Test activation: Will Claude recognize the description in real requests?
-   - Document reasoning: Explain which gates applied to each content decision
 
 ### For Converting Slash Commands to Skills
 
@@ -278,54 +188,20 @@ Create `references/` subdirectories for:
 **Step 5: Validate**
 Use the checklist in `references/checklist.md` to verify quality before deployment.
 
-## ⚠️ CRITICAL: Refinement Preservation Rules
-
-**Refinement is refactoring, not reduction.** Preserve skill functionality while improving clarity. **Critical pattern: For ANY content movement (within file, between files, skill ↔ refs), create/update destination FIRST, then remove from source.** See `references/refinement-guardrails.md` for what NEVER gets cut and the Movement Pattern. Load `references/skill-workflow.md` for the complete unified workflow.
-
-**The 80% Rule (core procedural decision):**
-- Will Claude execute this in 80%+ of skill activations? → STAYS in SKILL.md
-- Will Claude execute this in <20% of cases? → Can move to references/
-- Uncertain? → Defer to operator; keep in SKILL.md by default
-
-**Pre-Refinement Gates (summary — see skill-workflow.md Part 2 for full details):**
-
-1. **Content Audit** — List all existing content. Classify as core (80%+) or supplementary (<20%).
-2. **Capability Assessment** — Will changes impair execution? If yes → cannot delete, only migrate.
-3. **Migration Verification** — Before moving, verify destination exists and content is complete. NO GAPS.
-4. **Operator Confirmation** — Deletions require explicit approval. Migrations are auto-approved.
-
-**Quick Decision Tree:**
-```
-Is content used in 80%+ of activations?
-├─ YES → STAYS in SKILL.md (core procedural)
-├─ NO → Can MOVE to references/ (supplementary)
-└─ Being DELETED? → Requires operator approval
-```
-
-**See `references/skill-workflow.md`** for the complete unified workflow including content distribution rules, preservation gates, and validation phases.
-
 ## Reference Guide
-
-**Primary workflow reference (load for ANY skill work):**
-- `references/skill-workflow.md` — **MUST load:** Unified workflow for creating, validating, and refining skills. Contains content distribution (80% rule), preservation gates (4 gates), and validation phases (7 phases). This is the single authoritative workflow.
-
-**Load when understanding skill fundamentals:**
-- `references/how-skills-work.md` — When user asks about token loading, activation mechanism, or skill architecture
 
 **Load when creating a new skill:**
 - `references/templates.md` — **MUST load:** After requirements interview, provides copy-paste starting points
 - `references/content-guidelines.md` — When writing descriptions/frontmatter, to verify trigger phrases
+- `references/skill-workflow.md` — Content distribution (80% rule) and skill structure guidance (Part 1 + Part 3)
 
-**Load when validating or improving skills:**
-- `references/checklist.md` — Additional quality assessment across all dimensions
-- `references/refinement-guardrails.md` — **Critical:** What NEVER gets cut during refinement (scope, descriptions, capabilities)
-- `references/advanced-patterns.md` — When skill needs production patterns (error handling, version history, security)
+**Load when understanding skill fundamentals:**
+- `references/how-skills-work.md` — When user asks about token loading, activation mechanism, or skill architecture
 
 **Load for team/production skill patterns:**
-- `references/team-production-patterns.md` — Error handling, tool scoping, validation scripts for team environments
-
-**Load when configuring permissions and structure:**
-- `references/allowed-tools.md` — **MUST load:** When determining tool scoping or reviewing security
+- `references/advanced-patterns.md` — Production patterns, skill archetypes, quality examples
+- `references/team-production-patterns.md` — Error handling, tool scoping, validation scripts, security review, documentation patterns
+- `references/allowed-tools.md` — Tool scoping validation, principle of least privilege, and security
 - `references/self-containment-principle.md` — When deciding about external dependencies (architectural background)
 
 **Load when converting slash commands to skills:**

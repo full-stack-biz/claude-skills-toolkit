@@ -2,6 +2,27 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.1.0] - 2026-02-02
+
+### Added
+- **skill-refiner 1.1.0:**
+  - New skill for improving and validating existing Claude Code skills
+  - Systematic refinement workflows with preservation gates (4-gate validation)
+  - Validation phases (7-phase checklist) for production readiness
+  - Movement pattern enforcement with hook validation (prevents content loss during refactoring)
+  - Reference files covering 80% rule, advanced patterns, allowed tools, content guidelines, preservation rules, and production patterns
+  - Auto-detection of skill context with offers to help refine or validate during skill work
+
+### Changed
+- **skill-creator 2.0.0:**
+  - Extracted skill refinement capability to new **skill-refiner** skill
+  - Now focuses solely on creating new skills (removed refinement workflows, validation phases, and preservation gates)
+  - Removed backup scripts (now handled by skill-refiner's movement pattern validation)
+
+### Fixed
+- **hooks/hooks.json:**
+  - Fixed hook leakage (component-scoped hooks properly isolated)
+
 ## [1.12.1] - 2026-02-01
 
 ### Fixed
