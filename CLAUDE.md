@@ -54,7 +54,8 @@ allowed-tools: Read,Write,Bash(*)   # Optional: principle of least privilege
 ### Agent Skills (in `skills/`)
 Skills are discoverable and invocable via both auto-activation and direct `/` commands:
 
-- **skill-creator** - Create and refine Claude Code skills following best practices. Claude auto-activates when detecting skill-related tasks; users can invoke directly with `/skills-toolkit:create-skill`.
+- **skill-creator** - Create NEW Claude Code skills from scratch following best practices. Claude auto-activates when detecting skill creation tasks; users can invoke directly with `/skills-toolkit:create-skill`.
+- **skill-refiner** - Improve and validate EXISTING Claude Code skills for clarity, efficiency, and production readiness. Claude auto-activates when detecting skill refinement/validation tasks; users can invoke directly with `/skills-toolkit:skill-refiner`.
 - **plugin-creator** - Create, convert, and validate Claude Code plugins. Claude auto-activates when detecting plugin-related tasks; users can invoke directly with `/skills-toolkit:create-plugin`.
 - **subagent-creator** - Create, validate, and refine Claude Code subagents. Claude auto-activates for subagent delegation tasks; users can invoke with `/skills-toolkit:create-subagent`.
 - **hook-creator** - Create, validate, and refine hooks for automating workflows. Claude auto-activates for hook-related work; users can invoke with `/skills-toolkit:create-hook`.
