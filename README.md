@@ -5,15 +5,23 @@ A plugin for creating and managing Claude Code skills and plugins.
 ## What You Get
 
 ### `/skills-toolkit:create-skill`
-Interactive guide for creating and validating skills:
+Interactive guide for creating new skills from scratch:
 - Name and describe your skill
 - Structure SKILL.md (frontmatter + instructions)
 - Set up reference documentation
 - Configure tool permissions
-- Validate structure and trigger phrases
+- Apply best practices during creation
+
+### `/skills-toolkit:skill-refiner`
+Interactive guide for improving and validating existing skills:
+- Refine skill structure and clarity
+- Validate against best practices
+- Reduce token usage and improve efficiency
+- Check production readiness
+- Apply the 80% rule for optimization
 
 ### `/skills-toolkit:create-plugin`
-Interactive guide for creating and managing plugins:
+Interactive guide for creating and validating plugins:
 - Generate `.claude-plugin/plugin.json` manifest
 - Organize skills, commands, hooks, MCP/LSP servers
 - Convert existing projects to plugins
@@ -49,7 +57,7 @@ Instead of documentation sitting idle, turn it into a skill—interactive guidan
 
 1. **Start with what you know** - You have documentation, a process guide, or expertise
 2. **Turn it into a skill** - Use `/skills-toolkit:create-skill` to formalize it into instructions Claude follows
-3. **Validate and refine** - The toolkit checks that Claude understands it and it's optimized
+3. **Refine for quality** - Use `/skills-toolkit:skill-refiner` to optimize clarity, efficiency, and production readiness
 4. **Package for your team** - Use `/skills-toolkit:create-plugin` to make it installable
 5. **Share and evolve** - Team members install once, Claude guides the process every time
 
@@ -77,7 +85,7 @@ Claude created the plugin manifest, README, changelog, added the skill, made it 
 
 **User:** Do a fresh review. Make sure everything is solid.
 
-Claude asked:
+Claude asked (using skill-refiner):
 - Which refinement areas matter most for your team?
 
 **User:** Activation & trigger phrases, token efficiency, quick start strengthening, error prevention guardrails.
@@ -127,16 +135,16 @@ Organize all components into one installable plugin with a single manifest. Team
 
 Result: Shareable plugin your team can install and keep up to date.
 
-### Scenario 3: Validate an Existing Skill
+### Scenario 3: Refine an Existing Skill
 You have a skill that mostly works but want to ensure Claude understands it correctly and it's optimized.
 
 ```
-I need to validate an existing skill against best practices.
+I need to refine an existing skill against best practices.
 ```
 
-Select validation mode. The guide checks your skill structure, trigger phrases, tool permissions, and efficiency.
+Use skill-refiner to validate structure, trigger phrases, token efficiency, tool permissions, and production readiness.
 
-Result: Confidence your skill works reliably and loads efficiently into Claude's context.
+Result: Confidence your skill works reliably, loads efficiently, and meets quality standards.
 
 ### Scenario 4: Convert a Project to a Plugin
 You have an existing project with helper scripts, documentation, and utilities. You want to make it installable as a Claude plugin.
@@ -165,7 +173,7 @@ Result: Centralized distribution with version control and easy updates.
 This toolkit follows **Claude's Bounded Scope Principle** for skills, which creates some intentional knowledge duplication:
 
 - **plugin-creator** includes summaries of skill/subagent/hook concepts for users getting started with plugins
-- **skill-creator**, **subagent-creator**, and **hook-creator** provide authoritative, detailed knowledge
+- **skill-creator**, **skill-refiner**, **subagent-creator**, and **hook-creator** provide authoritative, detailed knowledge
 - These overlap because Claude's skill architecture doesn't support skill-to-skill delegation yet
 
 **Why this design?** Each skill must be completely self-contained within its directory—this ensures skills work reliably across any deployment context (local, project, user, marketplace). For details, see [Bounded Scope Principle](skills/skill-creator/references/bounded-scope-principle.md).

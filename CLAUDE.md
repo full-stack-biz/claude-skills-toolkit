@@ -245,11 +245,12 @@ For detailed release process guidance, use the `/dev-flow:release-process` skill
 
 Each skill maintains its own independent semantic version (in `SKILL.md` frontmatter):
 
-- **skill-creator**: 1.6.0
+- **skill-creator**: 1.5.0
+- **skill-refiner**: 1.0.0
 - **plugin-creator**: 1.3.0
 - **subagent-creator**: 1.1.0
 - **hook-creator**: 2.2.1
-- **Plugin**: 1.8.0
+- **Plugin**: 1.9.0
 
 These are independent tracking systems, NOT a hierarchy.
 
