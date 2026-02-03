@@ -239,6 +239,18 @@ When authoring skill examples that show code blocks within code blocks, use thes
 
 For detailed release process guidance, use the `/dev-flow:release-process` skill.
 
+### ⚠️ CRITICAL: When Any Skill Changes, Bump Plugin Version
+
+When you update a skill/hook/subagent:
+1. Update that component's version in its frontmatter/manifest
+2. **ALWAYS also bump the plugin version** in `.claude-plugin/plugin.json`
+3. Update **root CHANGELOG.md only** (never create skill-level changelogs)
+
+Example:
+- skill-creator 1.4.0 → 1.5.0 (MINOR)
+- Plugin 1.12.0 → 1.13.0 (MINOR) ← **Must bump**
+- Single entry in root CHANGELOG.md documenting the skill changes
+
 ### CRITICAL: Skill Versions Are Independent From Plugin Version
 
 **⚠️ NEVER compare plugin version numbers to skill version numbers. They track different things.**
@@ -273,6 +285,16 @@ These are independent tracking systems, NOT a hierarchy.
 1. skill-creator 1.6.0, hook-creator 2.2.1
 2. "Plugin is 1.8.0 which is LESS than hook-creator's 2.2.1, so bump plugin"
 3. ❌ WRONG: Comparing version numbers across independent systems creates nonsense
+
+### CHANGELOG Location Rule
+
+**ALL changelog entries go in root `CHANGELOG.md` only.**
+
+- ❌ Never create `skills/plugin-creator/CHANGELOG.md`
+- ❌ Never create `skills/hook-creator/CHANGELOG.md`
+- ✅ All releases documented in root `/CHANGELOG.md` with skill/hook/subagent prefixes
+
+Format: `- **skill-name X.Y.Z:** Change description`
 
 ## Control who invokes a skill
 

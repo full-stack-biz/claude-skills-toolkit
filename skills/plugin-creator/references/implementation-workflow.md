@@ -47,7 +47,7 @@ Create `.claude-plugin/plugin.json`:
 ```json
 {
   "name": "my-plugin",
-  "description": "[Action]. Use when [trigger contexts]. [Components/scope].",
+  "description": "[Action]. [Brief description of purpose and capabilities]. [Components/scope].",
   "version": "1.0.0",
   "author": {
     "name": "Your Name"
@@ -57,7 +57,8 @@ Create `.claude-plugin/plugin.json`:
 
 **Validation:**
 - `name`: lowercase-hyphen, 1-64 chars, no spaces or special chars
-- `description`: 1-1024 chars, includes specific trigger phrases Claude will recognize
+- `description`: 1-1024 chars, clear description of plugin purpose and capabilities
+- `author`: Must be object with `name` field, not string (common failure point)
 - See `references/plugin-json-schema.md` for optional fields (homepage, repository, license)
 
 ### Step 4: Add Components in Order
@@ -500,11 +501,11 @@ Check if Claude will recognize when to use the plugin:
 
 **Plugin description must include:**
 - ✅ Specific action verbs: "Review code", "Process PDFs", "Generate reports"
-- ✅ Concrete trigger contexts: "when validating pull requests", "before committing code", "when analyzing documents"
+- ✅ Clear purpose statements: Explain what the plugin does and its capabilities
 - ✅ Component list or scope: "Includes validate, report, and export commands"
 
 **Example good description:**
-"Review code for best practices and potential issues. Use when validating pull requests, reviewing before commit, or analyzing code quality. Includes validate, report, and export commands."
+"Review code for best practices and potential issues. Includes validate, report, and export commands."
 
 **Example poor description:**
 "A plugin for code operations."

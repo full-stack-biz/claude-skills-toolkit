@@ -274,28 +274,28 @@ JSON parse error: Unexpected token } in JSON at position 142
 **Plugin Description Formula:**
 
 ```
-[Action/capability]. Use when [trigger contexts]. [Components/scope].
+[Action/capability]. [Brief description of purpose]. [Components/scope].
 ```
 
 **Examples:**
 
 ```
-Review code for best practices and potential issues. Use when validating pull requests, reviewing before commit, or analyzing code quality. Includes validate, report, and export commands.
+Review code for best practices and potential issues. Includes validate, report, and export commands.
 ```
 
 ```
-Extract and analyze PDF documents with OCR. Use when processing PDFs, extracting text, or analyzing document content. Supports encrypted PDFs and multiple formats.
+Extract and analyze PDF documents with OCR. Supports encrypted PDFs and multiple formats.
 ```
 
-**Good trigger phrases:**
-- "when validating pull requests"
-- "before committing code"
-- "when analyzing code quality"
+**Good descriptions:**
+- Clear and specific about what the plugin does
+- Mentions key capabilities or supported features
+- Includes component list or scope
 
-**Poor trigger phrases:**
-- "for processing" (too vague)
+**Poor descriptions:**
+- "for processing" (too vague and generic)
 - "for useful operations" (meaningless)
-- "when needed" (everyone would match)
+- "a general-purpose tool" (unclear purpose)
 
 ### Component Organization
 

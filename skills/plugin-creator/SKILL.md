@@ -2,7 +2,7 @@
 name: plugin-creator
 description: >-
   Create, convert, validate, and publish Claude Code plugins with Agent Skills, hooks, agents, and servers. Use when building plugins from scratch, converting projects to plugins, improving plugin structure, or publishing to marketplace. Includes automated scanning, manifest generation, marketplace.json creation, and validation guidance. Component-specific work delegates to hook-creator, subagent-creator, and skill-creator skills.
-version: 1.4.0
+version: 1.5.0
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(find:*,grep:*,head:*,jq:*,du:*,xargs:*)
 ---
 
@@ -84,21 +84,83 @@ my-plugin/
 
 ## Choose Your Workflow
 
-**START HERE:** Always begin by asking the user to clarify their intent using AskUserQuestion:
+**START HERE:** Always begin by asking the user to clarify their intent and collect all required manifest data using AskUserQuestion (one question at a time, progressive disclosure):
 
-```
-Question 1: What would you like to do?
-- Create a new plugin (Recommended) - Build from scratch
-- Convert a project - Transform existing project into a plugin
-- Validate a plugin - Check against Claude Code standards
-- Publish to marketplace - Make plugin installable via `marketplace add`
+### Interview Flow for New Plugin Creation
 
-Question 2: What is the plugin name or path?
-- If creating/validating: Provide the plugin name (e.g., `code-reviewer`, `api-tools`)
-- If converting/publishing: Provide the path to the existing project
-```
+For users creating a new plugin, conduct this structured interview to gather all manifest.json fields **before** file creation:
 
-Based on their answers, route to the appropriate workflow below:
+1. **Action** - "What would you like to do?"
+   - Create a new plugin (→ proceed to 2-8)
+   - Convert a project (→ skip to Step 1 in Converting Projects section)
+   - Validate a plugin (→ skip to Validating Plugins section)
+   - Publish to marketplace (→ skip to Publishing to Marketplace section)
+
+2. **Plugin name** - "What's the plugin name?" (lowercase-hyphen, 1-64 chars)
+   - Maps to: `plugin.json` → `name` field
+   - Example: `code-reviewer`, `pdf-processor`
+
+3. **Purpose/description** - "What does the plugin do? Describe its main purpose and capabilities."
+   - Maps to: `plugin.json` → `description` field (1-1024 chars)
+   - Example: "Review code for best practices and potential issues."
+
+4. **Version** - "What version? (semantic format: MAJOR.MINOR.PATCH)"
+   - Maps to: `plugin.json` → `version` field
+   - Default if not specified: `1.0.0`
+
+5. **Author information** - "Who is the author? (name, optional: email, URL)"
+   - Maps to: `plugin.json` → `author` object with `name` field (REQUIRED)
+   - Format: `{"name": "Your Name", "email": "optional@email.com", "url": "https://optional.url"}`
+   - **CRITICAL:** author must be object, not string (common failure point)
+
+6. **Optional metadata** - "Any additional metadata? (license, repository, homepage)"
+   - Maps to: `plugin.json` → `license`, `repository`, `homepage` fields
+   - Example: `"MIT"`, `"https://github.com/user/plugin"`, `"https://docs.example.com"`
+
+7. **Components** - "Which components will the plugin include?"
+   - Maps to: Directory structure and marketplace.json `plugins[].source`
+   - Options: Skills, Commands, Agents, Hooks, MCP servers, LSP servers
+
+8. **Distribution scope** - "Will this be personal, team-shared, or marketplace-published?"
+   - Determines: Whether to create `marketplace.json` and final installation scope
+   - Marketplace → needs `marketplace.json` with proper schema
+
+### Manifest Field Mapping Reference
+
+| Interview Question | Maps to | Type | Required | Notes |
+|---|---|---|---|---|
+| Action | (routing logic) | string | Yes | Determines workflow path |
+| Plugin name | `plugin.json` → `name` | string | Yes | kebab-case, 1-64 chars, no spaces |
+| Purpose/description | `plugin.json` → `description` | string | Yes | 1-1024 chars, clear and specific |
+| Version | `plugin.json` → `version` | string | No | Semantic versioning (default: 1.0.0) |
+| Author name | `plugin.json` → `author.name` | string | Yes | Must be object property, not string |
+| Author email | `plugin.json` → `author.email` | string | No | Optional contact information |
+| Author URL | `plugin.json` → `author.url` | string | No | Optional profile/website |
+| License | `plugin.json` → `license` | string | No | e.g., "MIT", "Apache-2.0" |
+| Repository | `plugin.json` → `repository` | string | No | GitHub/GitLab URL |
+| Homepage | `plugin.json` → `homepage` | string | No | Documentation URL |
+| Components | Directory structure | array | No | Determines which `skills/`, `commands/`, etc. to create |
+| Distribution scope | `marketplace.json` | string | No | "personal", "team", or "marketplace" |
+
+### Common Manifest Generation Failures (Prevention)
+
+**Failure: `author` is string instead of object**
+- ❌ Wrong: `"author": "John Doe"`
+- ✅ Correct: `"author": {"name": "John Doe"}`
+- **Prevention:** Always structure author as object in template
+
+**Failure: Missing required fields**
+- Check: `name`, `description`, `author.name` are always present
+- Validate before writing plugin.json
+
+**Failure: Incorrect marketplace.json schema**
+- **Critical requirements:**
+  - `owner` MUST be object: `{"name": "username"}`
+  - `plugins` MUST be array: `[{...}]`
+  - `source` MUST start with `./`
+- See "Publishing to Marketplace" section for full schema
+
+Based on their answers, route to the appropriate workflow section below:
 
 ---
 
@@ -158,6 +220,48 @@ Make your plugin installable via `claude plugin marketplace add owner/repo`.
 
 See `references/team-marketplaces.md` for complete marketplace schema and common errors.
 
+## Manifest Generation Best Practices
+
+**BEFORE generating manifests, verify you have all required data:**
+
+1. ✅ Plugin name (kebab-case, 1-64 chars)
+2. ✅ Description (clear, 1-1024 chars)
+3. ✅ Author name (will be in object: `{"name": "..."}`)
+4. ✅ Version (semantic format, default: 1.0.0)
+
+**ALWAYS structure author as object:**
+```json
+{
+  "name": "my-plugin",
+  "description": "What it does.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Your Name"
+  }
+}
+```
+
+**NEVER generate with incomplete data** - Incomplete manifests cause validation failures. Run the interview flow first, collect all fields, then proceed with generation.
+
+**For marketplace.json, use official schema:**
+```json
+{
+  "name": "plugin-name",
+  "owner": {
+    "name": "github-username"
+  },
+  "plugins": [
+    {
+      "name": "plugin-name",
+      "source": "./",
+      "description": "What it does"
+    }
+  ]
+}
+```
+
+---
+
 ## Quick Start: 5-Minute Setup
 
 **Create plugin directory:**
@@ -170,7 +274,7 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 ```json
 {
   "name": "my-plugin",
-  "description": "[Action]. Use when [trigger contexts].",
+  "description": "[Action]. [Brief description of purpose and capabilities].",
   "version": "1.0.3"
 }
 ```
@@ -233,9 +337,9 @@ See `references/quick-reference.md` for component templates, formats, and metada
 
 **Description formula (Claude's activation signal):**
 ```
-[Action]. Use when [trigger contexts]. [Components/scope].
+[Action]. [Brief description of purpose]. [Components/scope].
 ```
-Example: "Review code for best practices. Use when validating pull requests. Includes validate, report, and export commands."
+Example: "Review code for best practices and potential issues. Includes validate, report, and export commands."
 
 **CLI commands:** `claude plugin install|uninstall|enable|disable|update <name>@<marketplace> [--scope user|project|local]`
 

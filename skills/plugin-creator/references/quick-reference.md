@@ -29,7 +29,7 @@ my-plugin/
 ```json
 {
   "name": "my-plugin",
-  "description": "What it does. Use when [trigger contexts]. [Components].",
+  "description": "Brief description of purpose and capabilities. [Components].",
   "version": "1.0.0",
   "author": {
     "name": "Your Name"
@@ -87,7 +87,7 @@ Important constraints and edge cases.
 ## Plugin Description Formula
 
 ```
-[Action/capability]. Use when [trigger contexts]. [Components/scope].
+[Action/capability]. [Brief description of purpose]. [Components/scope].
 ```
 
 **Components to mention:**
