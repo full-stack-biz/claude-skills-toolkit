@@ -51,23 +51,23 @@ Complete reference for `.claude-plugin/plugin.json` fields and validation.
 
 **Format:**
 ```
-[Action]. Use when [trigger contexts/phrases]. [Components/scope].
+[Action]. [Brief description of purpose and capabilities]. [Components/scope].
 ```
 
 **Examples:**
 ```json
-"description": "Review code for best practices and potential issues. Use when validating pull requests, reviewing before commit, or analyzing code quality. Includes validate, report, and export commands."
+"description": "Review code for best practices and potential issues. Includes validate, report, and export commands."
 
-"description": "Extract and analyze PDF documents with OCR. Use when processing PDFs, extracting text, or analyzing document content. Supports encrypted PDFs and multiple formats."
+"description": "Extract and analyze PDF documents with OCR. Supports encrypted PDFs and multiple formats."
 
-"description": "Run tests and generate reports. Use when validating code before commit or generating test coverage reports. Supports PHPUnit, Jest, and Go testing frameworks."
+"description": "Run tests and generate reports. Supports PHPUnit, Jest, and Go testing frameworks."
 ```
 
 **Wrong:**
 ```json
-"description": "A plugin for code stuff"              // vague, no trigger phrases
-"description": "processor"                             // too short, unclear
-"description": "Use this plugin to process things"    // no specific trigger context
+"description": "A plugin for code stuff"              // vague and unclear
+"description": "processor"                             // too short, no specificity
+"description": "Use this plugin to process things"    // no clear purpose
 ```
 
 ### `version` (string)
