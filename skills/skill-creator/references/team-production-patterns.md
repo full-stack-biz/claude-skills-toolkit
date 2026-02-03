@@ -73,6 +73,7 @@ Peer review catches edge cases and security assumptions.
 - [ ] Input validation: All user/external input sanitized?
 - [ ] Command injection: Shell commands safe from argument injection?
 - [ ] Data exposure: Sensitive data not logged or exposed?
+- [ ] Secrets handling: No hardcoded credentials (see `references/secrets-and-credentials.md`)
 - [ ] Permissions: Tool scoping appropriate?
 - [ ] Failure modes: Graceful degradation on errors?
 
