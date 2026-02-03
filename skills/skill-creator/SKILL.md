@@ -5,7 +5,7 @@ description: >-
   skills, interviewing for requirements, applying templates, organizing frontmatter and body
   content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
   progressive disclosure, reference organization, and tool scoping.
-version: 2.0.0
+version: 2.1.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -201,6 +201,7 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 **Load for team/production skill patterns:**
 - `references/advanced-patterns.md` — Production patterns, skill archetypes, quality examples
 - `references/team-production-patterns.md` — Error handling, tool scoping, validation scripts, security review, documentation patterns
+- `references/secrets-and-credentials.md` — Preventing secret leaks: detection, handling, git safety, testing patterns
 - `references/allowed-tools.md` — Tool scoping validation, principle of least privilege, and security
 - `references/self-containment-principle.md` — When deciding about external dependencies (architectural background)
 
@@ -243,6 +244,8 @@ When tool has constraints (maxItems: 4), this pattern is mandatory. Applied in "
 ❌ **Vague descriptions** (e.g., "Process things") never activate the skill when users need it.
 
 **Team/Production considerations:** For skills used in team environments or with production data, ensure robust error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/team-production-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
+
+**Secrets & credentials:** Skills must never contain hardcoded secrets (API keys, passwords, tokens). Use environment variables instead, validate they're set, and provide clear error messages. Never commit `.env` files or credentials to git. See `references/secrets-and-credentials.md` for complete guidance on detection, handling, git safety, and testing patterns.
 
 **Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
 

@@ -268,8 +268,22 @@ If creating skills for shared team use:
 - [ ] If `Bash` included: scope to specific commands (`Bash(git:*)`)
   - Example: `Read,Write,Bash(python:*)` for Python skill
   - Example: `Bash(git:*)` for git-only skill
-- [ ] No hardcoded paths or credentials
 - [ ] Safe defaults (read-only when possible)
+
+### Secrets & Credentials
+See `references/secrets-and-credentials.md` for complete guidance.
+
+- [ ] No hardcoded API keys, passwords, or tokens in SKILL.md
+- [ ] No hardcoded credentials in scripts/ directory
+- [ ] No `.env`, `.env.local`, or credential files in skill directory
+- [ ] Only `.env.example` or template files with placeholders (if needed)
+- [ ] Sensitive values referenced via environment variables only
+- [ ] Environment variable usage documented in Prerequisites section
+- [ ] Validation scripts check env vars are set before proceeding
+- [ ] Examples use placeholders (e.g., `YOUR_API_KEY_HERE`, `$API_KEY`)
+- [ ] No credentials in git history (verify with `git log -p`)
+- [ ] Forbidden files not present: `.env`, `.git/config` with credentials, `credentials.json`, `secrets.yml`
+- [ ] Git pre-commit hook prevents accidental secret commits
 
 ### User Safety
 - [ ] Destructive operations are warned/confirmed

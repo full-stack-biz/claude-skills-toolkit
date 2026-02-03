@@ -2,6 +2,20 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.3.0] - 2026-02-03
+
+### Added
+- **skill-creator 2.1.0:**
+  - New comprehensive reference file `references/secrets-and-credentials.md` (240 lines)
+  - Complete secret leak prevention guidance: detection patterns, handling, git safety, testing patterns
+  - 6 concrete before/after examples covering API keys, connection strings, .env handling, documentation, git config, bash scripts
+  - Pre-commit hook script for secret detection and git-secrets integration guide
+  - Validation checklist for preventing hardcoded secrets and credential exposure
+  - Progressive disclosure: zero token cost until secrets handling needed
+  - Enhanced templates.md with Security Notes section for team/production skills
+  - Expanded checklist.md with 10-item "Secrets & Credentials" validation subsection
+  - Updated team-production-patterns.md security review checklist with secrets reference
+
 ## [2.2.0] - 2026-02-03
 
 ### Added
