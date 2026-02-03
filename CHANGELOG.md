@@ -2,6 +2,21 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.2.0] - 2026-02-03
+
+### Added
+- **plugin-creator 1.5.0:**
+  - Structured 8-step interview flow for new plugin creation with all required manifest fields (name, description, version, author, metadata, components, distribution scope)
+  - Manifest field mapping reference table showing how interview questions map to plugin.json fields
+  - Common manifest generation failure prevention guide with specific examples (author field schema, missing required fields, marketplace.json schema)
+  - Best practices checklist for manifest data verification before file creation
+
+### Fixed
+- **plugin-creator 1.5.0:**
+  - Author field schema documentation (was showing string, now correctly shows object structure)
+  - Outdated references to "trigger phrases" in manifest descriptions (aligned with official Claude Code documentation)
+  - Incomplete data collection process that was causing validation failures during manifest generation
+
 ## [2.1.0] - 2026-02-02
 
 ### Added
