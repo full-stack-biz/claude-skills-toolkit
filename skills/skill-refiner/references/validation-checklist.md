@@ -25,6 +25,9 @@ Quick reference checklist for validating Claude Code skills. Use in conjunction 
   - [ ] Includes specific trigger phrases (e.g., "refine", "validate", "improve")
   - [ ] Clear use case context ("Use when...")
   - [ ] Mentions scope and constraints
+  - [ ] **Multiline syntax:** Uses `>-` for multiline descriptions (never quotes)
+    - ✓ `description: >-` (correct YAML block syntax)
+    - ✗ `description: "..."` (never use quotes for multiline text)
 - [ ] `version` field (optional but recommended)
   - [ ] Semantic versioning format (X.Y.Z)
   - [ ] Incremented appropriately from previous version

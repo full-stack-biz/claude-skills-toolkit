@@ -2,6 +2,16 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.4.1] - 2026-02-10
+
+### Fixed
+- **skill-creator 2.2.1:**
+  - Improved `references/anti-patterns.md` table of contents with detailed section anchors for easier navigation
+  - Enhanced anti-pattern section headers for clarity (removed numbered prefixes)
+
+- **skill-refiner 1.1.1:**
+  - Added multiline syntax validation (`>-` vs quotes) to `references/validation-checklist.md`
+
 ## [2.4.0] - 2026-02-09
 
 ### Added

@@ -5,7 +5,7 @@ description: >-
   Use when: refining skills, improving skill structure, validating against best practices, reducing
   token usage, consolidating references, checking production readiness, or applying the 80% rule.
   Takes imperfect existing skills and elevates them to quality standards.
-version: 1.1.0
+version: 1.1.1
 allowed-tools: Read,Edit,Write,Glob,Task(*)
 hooks:
   PreToolUse:

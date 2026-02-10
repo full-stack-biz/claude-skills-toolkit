@@ -4,9 +4,23 @@ Learn from common mistakes that prevent skills from activating, executing clearl
 
 ## Table of Contents
 - [Activation Anti-Patterns](#activation-anti-patterns)
+  - [Vague Description](#vague-description)
+  - [Missing Trigger Phrases](#missing-trigger-phrases)
+  - [Generic Category Instead of Action](#generic-category-instead-of-action)
+  - [Quoted Multiline Description](#quoted-multiline-description)
 - [Structure Anti-Patterns](#structure-anti-patterns)
+  - [Nested Reference Chains](#nested-reference-chains)
+  - [No Quick Start](#no-quick-start)
+  - [Unclear Reference Links](#unclear-reference-links)
 - [Content Anti-Patterns](#content-anti-patterns)
+  - [Theoretical Background Before Examples](#theoretical-background-before-examples)
+  - [Overly Detailed Troubleshooting](#overly-detailed-troubleshooting)
+  - [Generic Placeholder Names](#generic-placeholder-names)
+  - [Exceeding 500 Lines](#exceeding-500-lines)
 - [Tool Scoping Anti-Patterns](#tool-scoping-anti-patterns)
+  - [Overly Broad Bash Access](#overly-broad-bash-access)
+  - [Requesting Unnecessary Tools](#requesting-unnecessary-tools)
+  - [No Tool Scoping at All](#no-tool-scoping-at-all)
 
 ---
 
@@ -14,7 +28,7 @@ Learn from common mistakes that prevent skills from activating, executing clearl
 
 **Problem:** Skill never triggers when users need it because description lacks specificity.
 
-### Anti-Pattern 1: Vague Description
+### Vague Description
 
 ❌ **BAD:**
 ```yaml
@@ -31,7 +45,7 @@ description: >-
 ```
 **Why it works:** Specific trigger phrases ("extract text", "PDF", "OCR", "scanned documents") match real user requests.
 
-### Anti-Pattern 2: Missing Trigger Phrases
+### Missing Trigger Phrases
 
 ❌ **BAD:**
 ```yaml
@@ -47,7 +61,7 @@ description: >-
   before committing to git, or analyzing Laravel code quality.
 ```
 
-### Anti-Pattern 3: Generic Category Instead of Action
+### Generic Category Instead of Action
 
 ❌ **BAD:**
 ```yaml
@@ -64,13 +78,36 @@ description: >-
   converting to markdown, or reading scanned documents.
 ```
 
+### Quoted Multiline Description
+
+❌ **BAD:**
+```yaml
+name: pdf-text-extractor
+description: "Extract text and structured data from PDF files. Use when analyzing PDFs,
+  converting to markdown, or reading scanned documents."
+```
+
+**Problem:** Quoted multiline strings break YAML parsing or include escaped characters. This causes manifest generation issues and tool compatibility problems.
+
+✅ **GOOD:**
+```yaml
+name: pdf-text-extractor
+description: >-
+  Extract text and structured data from PDF files. Use when analyzing PDFs,
+  converting to markdown, or reading scanned documents.
+```
+
+**Why it works:** The `>-` syntax (block scalar with strip) is YAML's correct format for multiline text. It's readable, parseable, and compatible with all tools that consume skill manifests.
+
+**Key rule:** Multiline descriptions **always use `>-`**, never quotes. Single-line descriptions can use quotes or no quotes; multiline must use `>-`.
+
 ---
 
 ## Structure Anti-Patterns
 
 **Problem:** Skill has correct content but organized poorly, making it hard for Claude to find what's needed.
 
-### Anti-Pattern 4: Nested Reference Chains
+### Nested Reference Chains
 
 ❌ **BAD:**
 ```
@@ -97,7 +134,7 @@ skill-name/
 ```
 **Why it works:** One level deep. Claude reads all files at same level together.
 
-### Anti-Pattern 5: No Quick Start
+### No Quick Start
 
 ❌ **BAD:**
 ```markdown
@@ -115,7 +152,7 @@ To configure the skill, you need to...
 **Problem:** Claude must read extensive content before doing anything.
 
 ✅ **GOOD:**
-```markdown
+````markdown
 # Skill Name
 
 ## Quick Start
@@ -127,9 +164,9 @@ python scripts/process.py input.txt
 
 ## Core Workflow
 [3-5 steps with examples]
-```
+````
 
-### Anti-Pattern 6: Unclear Reference Links
+### Unclear Reference Links
 
 ❌ **BAD:**
 ```markdown
@@ -149,10 +186,10 @@ For production deployment guidelines, see `references/team-production-patterns.m
 
 **Problem:** SKILL.md includes content that violates the 80% rule or lacks clarity.
 
-### Anti-Pattern 7: Theoretical Background Before Examples
+### Theoretical Background Before Examples
 
 ❌ **BAD:**
-```markdown
+````markdown
 ## PDF Processing
 
 PDF files use a complex format with streams and objects. Understanding the
@@ -164,10 +201,10 @@ internal structure is key to effective extraction...
 ```python
 extract_text("file.pdf")
 ```
-```
+````
 
 ✅ **GOOD:**
-```markdown
+````markdown
 ## Extract Text
 
 Extract text from PDF:
@@ -178,29 +215,29 @@ with pdfplumber.open("file.pdf") as pdf:
 ```
 
 For theory and advanced patterns, see `references/pdf-architecture.md`.
-```
+````
 
-### Anti-Pattern 8: Overly Detailed Troubleshooting
+### Overly Detailed Troubleshooting
 
 ❌ **BAD:** SKILL.md includes full troubleshooting section with 20 error cases.
 
 ✅ **GOOD:** SKILL.md mentions "For troubleshooting, see `references/troubleshooting.md`" (supplementary, <20% cases).
 
-### Anti-Pattern 9: Generic Placeholder Names
+### Generic Placeholder Names
 
 ❌ **BAD:**
-```markdown
+````markdown
 ## Example
 
 Process your data:
 ```python
 process_data(your_data)
 ```
-```
+````
 **Problem:** Claude doesn't know what "data" means.
 
 ✅ **GOOD:**
-```markdown
+````markdown
 ## Example
 
 Extract contact names from a CSV:
@@ -211,9 +248,9 @@ with open("contacts.csv") as f:
     for row in reader:
         print(row["name"])
 ```
-```
+````
 
-### Anti-Pattern 10: Exceeding 500 Lines
+### Exceeding 500 Lines
 
 ❌ **BAD:** SKILL.md body is 800 lines, with comprehensive guides inlined.
 
@@ -227,7 +264,7 @@ with open("contacts.csv") as f:
 
 **Problem:** Skill requests too many permissions, violating principle of least privilege.
 
-### Anti-Pattern 14: Overly Broad Bash Access
+### Overly Broad Bash Access
 
 ❌ **BAD:**
 ```yaml
@@ -241,7 +278,7 @@ allowed-tools: Read,Write,Bash(python:*,grep:*)
 ```
 **Why it works:** Only Python and grep commands allowed.
 
-### Anti-Pattern 15: Requesting Unnecessary Tools
+### Requesting Unnecessary Tools
 
 ❌ **BAD:**
 ```yaml
@@ -255,7 +292,7 @@ allowed-tools: Read,Write,Bash(git:*)
 ```
 (Only what's actually used in the skill.)
 
-### Anti-Pattern 16: No Tool Scoping at All
+### No Tool Scoping at All
 
 ❌ **BAD:** Omit `allowed-tools` field entirely.
 
