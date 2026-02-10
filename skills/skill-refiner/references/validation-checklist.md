@@ -211,3 +211,49 @@ If any check fails, identify specific issues and address them before deployment.
 | **No examples** | All abstract explanations, no concrete cases | Add code examples, walk-throughs, decision trees |
 | **Error handling missing** | Skill crashes on unexpected input | Add checks: missing files, malformed YAML, permission errors |
 
+## Anti-Patterns Validation
+
+Check against common skill creation mistakes. For detailed examples, see `skill-creator/references/anti-patterns.md`.
+
+### Activation Anti-Patterns
+
+- [ ] **Vague description** - Does description match specific trigger phrases or just generic terms?
+  - ❌ BAD: "A helpful skill for working with documents"
+  - ✅ GOOD: "Extract text from PDF files. Use when analyzing PDFs or scanned documents"
+- [ ] **Missing trigger context** - Are trigger phrases matched to real user requests?
+  - Test mentally: Would user's actual request activate this skill?
+  - If not sure, ask in requirements gathering
+
+### Structure Anti-Patterns
+
+- [ ] **Nested reference chains** - Are references only one level deep?
+  - ❌ BAD: SKILL.md → guide.md → advanced/patterns.md → edge-cases.md
+  - ✅ GOOD: SKILL.md → {guide.md, patterns.md, edge-cases.md} (all at same level)
+- [ ] **No Quick Start** - Does important content appear before extensive theory?
+  - ❌ BAD: Long explanation before examples
+  - ✅ GOOD: Example first, explanation second
+- [ ] **Unclear reference links** - Do link descriptions explain what's inside?
+  - ❌ BAD: "For details, see `references/docs.md`"
+  - ✅ GOOD: "For error handling patterns, see `references/error-handling.md`"
+
+### Content Anti-Patterns
+
+- [ ] **Theory before examples** - Are concrete examples presented first?
+  - ❌ BAD: 3 paragraphs explaining PDF structure, then one example
+  - ✅ GOOD: Example code first, then link to detailed theory
+- [ ] **Generic placeholder names** - Are examples concrete or generic?
+  - ❌ BAD: `process_data(your_data)`
+  - ✅ GOOD: `extract_names_from_csv(contacts.csv)`
+- [ ] **Exceeds 500 lines** - Is SKILL.md body within token efficiency limit?
+  - ❌ BAD: 800 lines of comprehensive content inlined
+  - ✅ GOOD: 300 lines with links to 5 reference files
+
+### Tool Scoping Anti-Patterns
+
+- [ ] **Overly broad Bash access** - Is tool access narrowly scoped?
+  - ❌ BAD: `allowed-tools: Bash(*)`
+  - ✅ GOOD: `allowed-tools: Bash(python:*,grep:*)`
+- [ ] **Unnecessary tools** - Does skill actually need all listed tools?
+  - Apply principle of least privilege: only what's required
+  - Common mistake: Including Task(*) when task operations not needed
+
