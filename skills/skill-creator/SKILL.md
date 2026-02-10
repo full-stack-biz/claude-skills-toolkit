@@ -5,7 +5,7 @@ description: >-
   skills, interviewing for requirements, applying templates, organizing frontmatter and body
   content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
   progressive disclosure, reference organization, and tool scoping.
-version: 2.2.0
+version: 2.2.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
