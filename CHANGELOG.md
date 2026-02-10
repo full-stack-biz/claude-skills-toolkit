@@ -2,6 +2,16 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.4.0] - 2026-02-09
+
+### Added
+- **skill-creator 2.1.0:**
+  - New reference file: `references/anti-patterns.md` with 10 common skill creation mistakes and fixes across activation, structure, content, and tool scoping categories
+  - Consolidated reference loading guidance into clear progressive disclosure
+
+- **skill-refiner 1.1.0:**
+  - Enhanced `references/validation-checklist.md` with anti-patterns validation section covering activation, structure, content, and tool scoping
+
 ## [2.3.0] - 2026-02-03
 
 ### Added

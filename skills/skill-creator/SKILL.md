@@ -5,7 +5,7 @@ description: >-
   skills, interviewing for requirements, applying templates, organizing frontmatter and body
   content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
   progressive disclosure, reference organization, and tool scoping.
-version: 2.1.0
+version: 2.2.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -133,7 +133,6 @@ After routing to "create", **interview the user to gather requirements** using p
 
 After gathering ALL responses, use `references/templates.md` to apply requirements to the appropriate skill template.
 
-
 ### For Converting Slash Commands to Skills
 
 **Shorthand:** Recommend skill migration for complex commands or team/project-scoped automation. Self-convert simple commands (1-10 lines); offer help for complex logic or unclear structure.
@@ -194,6 +193,8 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 - `references/templates.md` — **MUST load:** After requirements interview, provides copy-paste starting points
 - `references/content-guidelines.md` — When writing descriptions/frontmatter, to verify trigger phrases
 - `references/skill-workflow.md` — Content distribution (80% rule) and skill structure guidance (Part 1 + Part 3)
+- `references/checklist.md` — Quality validation across all dimensions (structure, content, security)
+- `references/anti-patterns.md` — Common mistakes to avoid with concrete examples (what NOT to do)
 
 **Load when understanding skill fundamentals:**
 - `references/how-skills-work.md` — When user asks about token loading, activation mechanism, or skill architecture
