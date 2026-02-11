@@ -2,6 +2,39 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.7.0] - 2026-02-11
+
+### Added
+- **skill-creator 2.4.0:**
+  - Reference Linking Pattern: context snippets for all reference links so agents know what to expect before loading
+  - Restructured Reference Guide by workflow context (structuring, understanding, team/production patterns)
+  - Added "Reference Linking Pattern" guidance in Key Notes to teach skill builders the pattern
+
+- **skill-refiner 1.4.0:**
+  - Reference Linking Pattern: context for all reference links organized by refinement scenario
+  - Restructured Reference Guide from generic list to scenario-driven organization (clarity, efficiency, structure, quality)
+  - Added Scenario 3.5 for auditing reference link quality during refinement
+
+- **plugin-creator 1.7.0:**
+  - Reference Linking Pattern: completely restructured Reference Guide with context for all 16 references
+  - Organized references by workflow stage (creating, converting, publishing, advanced topics)
+  - Consolidated "Advanced Topics" section with Reference Guide to reduce duplication and stay under 500 lines
+
+- **subagent-creator 1.3.0:**
+  - Reference Linking Pattern: restructured Reference Files section with context for each reference
+  - Organized by subagent lifecycle: create → validate → improve → production patterns
+  - All reference links now include what agents will find in each file
+
+- **hook-creator 2.4.0:**
+  - Reference Linking Pattern: converted Reference Files table to contextual Reference Guide
+  - Reorganized by hook creation workflow with step-by-step guidance
+  - Moved Core Principles section to come before Reference Guide (proper pedagogical order)
+
+### Changed
+- All skills now follow Reference Linking Pattern: reference links include 1-3 sentence context explaining what's in the reference
+- Consistent pedagogical order across all skills: Core Principles → Reference Guide → Implementation Details
+- Token efficiency: agents can now confidently skip references they don't need, loading only what's necessary
+
 ## [2.6.0] - 2026-02-11
 
 ### Added

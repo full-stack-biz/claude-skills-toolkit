@@ -5,7 +5,7 @@ description: >-
   Use when: refining skills, improving skill structure, validating against best practices, reducing
   token usage, consolidating references, checking production readiness, or applying the 80% rule.
   Takes imperfect existing skills and elevates them to quality standards.
-version: 1.3.0
+version: 1.4.0
 allowed-tools: Read,Edit,Write,Glob,Task(*),AskUserQuestion
 hooks:
   PreToolUse:
@@ -140,7 +140,7 @@ After gathering ALL responses, document approved scope and proceed.
 ---
 
 2. **Load workflow reference**
-   - Read `references/refinement-workflow.md` (unified workflow with preservation gates)
+   - Review `references/refinement-workflow.md` for the complete refinement workflow with all preservation gates and validation phases
 
 3. **Identify consolidation opportunities (BEFORE changes)**
    - List all files in `references/` directory with line counts
@@ -209,7 +209,7 @@ NEVER: DELETE → LINK → CREATE (creates broken links and lost content)
 ```
 
 ### Preservation Gates (Four Gates, In Order)
-1. **Content Audit** - List ALL existing content. Classify as core (80%+) or supplementary (<20%)
+1. **Content Audit** - List ALL existing content. Classify using **the 80% rule**: core content (used in 80%+ of activations) vs. supplementary (<20%). Example: release-process uses standard workflow every time → core; monorepo coordination is rare → supplementary. See `references/80-percent-rule.md` for full decision framework.
 2. **Capability Assessment** - Will changes impair execution? If YES → cannot delete, only migrate
 3. **Migration Verification** - Before moving, verify destination complete. NO GAPS
 4. **Operator Confirmation** - Deletions require explicit approval. Migrations auto-approved
@@ -228,21 +228,41 @@ NEVER: DELETE → LINK → CREATE (creates broken links and lost content)
 - `~/.claude/plugins/cache/*` (installed plugins - read-only)
 - Any path containing `/cache/` (always read-only)
 
-## Reference Files
+## Reference Guide
 
-Load these references as needed:
+### Refining for Clarity
+Remove jargon, improve examples, restructure for flow
+→ `references/ask-user-question-patterns.md` for interaction patterns
+→ `references/content-guidelines.md` for description improvement
+→ `references/anti-patterns.md` for what NOT to do
 
-- **`references/refinement-workflow.md`** - Unified refinement workflow with preservation gates and validation phases
-- **`references/ask-user-question-patterns.md`** - AskUserQuestion best practices, max 4 options, progressive disclosure, pattern decision trees
-- **`references/refinement-guardrails.md`** - What NEVER gets cut during refinement, safe patterns, the Litmus Test
-- **`references/validation-checklist.md`** - Quality assessment across all dimensions
-- **`references/production-patterns.md`** - Error handling, logging, and team patterns
-- **`references/preservation-rules.md`** - What NEVER gets cut during refinement
-- **`references/80-percent-rule.md`** - Content distribution decision framework (when to move content to references/)
-- **`references/movement-pattern.md`** - Safe content migration procedure (CREATE → LINK → DELETE sequence)
-- **`references/advanced-patterns.md`** - Advanced skill patterns, archetype structures, and production quality examples
-- **`references/allowed-tools.md`** - Tool scoping validation, principle of least privilege, and security
-- **`references/content-guidelines.md`** - Description and trigger phrase improvement, MCP tool references, consistent terminology
+### Refining for Efficiency (Token Usage)
+Apply 80% rule, consolidate references, optimize content
+→ `references/80-percent-rule.md` for content distribution decisions
+→ `references/skill-workflow.md` for detailed framework
+→ `references/movement-pattern.md` for safe migration procedure
+
+### Refining for Structure
+Reorganize sections, improve grouping, better information flow
+→ `references/refinement-workflow.md` for unified workflow with gates
+→ `references/movement-pattern.md` for safe content relocation
+→ `references/advanced-patterns.md` for archetype structures
+
+### Preserving Functionality (Safety Gates)
+Never break existing behavior, never delete without knowing where content goes
+→ `references/preservation-rules.md` for what NEVER gets cut
+→ `references/refinement-guardrails.md` for safe patterns
+→ `references/movement-pattern.md` for CREATE → LINK → DELETE sequence
+
+### Validating Quality
+Check production readiness, tool scoping, completeness
+→ `references/validation-checklist.md` for comprehensive assessment
+→ `references/production-patterns.md` for error handling and team patterns
+→ `references/allowed-tools.md` for tool scoping validation
+
+### Understanding Refinement Fully
+Complete workflow with all phases and preservation gates
+→ `references/refinement-workflow.md`
 
 ## Pro Tips
 
@@ -275,10 +295,11 @@ Load these references as needed:
 → Verify 80% rule for SKILL.md body content
 
 **Scenario 2: "Reduce token usage"**
-→ Identify supplementary content (<20% cases) that can move to references
+→ Apply **80% rule:** identify supplementary content used in <20% of cases (e.g., error handling for rare failure modes) that can move to references
+→ Keep core content (80%+ usage) in SKILL.md (e.g., standard error handling patterns)
 → Consolidate related reference files
-→ Apply 80% rule systematically
 → Verify activation doesn't suffer from moved content
+→ See `references/80-percent-rule.md` for decision examples
 
 **Scenario 3: "Improve user interaction UX"**
 → Audit all AskUserQuestion calls (max 4 options, progressive disclosure)
@@ -288,10 +309,17 @@ Load these references as needed:
 → Check for >4 options violations (split into multiple AskUserQuestion batches)
 → See `references/ask-user-question-patterns.md` for patterns and decision trees
 
+**Scenario 3.5: "Improve reference quality"**
+→ Audit every reference link: does it provide context about what agents will find?
+→ Pattern check: [Core knowledge] + `See `references/file.md` for [edge cases/depth]`
+→ Flag orphaned links (bare links with no context): "This reference might not get loaded because agents don't know what's in it"
+→ Offer: "Let's add context snippets so agents load references intentionally, not out of uncertainty"
+→ Improves token efficiency: references only load when truly needed
+
 **Scenario 4: "Check if this skill is production-ready"**
 → Run full validation phases (all 7 phases)
 → Check: error handling, tool scoping, clear trigger phrases, comprehensive testing
-→ Flag missing production patterns (see references/production-patterns.md)
+→ Flag missing production patterns (error handling, validation scripts, security review). See `references/production-patterns.md` for team patterns.
 → Generate detailed report with findings and recommendations
 
 **Scenario 5: "Offer to help during skill work"**
