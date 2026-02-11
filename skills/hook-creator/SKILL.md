@@ -6,7 +6,7 @@ description: >-
   or improving hook quality. Supports command hooks (shell scripts), prompt hooks (LLM decisions),
   event matching, decision schemas, and production safety validation. Claude auto-activates when
   you ask to build a hook, check hook reliability, improve hook configurations, or validate hooks for production.
-version: 2.3.0
+version: 2.4.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -164,23 +164,6 @@ Measure success by whether the hook will execute reliably and safely:
 ✅ **Testing** - Validated with real plugin scenarios; tested both success and failure cases
 ✅ **Documentation** - Clear comments explaining matcher logic and failure modes
 
-
-## Reference Files
-
-| File | Purpose |
-|------|---------|
-| `how-hooks-work.md` | Hook lifecycle, event timing, matcher evaluation, execution model |
-| `event-reference.md` | Event documentation (when events fire, available data, timing constraints) |
-| `command-hook-input-parsing.md` | **CRITICAL:** How command hooks receive tool arguments via stdin, not env vars. Common mistake & correct pattern. |
-| `decision-schemas.md` | JSON output formats for each event (PreToolUse, PermissionRequest, Stop, etc.) |
-| `exit-code-behavior.md` | Command hook exit codes (0, 2, other) and error handling |
-| `validation-workflow.md` | 7-phase validation process (event, matcher, action, error handling, performance) |
-| `checklist.md` | Best practices and validation checklists (creation, validation, troubleshooting) |
-| `templates.md` | Copy-paste templates for command and prompt hooks, common patterns |
-| `mcp-tools.md` | MCP tool naming patterns, matching MCP tools in hooks |
-| `component-scoped-hooks.md` | Defining hooks in skill/agent frontmatter, once option, environment variables |
-| `advanced-patterns.md` | Production patterns (conditional execution, fallbacks, monitoring, testing) |
-
 ## Core Principles
 
 **Event Correctness** — Right event = right trigger time (Pre vs Post). Wrong event = missed or wrong-time triggers.
@@ -190,6 +173,57 @@ Measure success by whether the hook will execute reliably and safely:
 **Safe Execution** — Commands must be fast (<1s) and non-blocking. Failed hooks must not crash plugins.
 
 **Error Handling** — All hooks need timeouts, onError behavior, validation. Production hooks need monitoring/logging.
+
+## Reference Guide
+
+### Creating a New Hook
+
+**Step 1: Understand hook architecture**
+→ Hook flow: event fires → matcher evaluated → action executes → decision returned
+→ Hook types: command (shell scripts) vs. prompt (LLM decisions)
+→ Execution modes: synchronous (blocking) vs. asynchronous (background)
+→ `references/how-hooks-work.md` for detailed execution model and timing
+
+**Step 2: Choose the right template**
+→ Copy-paste starting points for command hooks and prompt hooks
+→ `references/templates.md`
+
+**Step 3: Select event & matcher**
+→ Event decision tree: PreToolUse, PostToolUse, UserPromptSubmit, PermissionRequest, Stop, SessionStart/End
+→ Matcher patterns: precise regex for specific targeting (avoid `.*` performance killer)
+→ `references/event-reference.md` for all available events
+
+**Step 4: Configure command vs. prompt**
+→ Command: deterministic logic (linting, validation) with proper exit codes
+→ Prompt: intelligent decision-making with decision schemas
+→ `references/decision-schemas.md` for schema format and validation
+
+**Step 5: Handle errors & edge cases**
+→ Critical: exit codes (0=success, 2=blocking error), onError behavior (warn/fail/continue)
+→ Async vs. sync decision (blocking validators → sync; logging → async)
+→ `references/command-hook-input-parsing.md` for stdin parsing (common mistake: missing input)
+
+**Step 6: Validate before deployment**
+→ 7-phase validation: event → matcher → type → error handling → performance → integration → testing
+→ `references/validation-workflow.md` for systematic validation
+→ `references/checklist.md` for production readiness checklist
+
+### Validating Existing Hooks
+
+→ Run 7-phase validation workflow systematically
+→ `references/validation-workflow.md` for all phases
+→ `references/checklist.md` for quality assessment
+
+### Improving/Refining Hooks
+
+→ Identify issues using validation workflow, make targeted improvements, re-validate
+→ `references/checklist.md` for identifying gaps
+→ Topic-specific references as needed
+
+### Production & Advanced Patterns
+
+→ Conditional execution, fallbacks, rate limiting, monitoring, testing patterns
+→ `references/advanced-patterns.md` for production patterns
 
 ## Key Reference Points
 
@@ -239,7 +273,7 @@ Measure success by whether the hook will execute reliably and safely:
 
 **Naming convention:** action-on-event (e.g., `format-on-write`, `validate-on-prompt-submit`, `backup-on-compact`)
 
-**For detailed reference:** See `references/templates.md` (copy-paste examples), `references/validation-workflow.md` (systematic validation), `references/checklist.md` (best practices)
+**For detailed reference:** Templates (`references/templates.md`), validation workflow (`references/validation-workflow.md`), best practices (`references/checklist.md`)
 
 **Production hooks checklist (summary):**
 - ✅ Timeout set (<2s for command, <10s for prompt)

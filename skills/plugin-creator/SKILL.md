@@ -2,7 +2,7 @@
 name: plugin-creator
 description: >-
   Create, convert, validate, and publish Claude Code plugins with Agent Skills, hooks, agents, and servers. Use when building plugins from scratch, converting projects to plugins, improving plugin structure, or publishing to marketplace. Includes automated scanning, manifest generation, marketplace.json creation, and validation guidance. Component-specific work delegates to hook-creator, subagent-creator, and skill-creator skills.
-version: 1.6.0
+version: 1.7.0
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(find:*,grep:*,head:*,jq:*,du:*,xargs:*)
 ---
 
@@ -356,39 +356,71 @@ mkdir -p my-plugin/commands my-plugin/agents my-plugin/skills
 - Other components: See "Component Overview" section below
 - Test: `claude --plugin-dir /path/to/my-plugin`
 
-## Complete Reference Documentation
+## Reference Guide
 
-**Quick lookup:** Fast tables, templates, and common patterns are in `references/quick-reference.md`.
+### Creating a New Plugin
 
-**Implementation & Validation:**
-- `references/implementation-workflow.md` — Step-by-step procedures for creating, converting, and validating plugins
-- `references/automated-scanning-workflow.md` — Scanning phase for validating existing plugins (errors, warnings, decisions)
-- `references/validation-checklist.md` — Comprehensive validation phases and checklists
+**Step 1: Understand plugin architecture**
+→ How plugins load, token costs, standard directory layout, manifest format
+→ `references/plugin-architecture.md` for architecture overview
+→ `references/directory-structure.md` for standard layout
+→ `references/plugin-json-schema.md` for plugin.json format
 
-**Installation & Operations:**
-- `references/installation-and-cli.md` — Installation scopes, CLI commands (install/uninstall/enable/disable/update)
+**Step 2: Set up plugin structure & manifest**
+→ Create `.claude-plugin/plugin.json` with metadata (name, description, version)
+→ Templates and common patterns for quick setup
+→ `references/quick-reference.md` for templates and metadata requirements
 
-**Plugin Architecture:**
-- `references/plugin-architecture.md` — How plugins work, token loading, templates for common patterns
-- `references/directory-structure.md` — Standard plugin layout, file organization, validation
-- `references/plugin-json-schema.md` — Plugin manifest (plugin.json) format, required/optional fields
-- `references/team-marketplaces.md` — Marketplace setup, marketplace.json schema, team distribution
-- `references/plugin-paths-variables.md` — Relative paths, ${CLAUDE_PLUGIN_ROOT} variable
-- `references/plugin-caching.md` — Plugin caching, file resolution, symlinks, path traversal
+**Step 3: Add Agent Skills, Hooks, or other components**
+→ Agent Skills: recommended approach, `.md` files in `skills/`
+→ Hooks: event handlers in `hooks.json`
+→ Subagents: isolated execution in `agents/`
+→ External services: MCP servers, LSP for code intelligence
+→ `references/components-in-plugins.md` for packaging guidance
+→ Use `skill-creator`, `subagent-creator`, or `hook-creator` skills to build components
 
-**Components & Configuration:**
-- `references/components-in-plugins.md` — Packaging Agent Skills, Subagents, and Hooks in plugins
-- `references/slash-command-format.md` — Command file format (DEPRECATED: for legacy support only)
-- `references/hooks.md` — Hook event reference (events, formats, matchers, patterns)
-- `references/mcp-servers.md` — External service integration
-- `references/lsp-servers.md` — Language-specific code intelligence
+**Step 4: Validate & test locally**
+→ Run `claude plugin validate /path` for errors
+→ Run `claude --plugin-dir /path` for local testing
+→ Check best practices from validation checklist
+→ `references/validation-checklist.md` for comprehensive checks
+→ `references/local-development.md` for debugging
 
-**Troubleshooting & Production:**
-- `references/troubleshooting-and-production.md` — Debugging plugins, common issues, best practices, production checklist
-- `references/local-development.md` — Testing plugins locally with `--plugin-dir`, debugging hooks/skills/agents
+### Converting Existing Project to Plugin
 
-**Deployment:**
-- `references/versioning-and-distribution.md` — Semantic versioning, changelog, distribution
+→ Complete step-by-step procedures for converting projects to plugins
+→ `references/implementation-workflow.md` for full conversion workflow
+→ `references/automated-scanning-workflow.md` for scanning & validation phase
+
+### Publishing & Distribution
+
+→ Semantic versioning, changelog, marketplace setup
+→ `references/versioning-and-distribution.md` for versioning
+→ `references/team-marketplaces.md` for marketplace.json schema and multi-plugin registries
+
+### Advanced Topics
+
+**Path handling & caching:**
+→ Use `${CLAUDE_PLUGIN_ROOT}` variable in hooks/scripts. Plugins are cached for security.
+→ `references/plugin-paths-variables.md` for path guidance
+→ `references/plugin-caching.md` for caching behavior
+
+**Installing & managing plugins:**
+→ Installation scopes (global, project), CLI commands (install/uninstall/enable/disable/update)
+→ `references/installation-and-cli.md` for scope and commands
+
+**Troubleshooting & production:**
+→ Debugging plugins, common issues, best practices, production checklist
+→ `references/troubleshooting-and-production.md`
+
+**Integration patterns:**
+→ External service integration (MCP servers), language-specific intelligence (LSP)
+→ `references/mcp-servers.md` for MCP configuration
+→ `references/lsp-servers.md` for LSP integration
+
+**Legacy support:**
+→ Command file format (deprecated, for backward compatibility only)
+→ `references/slash-command-format.md` for legacy command support
 
 ## Component Overview
 
@@ -445,29 +477,3 @@ Do NOT create wrapper scripts. Run this command directly and review its output.
 - Security: No hardcoded secrets, safe shell patterns, proper permissions
 - Documentation: README.md, CHANGELOG.md present for distributed plugins
 - Test locally with `claude --plugin-dir /path/to/plugin`
-
-## Advanced Topics
-
-**Publishing & Distribution:**
-- `references/team-marketplaces.md` — **MUST read** for marketplace.json schema, common errors, team distribution patterns, and multi-plugin registries
-
-**Language Servers (LSP):**
-See `references/lsp-servers.md` for LSP configuration and language-specific integration examples.
-
-**Hooks & Events:**
-See `references/hooks.md` for event handler configuration and common automation patterns.
-
-**Components in Plugins:**
-See `references/components-in-plugins.md` for packaging Agent Skills, Subagents, and Hooks in plugins. (Note: To create these components, use `skill-creator`, `subagent-creator`, or `hook-creator` skills.)
-
-**External Service Integration (MCP):**
-See `references/mcp-servers.md` for MCP server configuration and testing.
-
-**Team Plugins:**
-- Use `.claude/skills/` (project-local) for team-shared plugins
-- Use `~/.claude/skills/` (global) for organization-wide plugins
-- Document dependencies in plugin description
-- Version track releases in plugin.json
-- Peer review before team deployment
-
-See `references/team-marketplaces.md` for multi-plugin registries and marketplace setup.

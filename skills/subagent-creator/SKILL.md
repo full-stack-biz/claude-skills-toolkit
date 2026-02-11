@@ -5,7 +5,7 @@ description: >-
   Use when building new subagents, validating existing ones, improving quality,
   scoping tool access, configuring permission modes, or setting up hook
   validation. For personal, team, or production environments.
-version: 1.2.0
+version: 1.3.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -254,26 +254,52 @@ Have the user review the checklist in `references/checklist.md` before deploymen
 5. **Guide user to test execution:** Once delegation works, verify the subagent can complete the task with its prompt and tools. Ask the user to test actual workflows.
 6. **Re-validate** using the workflow before considering refinements complete
 
-## Reference Files
+## Reference Guide
 
-For detailed guidance, see references/:
+### Creating a New Subagent
 
-**Getting Started:**
-- **`templates.md`** — Real-world examples and copy-paste starting points for common patterns
+**Step 1: Understand subagent architecture**
+→ How Claude delegates, execution models, when to use subagents, delegation mechanisms
+→ `references/how-subagents-work.md` for architecture overview
 
-**Understanding & Validation:**
-- **`how-subagents-work.md`** — Architecture: delegation mechanism, execution models, hooks, built-in subagents
-- **`validation-workflow.md`** — 7-phase validation process (configuration → delegation → prompt → tools → permissions → hooks → testing)
-- **`checklist.md`** — Best practices checklist (delegation signals, tool scoping, permission modes, team/production)
+**Step 2: Choose starting template**
+→ Real-world examples and copy-paste starting points for common patterns
+→ `references/templates.md`
 
-**Writing & Configuration:**
-- **`delegation-signals.md`** — Writing descriptions that trigger Claude's delegation
-- **`configuration-reference.md`** — Complete YAML frontmatter reference (fields, values, defaults, validation)
-- **`permission-modes.md`** — Permission mode behavior with decision matrices and examples
-- **`tool-scoping.md`** — Tool access patterns (principle of least privilege, hook-based validation, security)
+**Step 3: Write clear delegation signals**
+→ Descriptions trigger Claude's delegation. Include specific trigger phrases; vague descriptions = poor reliability.
+→ `references/delegation-signals.md` for writing descriptions that trigger delegation
 
-**Advanced & Production:**
-- **`advanced-patterns.md`** — Production patterns (hook validation, chaining, background execution, lifecycle management)
+**Step 4: Configure tools & permissions**
+→ Grant only necessary tools (principle of least privilege). Permission modes: foreground/interactive, background/concurrent, plan/read-only
+→ `references/tool-scoping.md` for tool access patterns
+→ `references/permission-modes.md` for permission mode decision matrices
+
+**Step 5: Complete YAML configuration**
+→ Frontmatter fields: name, description, model, tools, permissionMode, hooks (PreToolUse, PostToolUse, SubagentStart, SubagentStop)
+→ `references/configuration-reference.md` for complete YAML reference
+
+**Step 6: Validate before deployment**
+→ 7-phase validation process: configuration → delegation → prompt → tools → permissions → hooks → testing
+→ `references/validation-workflow.md` for validation phases
+→ `references/checklist.md` for best practices checklist
+
+### Validating Existing Subagents
+
+→ Run 7-phase validation workflow systematically
+→ `references/validation-workflow.md` for all phases
+→ `references/checklist.md` for quality assessment
+
+### Improving/Refining Subagents
+
+→ Identify gaps using checklist, make targeted improvements, re-validate
+→ `references/checklist.md` for identifying issues
+→ Topic-specific references as needed
+
+### Production & Advanced Patterns
+
+→ Hook validation, chaining, background execution, lifecycle management, error handling
+→ `references/advanced-patterns.md` for production patterns
 
 ## Core Principles
 
@@ -300,7 +326,7 @@ For detailed guidance, see references/:
 - ✅ Plugin: `agents/` in plugin directory (for plugin projects)
 - 🚫 Global/User-space: `~/.claude/agents/` (forbidden; affects all projects — do not edit here)
 
-For complete configuration reference, defaults, field combinations, naming conventions, and permission mode decision matrices, see `configuration-reference.md` and `permission-modes.md`.
+For complete configuration reference, defaults, field combinations, naming conventions, and permission mode decision matrices, see `references/configuration-reference.md` and `references/permission-modes.md`.
 
 **Team/Production:**
 - Error handling: prompts must handle failures gracefully
