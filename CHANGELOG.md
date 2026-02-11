@@ -2,6 +2,13 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.5.2] - 2026-02-11
+
+### Fixed
+- **skill-refiner 1.2.2:**
+  - Updated Quick Start and Requirements Interview sections to explicitly invoke AskUserQuestion for collecting user answers
+  - Clarified that Step 1, Step 2, BATCH 1, and BATCH 2 all use AskUserQuestion tool
+
 ## [2.5.1] - 2026-02-11
 
 ### Fixed

@@ -5,7 +5,7 @@ description: >-
   Use when: refining skills, improving skill structure, validating against best practices, reducing
   token usage, consolidating references, checking production readiness, or applying the 80% rule.
   Takes imperfect existing skills and elevates them to quality standards.
-version: 1.2.1
+version: 1.2.2
 allowed-tools: Read,Edit,Write,Glob,Task(*),AskUserQuestion
 hooks:
   PreToolUse:
@@ -22,20 +22,20 @@ Systematically improve and validate Claude Code skills while preserving function
 
 ## Quick Start
 
-**Step 1:** Ask the user: **"What skill do you want to work on?"**
+**Step 1:** Use AskUserQuestion to ask: **"What skill do you want to work on?"**
 
-**Step 2:** Ask: **"Do you want to refine it or validate it?"**
+**Step 2:** Use AskUserQuestion to ask: **"Do you want to refine it or validate it?"**
 
 **Step 3:** Route based on their answer:
 
-- **If "refine"** → Ask BATCH 1 + BATCH 2 questions (below), then proceed to **Core Workflow: Refinement**
+- **If "refine"** → Use AskUserQuestion to ask BATCH 1 + BATCH 2 questions (below), then proceed to **Core Workflow: Refinement**
 - **If "validate"** → Skip interview, go directly to **Core Workflow: Validation**
 
 ---
 
 **For refinement path only — BATCH 1 + BATCH 2 questions:**
 
-**🔴 BATCH 1: Refinement Focus** (Ask these 4 together):
+**🔴 BATCH 1: Refinement Focus** (Use AskUserQuestion to ask these 4 together):
 1. **Primary focus** — What aspect needs improvement? (clarity / efficiency / structure / testing / validation / other)
 2. **Key issues** — What specific problems are you seeing? (vague descriptions, long SKILL.md, scattered references, etc.)
 3. **Success metric** — What would success look like? (shorter, clearer, better organized, reduced tokens, etc.)
@@ -43,7 +43,7 @@ Systematically improve and validate Claude Code skills while preserving function
 
 ⏸️ Wait for all 4 responses.
 
-**🟢 BATCH 2: Implementation Details** (Then ask these 2):
+**🟢 BATCH 2: Implementation Details** (Then use AskUserQuestion to ask these 2):
 5. **References consolidation** — Should we merge related reference files to reduce scattered content?
 6. **Production readiness** — Should we also validate against production standards (error handling, tool scoping, security)?
 
@@ -64,7 +64,7 @@ After gathering ALL responses, document approved scope and proceed to Core Workf
 
 After locating the skill, **interview to gather what they want improved** using AskUserQuestion.
 
-**🔴 BATCH 1: Refinement Focus** (Ask these 4 together):
+**🔴 BATCH 1: Refinement Focus** (Use AskUserQuestion to ask these 4 together):
 1. **Primary focus** — What aspect needs improvement? (clarity / efficiency / structure / testing / validation / other)
 2. **Key issues** — What specific problems are you seeing? (vague descriptions, long SKILL.md, scattered references, etc.)
 3. **Success metric** — What would success look like? (shorter, clearer, better organized, reduced tokens, etc.)
@@ -72,7 +72,7 @@ After locating the skill, **interview to gather what they want improved** using 
 
 ⏸️ Wait for all 4 responses.
 
-**🟢 BATCH 2: Implementation Details** (Then ask these 2):
+**🟢 BATCH 2: Implementation Details** (Then use AskUserQuestion to ask these 2):
 5. **References consolidation** — Should we merge related reference files to reduce scattered content?
 6. **Production readiness** — Should we also validate against production standards (error handling, tool scoping, security)?
 
