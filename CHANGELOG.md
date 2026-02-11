@@ -2,6 +2,30 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.6.0] - 2026-02-11
+
+### Added
+- **hook-creator 2.3.0:**
+  - Added structured guidance for using AskUserQuestion with predefined options to gather requirements
+  - Provides template for action routing (create/validate/refine) with clear descriptions
+
+- **plugin-creator 1.6.0:**
+  - Added structured guidance for using AskUserQuestion with predefined options across all workflows
+  - Provides complete template covering create/convert/validate/publish actions
+  - Enhanced interview flow documentation with action routing guidance
+
+- **skill-creator 2.3.0:**
+  - Enhanced workflow guidance for AskUserQuestion patterns with predefined options
+  - Improved requirements gathering sections with structured decision frameworks
+
+- **skill-refiner 1.3.0:**
+  - Enhanced workflow guidance for AskUserQuestion patterns with predefined options
+  - Improved refinement decision pathways with structured option sets
+
+- **subagent-creator 1.2.0:**
+  - Enhanced workflow guidance for AskUserQuestion patterns with predefined options
+  - Improved requirements gathering with structured decision frameworks
+
 ## [2.5.2] - 2026-02-11
 
 ### Fixed

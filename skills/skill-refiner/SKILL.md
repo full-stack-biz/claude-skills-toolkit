@@ -5,7 +5,7 @@ description: >-
   Use when: refining skills, improving skill structure, validating against best practices, reducing
   token usage, consolidating references, checking production readiness, or applying the 80% rule.
   Takes imperfect existing skills and elevates them to quality standards.
-version: 1.2.2
+version: 1.3.0
 allowed-tools: Read,Edit,Write,Glob,Task(*),AskUserQuestion
 hooks:
   PreToolUse:
@@ -22,32 +22,34 @@ Systematically improve and validate Claude Code skills while preserving function
 
 ## Quick Start
 
-**Step 1:** Use AskUserQuestion to ask: **"What skill do you want to work on?"**
+**Step 1:** Use AskUserQuestion to ask: **"What skill do you want to work on?"** (free-form text input)
 
-**Step 2:** Use AskUserQuestion to ask: **"Do you want to refine it or validate it?"**
+**Step 2:** Use AskUserQuestion with **predefined options** to ask:
 
-**Step 3:** Route based on their answer:
+```
+questions: [
+  {
+    question: "What would you like to do with this skill?",
+    header: "Action",
+    options: [
+      {
+        label: "Refine",
+        description: "Improve clarity, structure, efficiency, token usage, or organization"
+      },
+      {
+        label: "Validate",
+        description: "Check if it's production-ready (tool scoping, completeness, error handling, trigger phrases)"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
 
-- **If "refine"** → Use AskUserQuestion to ask BATCH 1 + BATCH 2 questions (below), then proceed to **Core Workflow: Refinement**
-- **If "validate"** → Skip interview, go directly to **Core Workflow: Validation**
+**Step 3:** Route based on their selection:
 
----
-
-**For refinement path only — BATCH 1 + BATCH 2 questions:**
-
-**🔴 BATCH 1: Refinement Focus** (Use AskUserQuestion to ask these 4 together):
-1. **Primary focus** — What aspect needs improvement? (clarity / efficiency / structure / testing / validation / other)
-2. **Key issues** — What specific problems are you seeing? (vague descriptions, long SKILL.md, scattered references, etc.)
-3. **Success metric** — What would success look like? (shorter, clearer, better organized, reduced tokens, etc.)
-4. **Scope limits** — Any areas to exclude or preserve as-is?
-
-⏸️ Wait for all 4 responses.
-
-**🟢 BATCH 2: Implementation Details** (Then use AskUserQuestion to ask these 2):
-5. **References consolidation** — Should we merge related reference files to reduce scattered content?
-6. **Production readiness** — Should we also validate against production standards (error handling, tool scoping, security)?
-
-After gathering ALL responses, document approved scope and proceed to Core Workflow: Refinement.
+- **If "Refine"** → Proceed to **Core Workflow: Refinement** (you'll be asked BATCH 1 + BATCH 2 interview questions during the workflow)
+- **If "Validate"** → Skip interview, go directly to **Core Workflow: Validation**
 
 ## Core Workflow: Refinement
 
@@ -62,19 +64,76 @@ After gathering ALL responses, document approved scope and proceed to Core Workf
 
 ### Requirements Interview (Progressive Disclosure - One Batch at a Time)
 
-After locating the skill, **interview to gather what they want improved** using AskUserQuestion.
+After locating the skill, **interview to gather what they want improved** using AskUserQuestion with proper options.
 
-**🔴 BATCH 1: Refinement Focus** (Use AskUserQuestion to ask these 4 together):
-1. **Primary focus** — What aspect needs improvement? (clarity / efficiency / structure / testing / validation / other)
-2. **Key issues** — What specific problems are you seeing? (vague descriptions, long SKILL.md, scattered references, etc.)
-3. **Success metric** — What would success look like? (shorter, clearer, better organized, reduced tokens, etc.)
-4. **Scope limits** — Any areas to exclude or preserve as-is?
+**🔴 BATCH 1: Refinement Focus** (Use predefined options for Q1; open-form for Q2-4):
+
+```
+questions: [
+  {
+    question: "What aspects need improvement?",
+    header: "Focus Areas",
+    options: [
+      { label: "Clarity", description: "Make instructions clearer, remove jargon, improve examples" },
+      { label: "Efficiency", description: "Reduce token usage, consolidate references, optimize content" },
+      { label: "Structure", description: "Reorganize sections, improve flow, better grouping" },
+      { label: "User Interaction UX", description: "Convert free-form interactions to AskUserQuestion patterns, improve workflows" }
+    ],
+    multiSelect: true
+  },
+  {
+    question: "What specific problems are you seeing?",
+    header: "Key Issues",
+    options: [] // Open-form
+  },
+  {
+    question: "What would success look like?",
+    header: "Success Metric",
+    options: [] // Open-form
+  },
+  {
+    question: "Any areas to exclude or preserve as-is?",
+    header: "Scope Limits",
+    options: [] // Open-form
+  }
+]
+```
 
 ⏸️ Wait for all 4 responses.
 
-**🟢 BATCH 2: Implementation Details** (Then use AskUserQuestion to ask these 2):
-5. **References consolidation** — Should we merge related reference files to reduce scattered content?
-6. **Production readiness** — Should we also validate against production standards (error handling, tool scoping, security)?
+**🟢 BATCH 2: Implementation Details** (Then use AskUserQuestion with predefined options):
+
+```
+questions: [
+  {
+    question: "Should we consolidate related reference files to reduce scattered content?",
+    header: "References",
+    options: [
+      { label: "Yes", description: "Merge related files for clarity" },
+      { label: "No", description: "Keep current structure" }
+    ],
+    multiSelect: false
+  },
+  {
+    question: "Should we also validate against production standards?",
+    header: "Production Validation",
+    options: [
+      { label: "Yes", description: "Check error handling, tool scoping, security" },
+      { label: "No", description: "Skip production validation" }
+    ],
+    multiSelect: false
+  },
+  {
+    question: "Should we add testing & validation patterns (evaluation framework, test patterns, quality gates)?",
+    header: "Testing & Validation",
+    options: [
+      { label: "Yes", description: "Add evaluation framework and quality gates" },
+      { label: "No", description: "Skip testing patterns" }
+    ],
+    multiSelect: false
+  }
+]
+```
 
 After gathering ALL responses, document approved scope and proceed.
 
@@ -174,6 +233,7 @@ NEVER: DELETE → LINK → CREATE (creates broken links and lost content)
 Load these references as needed:
 
 - **`references/refinement-workflow.md`** - Unified refinement workflow with preservation gates and validation phases
+- **`references/ask-user-question-patterns.md`** - AskUserQuestion best practices, max 4 options, progressive disclosure, pattern decision trees
 - **`references/refinement-guardrails.md`** - What NEVER gets cut during refinement, safe patterns, the Litmus Test
 - **`references/validation-checklist.md`** - Quality assessment across all dimensions
 - **`references/production-patterns.md`** - Error handling, logging, and team patterns
@@ -220,13 +280,21 @@ Load these references as needed:
 → Apply 80% rule systematically
 → Verify activation doesn't suffer from moved content
 
-**Scenario 3: "Check if this skill is production-ready"**
+**Scenario 3: "Improve user interaction UX"**
+→ Audit all AskUserQuestion calls (max 4 options, progressive disclosure)
+→ Convert free-form instructions to predefined AskUserQuestion options where applicable
+→ Ensure questions follow wizard pattern (ask → wait → ask, not forms)
+→ Verify descriptions are clear and help users make good choices
+→ Check for >4 options violations (split into multiple AskUserQuestion batches)
+→ See `references/ask-user-question-patterns.md` for patterns and decision trees
+
+**Scenario 4: "Check if this skill is production-ready"**
 → Run full validation phases (all 7 phases)
 → Check: error handling, tool scoping, clear trigger phrases, comprehensive testing
 → Flag missing production patterns (see references/production-patterns.md)
 → Generate detailed report with findings and recommendations
 
-**Scenario 4: "Offer to help during skill work"**
+**Scenario 5: "Offer to help during skill work"**
 → Detect user is working with skills (reading SKILL.md, editing references, etc.)
 → Offer: "I can help refine this skill (clarity, efficiency) or validate it. Want me to?"
 → If yes, use appropriate workflow above
