@@ -2,6 +2,15 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.5.1] - 2026-02-11
+
+### Fixed
+- **skill-refiner 1.2.1:**
+  - Fixed workflow activation: Quick Start now asks skill name and refine/validate choice upfront
+  - Moved interview questions (BATCH 1 + BATCH 2) to Quick Start for immediate visibility
+  - Added conditional routing: validate path skips interview, refine path asks questions then proceeds
+  - Ensures skill workflow executes on invocation without parameters
+
 ## [2.5.0] - 2026-02-11
 
 ### Added
