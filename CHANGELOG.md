@@ -2,6 +2,14 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.5.0] - 2026-02-11
+
+### Added
+- **skill-refiner 1.2.0:**
+  - Progressive disclosure requirements interview using AskUserQuestion with two-batch approach (Refinement Focus + Implementation Details)
+  - Integrated interview workflow into core refinement process after skill location step
+  - Captures operator approval for refinement scope before making changes
+
 ## [2.4.1] - 2026-02-10
 
 ### Fixed

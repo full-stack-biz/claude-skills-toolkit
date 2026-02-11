@@ -5,8 +5,8 @@ description: >-
   Use when: refining skills, improving skill structure, validating against best practices, reducing
   token usage, consolidating references, checking production readiness, or applying the 80% rule.
   Takes imperfect existing skills and elevates them to quality standards.
-version: 1.1.1
-allowed-tools: Read,Edit,Write,Glob,Task(*)
+version: 1.2.0
+allowed-tools: Read,Edit,Write,Glob,Task(*),AskUserQuestion
 hooks:
   PreToolUse:
     - matcher: "^(Write|Edit)$"
@@ -25,7 +25,7 @@ Systematically improve and validate Claude Code skills while preserving function
 **Option 1: Refine a skill** (improve clarity, efficiency, activation, or structure)
 ```
 User: "Refine the skill-creator skill—make it clearer and more efficient"
-→ Claude loads this skill → Locates skill-creator → Gathers approval (scope focus) →
+→ Claude loads this skill → Locates skill-creator → Interviews for refinement scope (BATCH 1 + BATCH 2) →
 → Identifies improvements → Applies preservation gates → Makes changes → Validates result
 ```
 
@@ -53,34 +53,49 @@ User: (working with skills, no explicit request)
    - If in cache (`~/.claude/plugins/cache/`) → REFUSE: "That's an installed copy (read-only)"
    - If not found anywhere → ASK: "Where should I find this skill?"
 
-2. **Get approval (wizard approach - one question at a time)**
-   - Ask: "What's the primary focus?" (structure/clarity OR content/efficiency OR both)
-   - If NOT "both" → Ask: "Any additional areas to review?"
-   - Document approved scope before proceeding
+### Requirements Interview (Progressive Disclosure - One Batch at a Time)
 
-3. **Load workflow reference**
+After locating the skill, **interview to gather what they want improved** using AskUserQuestion.
+
+**🔴 BATCH 1: Refinement Focus** (Ask these 4 together):
+1. **Primary focus** — What aspect needs improvement? (clarity / efficiency / structure / testing / validation / other)
+2. **Key issues** — What specific problems are you seeing? (vague descriptions, long SKILL.md, scattered references, etc.)
+3. **Success metric** — What would success look like? (shorter, clearer, better organized, reduced tokens, etc.)
+4. **Scope limits** — Any areas to exclude or preserve as-is?
+
+⏸️ Wait for all 4 responses.
+
+**🟢 BATCH 2: Implementation Details** (Then ask these 2):
+5. **References consolidation** — Should we merge related reference files to reduce scattered content?
+6. **Production readiness** — Should we also validate against production standards (error handling, tool scoping, security)?
+
+After gathering ALL responses, document approved scope and proceed.
+
+---
+
+2. **Load workflow reference**
    - Read `references/refinement-workflow.md` (unified workflow with preservation gates)
 
-4. **Identify consolidation opportunities (BEFORE changes)**
+3. **Identify consolidation opportunities (BEFORE changes)**
    - List all files in `references/` directory with line counts
    - Group by topic (what do they cover?)
    - Flag potential merges (2-4 files on same topic → 1 consolidated file)
    - ASK: "Should we consolidate these files? Saves N lines, improves clarity"
    - Only proceed if operator approves
 
-5. **Apply preservation gates (CRITICAL - four gates, in order)**
+4. **Apply preservation gates (CRITICAL - four gates, in order)**
    - **GATE 1**: Content Audit - list ALL existing content, classify as core (80%+) or supplementary (<20%)
    - **GATE 2**: Capability Assessment - will changes impair execution? If YES → cannot delete, only migrate
    - **GATE 3**: Migration Verification - before moving content, verify destination exists and is complete
    - **GATE 4**: Operator Confirmation - deletions require explicit approval, migrations auto-approved
 
-6. **Make changes (following movement pattern)**
+5. **Make changes (following movement pattern)**
    - CREATE/UPDATE destination FIRST (new file, updated section)
    - LINK - update SKILL.md pointers to new destination
    - DELETE old source (only after links verified)
    - Never delete first; always: CREATE → LINK → DELETE
 
-7. **Validate result (seven phases)**
+6. **Validate result (seven phases)**
    - Phase 1: File Inventory - list structure before/after
    - Phase 2: Read All - load complete content, verify no gaps
    - Phase 3: Frontmatter - check required metadata (name, description)
