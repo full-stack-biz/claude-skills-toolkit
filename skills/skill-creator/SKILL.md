@@ -5,7 +5,7 @@ description: >-
   skills, interviewing for requirements, applying templates, organizing frontmatter and body
   content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
   progressive disclosure, reference organization, and tool scoping.
-version: 2.2.1
+version: 2.3.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -15,7 +15,29 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 ## Quick Start
 
-Ask the user: **"What do you want to do: create a new skill or convert a slash command?"** Then route to the appropriate section below.
+Use AskUserQuestion with **predefined options**:
+
+```
+questions: [
+  {
+    question: "What do you want to do?",
+    header: "Action",
+    options: [
+      {
+        label: "Create a new skill",
+        description: "Build a new Claude Code skill from scratch following best practices"
+      },
+      {
+        label: "Convert a slash command",
+        description: "Migrate existing ~/.claude/commands/ slash command to a project-scoped skill"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+Then route to the appropriate section below based on their selection.
 
 ---
 
@@ -119,17 +141,59 @@ When user mentions a skill by name (e.g., "refine plugin-creator"):
 
 After routing to "create", **interview the user to gather requirements** using progressive disclosure (AskUserQuestion, one batch at a time). This ensures the skill will activate correctly and Claude will execute it effectively.
 
-**🔴 BATCH 1: Core Definition** (Ask these 4 together):
-1. **Skill purpose** — What domain-specific task should Claude execute? What problem does this solve?
-2. **Trigger phrases** — What phrases will Claude see in user requests when this skill should activate?
-3. **Scope & constraints** — What's IN scope? What's OUT of scope?
-4. **Tool needs** — Which tools will Claude need (file operations, Bash, web access)?
+**🔴 BATCH 1: Core Definition** (Use AskUserQuestion with open-form responses):
+
+```
+questions: [
+  {
+    question: "What domain-specific task should Claude execute? What problem does this solve?",
+    header: "Skill Purpose",
+    options: [] // Open-form
+  },
+  {
+    question: "What phrases will Claude see in user requests when this skill should activate?",
+    header: "Trigger Phrases",
+    options: [] // Open-form
+  },
+  {
+    question: "What's IN scope? What's OUT of scope?",
+    header: "Scope & Constraints",
+    options: [] // Open-form
+  },
+  {
+    question: "Which tools will Claude need (file operations, Bash, web access, etc.)?",
+    header: "Tool Needs",
+    options: [] // Open-form
+  }
+]
+```
 
 ⏸️ Wait for all 4 responses.
 
-**🟢 BATCH 2: Team & Complexity** (Then ask these 2):
-5. **Team/production** — Will multiple Claude instances use this? Production data involved?
-6. **Complexity** — Will Claude need scripts or reference files? Multiple workflows?
+**🟢 BATCH 2: Team & Complexity** (Then use AskUserQuestion with predefined options):
+
+```
+questions: [
+  {
+    question: "Will multiple Claude instances use this? Production data involved?",
+    header: "Team & Production",
+    options: [
+      { label: "Personal use only", description: "Single user, no shared data" },
+      { label: "Team or production", description: "Multiple users or production data involved" }
+    ],
+    multiSelect: false
+  },
+  {
+    question: "Will Claude need scripts or reference files? Multiple workflows?",
+    header: "Complexity",
+    options: [
+      { label: "Simple", description: "Single workflow, SKILL.md only" },
+      { label: "Complex", description: "Multiple workflows, needs scripts or references" }
+    ],
+    multiSelect: false
+  }
+]
+```
 
 After gathering ALL responses, use `references/templates.md` to apply requirements to the appropriate skill template.
 
@@ -191,6 +255,7 @@ Use the checklist in `references/checklist.md` to verify quality before deployme
 
 **Load when creating a new skill:**
 - `references/templates.md` — **MUST load:** After requirements interview, provides copy-paste starting points
+- `references/ask-user-question-patterns.md` — Guidance on AskUserQuestion best practices, max 4 options, progressive disclosure
 - `references/content-guidelines.md` — When writing descriptions/frontmatter, to verify trigger phrases
 - `references/skill-workflow.md` — Content distribution (80% rule) and skill structure guidance (Part 1 + Part 3)
 - `references/checklist.md` — Quality validation across all dimensions (structure, content, security)

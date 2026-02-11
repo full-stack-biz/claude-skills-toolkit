@@ -2,7 +2,7 @@
 name: plugin-creator
 description: >-
   Create, convert, validate, and publish Claude Code plugins with Agent Skills, hooks, agents, and servers. Use when building plugins from scratch, converting projects to plugins, improving plugin structure, or publishing to marketplace. Includes automated scanning, manifest generation, marketplace.json creation, and validation guidance. Component-specific work delegates to hook-creator, subagent-creator, and skill-creator skills.
-version: 1.5.0
+version: 1.6.0
 allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(find:*,grep:*,head:*,jq:*,du:*,xargs:*)
 ---
 
@@ -12,11 +12,37 @@ allowed-tools: Read,Write,Edit,AskUserQuestion,Glob,Bash(find:*,grep:*,head:*,jq
 
 ## Quick Routing
 
-Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
+Use AskUserQuestion with **predefined options** to gather requirements:
 
-1. Ask what the user wants to do (create/convert/validate)
-2. Ask for the plugin name or path based on the action
-3. Route to the appropriate workflow section
+```
+questions: [
+  {
+    question: "What would you like to do?",
+    header: "Action",
+    options: [
+      {
+        label: "Create a new plugin",
+        description: "Build a plugin from scratch with proper manifest, structure, and components"
+      },
+      {
+        label: "Convert a project to plugin",
+        description: "Transform existing project into plugin with manifest and proper directory layout"
+      },
+      {
+        label: "Validate a plugin",
+        description: "Check plugin structure against Claude Code standards"
+      },
+      {
+        label: "Publish to marketplace",
+        description: "Prepare plugin for distribution and marketplace publication"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+Then proceed to the appropriate workflow section based on their selection.
 
 ---
 
@@ -88,11 +114,11 @@ my-plugin/
 
 ### Interview Flow for New Plugin Creation
 
-For users creating a new plugin, conduct this structured interview to gather all manifest.json fields **before** file creation:
+For users creating a new plugin, conduct this structured interview to gather all manifest.json fields **before** file creation. Use the predefined options format shown in Quick Routing above for Step 1.
 
-1. **Action** - "What would you like to do?"
-   - Create a new plugin (→ proceed to 2-8)
-   - Convert a project (→ skip to Step 1 in Converting Projects section)
+1. **Action** - Use the predefined options from "Quick Routing" section above
+   - Create a new plugin (→ proceed to 2-9)
+   - Convert a project (→ skip to Converting Projects section)
    - Validate a plugin (→ skip to Validating Plugins section)
    - Publish to marketplace (→ skip to Publishing to Marketplace section)
 
@@ -117,13 +143,58 @@ For users creating a new plugin, conduct this structured interview to gather all
    - Maps to: `plugin.json` → `license`, `repository`, `homepage` fields
    - Example: `"MIT"`, `"https://github.com/user/plugin"`, `"https://docs.example.com"`
 
-7. **Components** - "Which components will the plugin include?"
-   - Maps to: Directory structure and marketplace.json `plugins[].source`
-   - Options: Skills, Commands, Agents, Hooks, MCP servers, LSP servers
+7. **Components (BATCH 1)** - Use AskUserQuestion with **predefined options** (multiSelect: true):
 
-8. **Distribution scope** - "Will this be personal, team-shared, or marketplace-published?"
-   - Determines: Whether to create `marketplace.json` and final installation scope
-   - Marketplace → needs `marketplace.json` with proper schema
+```
+questions: [
+  {
+    question: "Which core components will the plugin include?",
+    header: "Core Components",
+    options: [
+      { label: "Skills", description: "Agent Skills (recommended)" },
+      { label: "Agents", description: "Subagents for complex workflows" },
+      { label: "Hooks", description: "Event handlers and automation" },
+      { label: "MCP servers", description: "Model Context Protocol servers" }
+    ],
+    multiSelect: true
+  }
+]
+```
+
+8. **Components (BATCH 2)** - Then use AskUserQuestion for optional server support:
+
+```
+questions: [
+  {
+    question: "Include Language Server Protocol (LSP) support?",
+    header: "LSP Servers",
+    options: [
+      { label: "Yes", description: "Add language-specific code intelligence" },
+      { label: "No", description: "Skip LSP servers" }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+⏸️ Wait for both batch responses before proceeding.
+
+9. **Distribution scope** - Use AskUserQuestion with **predefined options**:
+
+```
+questions: [
+  {
+    question: "What's the distribution scope for this plugin?",
+    header: "Distribution",
+    options: [
+      { label: "Personal", description: "Personal use only" },
+      { label: "Team-shared", description: "Share with team members" },
+      { label: "Marketplace", description: "Publish to plugin marketplace for community" }
+    ],
+    multiSelect: false
+  }
+]
+```
 
 ### Manifest Field Mapping Reference
 
@@ -139,7 +210,8 @@ For users creating a new plugin, conduct this structured interview to gather all
 | License | `plugin.json` → `license` | string | No | e.g., "MIT", "Apache-2.0" |
 | Repository | `plugin.json` → `repository` | string | No | GitHub/GitLab URL |
 | Homepage | `plugin.json` → `homepage` | string | No | Documentation URL |
-| Components | Directory structure | array | No | Determines which `skills/`, `commands/`, etc. to create |
+| Components (BATCH 1) | Directory structure | array | No | Skills, Agents, Hooks, MCP servers (max 4 options) |
+| Components (BATCH 2) | Directory structure | boolean | No | Include LSP servers (yes/no) |
 | Distribution scope | `marketplace.json` | string | No | "personal", "team", or "marketplace" |
 
 ### Common Manifest Generation Failures (Prevention)

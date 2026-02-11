@@ -5,7 +5,7 @@ description: >-
   Use when building new subagents, validating existing ones, improving quality,
   scoping tool access, configuring permission modes, or setting up hook
   validation. For personal, team, or production environments.
-version: 1.1.0
+version: 1.2.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -15,11 +15,33 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 ## Quick Routing
 
-Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
+Use AskUserQuestion with **predefined options**:
 
-1. Ask what the user wants to do (create/validate/refine)
-2. Ask for the subagent name or path based on the action
-3. Route to the appropriate workflow section
+```
+questions: [
+  {
+    question: "What would you like to do?",
+    header: "Action",
+    options: [
+      {
+        label: "Create a new subagent",
+        description: "Build a subagent from scratch with proper scope, tool access, and permissions"
+      },
+      {
+        label: "Validate existing subagent",
+        description: "Check if subagent is properly configured and production-ready"
+      },
+      {
+        label: "Refine/improve subagent",
+        description: "Enhance existing subagent for clarity, efficiency, or reliability"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+Then route to the appropriate workflow section based on their selection.
 
 ---
 
@@ -76,13 +98,29 @@ Always detect project type first, then clarify scope only when needed:
    - If it exists (project is a Claude plugin): Go to step 3a
    - If it doesn't exist (regular project): Go to step 3b
 
-3a. **IF PROJECT IS A CLAUDE PLUGIN - Ask Question 2: Scope choice**
-   ```
-   Should this subagent be part of the plugin or project-level?
-   - Part of the plugin - Add to `agents/` directory (bundled with plugin)
-   - Project-level - Add to `.claude/agents/` directory (local, not bundled)
-   ```
-   Then ask: "What do you want to call it?" (e.g., `db-analyzer`, `code-reviewer`, `compliance-auditor`)
+3a. **IF PROJECT IS A CLAUDE PLUGIN - Ask Question 2: Scope choice with predefined options**
+
+```
+questions: [
+  {
+    question: "Should this subagent be part of the plugin or project-level?",
+    header: "Scope",
+    options: [
+      {
+        label: "Part of the plugin",
+        description: "Add to agents/ directory (bundled with plugin for distribution)"
+      },
+      {
+        label: "Project-level",
+        description: "Add to .claude/agents/ directory (local, not bundled with plugin)"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+Then ask: "What do you want to call it?" (e.g., `db-analyzer`, `code-reviewer`, `compliance-auditor`)
 
 3b. **IF PROJECT IS REGULAR - No scope question needed**
    - Inform user: "Creating project-level subagent in `.claude/agents/`"
@@ -94,12 +132,38 @@ Based on answers, route to the appropriate workflow below.
 
 ### For New Subagents: Requirements Interview First
 
-After routing to "create", **interview the user to gather requirements** using AskUserQuestion. This ensures the subagent will be reliably delegated to and execute correctly:
+After routing to "create", **interview the user to gather requirements** using AskUserQuestion with proper options:
 
-1. **Purpose & scope** - What specialized task should this subagent execute? What problem does isolation solve?
-2. **Delegation trigger** - When should Claude delegate to this subagent? What request phrases trigger it?
-3. **Tool access** - Which tools will Claude need? Apply principle of least privilege.
-4. **Permission mode** - How should the subagent handle permission prompts? (default, acceptEdits, dontAsk, plan)
+```
+questions: [
+  {
+    question: "What specialized task should this subagent execute? What problem does isolation solve?",
+    header: "Purpose & Scope",
+    options: [] // Open-form
+  },
+  {
+    question: "When should Claude delegate to this subagent? What request phrases trigger it?",
+    header: "Delegation Trigger",
+    options: [] // Open-form
+  },
+  {
+    question: "Which tools will this subagent need? (Apply principle of least privilege)",
+    header: "Tool Access",
+    options: [] // Open-form
+  },
+  {
+    question: "How should the subagent handle permission prompts?",
+    header: "Permission Mode",
+    options: [
+      { label: "default", description: "Prompt for each permission (standard behavior)" },
+      { label: "acceptEdits", description: "Auto-accept file edits without prompting" },
+      { label: "dontAsk", description: "Auto-accept all permissions without prompting" },
+      { label: "plan", description: "Use plan mode for structured permission flow" }
+    ],
+    multiSelect: false
+  }
+]
+```
 5. **Model choice** - Should it use fast Haiku, standard Sonnet, or powerful Opus? Or inherit from parent?
 6. **Hooks & validation** - Does the subagent need conditional tool validation or lifecycle hooks?
 7. **Team/production** - Will multiple Claude instances use this? Production data involved?

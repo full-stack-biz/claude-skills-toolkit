@@ -6,7 +6,7 @@ description: >-
   or improving hook quality. Supports command hooks (shell scripts), prompt hooks (LLM decisions),
   event matching, decision schemas, and production safety validation. Claude auto-activates when
   you ask to build a hook, check hook reliability, improve hook configurations, or validate hooks for production.
-version: 2.2.2
+version: 2.3.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -16,11 +16,33 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 ## Quick Routing
 
-Use AskUserQuestion to gather requirements, then proceed to the appropriate section below:
+Use AskUserQuestion with **predefined options**:
 
-1. Ask what the user wants to do (create/validate/refine)
-2. Ask for the hook name or description based on the action
-3. Route to the appropriate workflow section
+```
+questions: [
+  {
+    question: "What would you like to do?",
+    header: "Action",
+    options: [
+      {
+        label: "Create a new hook",
+        description: "Build a hook from scratch with proper configuration and validation"
+      },
+      {
+        label: "Validate existing hooks",
+        description: "Check hooks against best practices and production standards"
+      },
+      {
+        label: "Refine/improve hooks",
+        description: "Enhance existing hooks for clarity, efficiency, or reliability"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+Then route to the appropriate workflow section based on their selection.
 
 ---
 
