@@ -70,7 +70,7 @@ This toolkit has intentional **knowledge duplication** that respects Claude's of
 
 - `plugin-creator` includes summaries of skill/subagent/hook knowledge in `references/`
 - These overlap with the full guidance in `skill-creator/`, `subagent-creator/`, and `hook-creator/`
-- This duplication follows the **Bounded Scope Principle** (see `skills/skill-creator/references/bounded-scope-principle.md`)
+- This duplication follows the **Bounded Scope Principle** (see `skills/skill-creator/references/self-containment-principle.md`)
 
 **Why?** Claude's official architecture does not support skill-to-skill delegation as a first-class feature. Each skill must be completely self-contained within its directory structure. This is documented in [Claude Code Skills documentation](https://code.claude.com/docs/en/skills).
 
@@ -116,7 +116,7 @@ This will enable:
 
 ### References
 
-- Official principle: [Bounded Scope Principle for Skills](skills/skill-creator/references/bounded-scope-principle.md)
+- Official principle: [Bounded Scope Principle for Skills](skills/skill-creator/references/self-containment-principle.md)
 - Claude docs: [Extend Claude with skills](https://code.claude.com/docs/en/skills)
 - Tracking: [GitHub issue for context: fork support](https://github.com/anthropics/claude-code/issues/17283)
 
@@ -132,7 +132,7 @@ This will enable:
 
 ### Best Practices Reference
 
-Consult **building-skills.md** for comprehensive guidance on:
+Consult [building-skills.md](building-skills.md) for comprehensive guidance on:
 - Writing effective descriptions and trigger phrases
 - Progressive disclosure of information
 - Workflow patterns (checklists, feedback loops, templates)
@@ -149,12 +149,12 @@ This repository is a Claude Code plugin. Install it with:
 ```bash
 claude plugin install . --scope project
 # or
-claude plugin install /Users/sergeymoiseev/full-stack.biz/claude-skills --scope project
+claude plugin install /path/to/skills-toolkit --scope project
 ```
 
 **Testing locally before installation:**
 ```bash
-claude --plugin-dir /Users/sergeymoiseev/full-stack.biz/claude-skills
+claude --plugin-dir /path/to/skills-toolkit
 ```
 
 **Plugin structure:**
@@ -257,12 +257,12 @@ Example:
 
 Each skill maintains its own independent semantic version (in `SKILL.md` frontmatter):
 
-- **skill-creator**: 1.5.0
-- **skill-refiner**: 1.0.0
-- **plugin-creator**: 1.3.0
-- **subagent-creator**: 1.1.0
-- **hook-creator**: 2.2.1
-- **Plugin**: 1.9.0
+- **skill-creator**: 2.4.0
+- **skill-refiner**: 1.4.0
+- **plugin-creator**: 1.7.0
+- **subagent-creator**: 1.3.0
+- **hook-creator**: 2.4.0
+- **Plugin**: 2.7.0
 
 These are independent tracking systems, NOT a hierarchy.
 
@@ -277,9 +277,9 @@ These are independent tracking systems, NOT a hierarchy.
 - MAJOR: Any skill gets MAJOR bump + plugin receives it (or breaking plugin structure changes)
 
 **Example workflow (correct):**
-1. skill-creator changes detected → MINOR bump (1.5.0 → 1.6.0)
-2. Plugin receives MINOR bump (1.7.1 → 1.8.0)
-3. ✅ CORRECT: Plugin 1.8.0 reflects "one of my skills had a minor change"
+1. skill-creator changes detected → MINOR bump (2.4.0 → 2.5.0)
+2. Plugin receives MINOR bump (2.7.0 → 2.8.0)
+3. ✅ CORRECT: Plugin 2.8.0 reflects "one of my skills had a minor change"
 
 **Example workflow (WRONG - never do this):**
 1. skill-creator 1.6.0, hook-creator 2.2.1
