@@ -391,18 +391,18 @@ Always lead with actionable essentials before theory:
 
 ---
 
-## Team & Production Skills Checklist
+## Complex Skills Checklist
 
-Beyond personal skills, production skills require:
+Complex skills require:
 
 | Requirement | Why |
 |-------------|-----|
 | **Error handling** | Errors must be clear, not silent failures |
-| **Testing** | Team depends on reliability |
-| **Documentation** | Team members unfamiliar with context |
+| **Testing** | Reliability required across different uses |
+| **Documentation** | Users unfamiliar with context |
 | **Tool scoping** | Minimize blast radius of malicious use |
-| **Version tracking** | Team coordination and rollbacks |
-| **Validation script** | Team can verify skill works before use |
+| **Version tracking** | Coordination and rollbacks |
+| **Validation script** | Verify skill works before use |
 | **Security review** | Catch edge cases and vulnerabilities |
 
-See `checklist.md` → "Team & Production Skills" for detailed requirements.
+See `checklist.md` → "Complex Skills" for detailed requirements.

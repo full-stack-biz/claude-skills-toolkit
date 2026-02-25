@@ -10,7 +10,7 @@ Use this checklist to validate new or improved skills against best practices.
 - [Design Principles](#design-principles)
 - [Description Quality](#description-quality)
 - [Testing Checklist](#testing-checklist)
-- [Team & Production Skills](#team--production-skills)
+- [Complex Skills](#complex-skills)
 - [Security & Permissions](#security--permissions)
 - [Common Issues Checklist](#common-issues-checklist)
 - [Final Sign-Off](#final-sign-off)
@@ -102,9 +102,9 @@ except Exception as e:
 - [ ] No hardcoded paths (use command-line args)
 - [ ] Executable permissions set (if shell script)
 
-**For team/production skills:**
+**For complex skills:**
 - [ ] Validation script included (bash script that tests the skill)
-- [ ] Scripts tested on multiple environments (>1 OS if applicable)
+- [ ] Scripts tested with real trigger phrases and workflows
 
 ### Code Examples
 - [ ] Concrete (real examples, not placeholder names)
@@ -234,19 +234,19 @@ For form filling, see references/FORMS.md
 - [ ] No false positives (validation passes legitimate use cases)
 - [ ] No excessive validation (doesn't block valid operations)
 
-## Team & Production Skills (Optional)
+## Complex Skills (Optional)
 
-If creating skills for shared team use:
+If creating complex skills:
 
-### Requirements for Team Skills
+### Requirements for Complex Skills
 - [ ] **Error handling**: Robust try/except blocks, clear error messages
 - [ ] **Testing**: All scripts tested before deployment
 - [ ] **Documentation**: Complete (Overview, Prerequisites, Troubleshooting, Support)
 - [ ] **Tool scoping**: Strict principle of least privilege
 - [ ] **Version tracking**: Optional but recommended for coordination
-- [ ] **Validation script**: Team can verify skill works
-- [ ] **Security review**: Peer review before sharing
-- [ ] **Peer testing**: Tested on >1 team member's machine
+- [ ] **Validation script**: Verify skill works
+- [ ] **Security review**: Review before deployment
+- [ ] **Testing**: Tested with real trigger phrases and workflows
 
 ### Team Skill Checklist
 - [ ] Prerequisites clearly listed
@@ -337,4 +337,4 @@ For comprehensive best practices, see:
 - **Workflow patterns**: `templates.md` (checklist, feedback loop, conditional, template patterns)
 - **Testing & iteration**: `validation-workflow.md` Phase 7 and Testing Checklist
 - **Security & permissions**: `allowed-tools.md` (tool scoping, principle of least privilege)
-- **Advanced patterns**: `advanced-patterns.md` (production patterns, archetypes, risk tiering)
+- **Advanced patterns**: `advanced-patterns.md` (complex skill patterns, archetypes, risk tiering)

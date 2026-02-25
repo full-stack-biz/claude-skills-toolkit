@@ -2,6 +2,16 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.7.1] - 2026-02-25
+
+### Fixed
+- **hook-creator 2.4.1:**
+  - CRITICAL: Added explicit JSON structure validation to prevent "hooks: Expected array" settings errors
+  - Added "Step 3b: Correct JSON Structure" with clear BAD/GOOD examples showing nested hooks array requirement
+  - Enhanced checklist with JSON structure validation and troubleshooting section for common settings errors
+  - Added prominent warning in Key Reference Points about the #1 mistake (missing hooks wrapper)
+  - Clarified that EVERY hook action must be nested under `"hooks": [...]` array
+
 ## [2.7.0] - 2026-02-11
 
 ### Added

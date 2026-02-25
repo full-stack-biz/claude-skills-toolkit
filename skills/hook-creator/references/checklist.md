@@ -27,11 +27,30 @@ Use this checklist when creating a new hook from scratch.
 - [ ] **Hook type chosen** - Command, prompt, or agent? Why?
 
 ### Configuration
+- [ ] **JSON structure correct** - Hook wrapped in `"hooks": [...]` array (CRITICAL - see below)
 - [ ] **Event syntax correct** - Event name matches Claude Code event names
 - [ ] **Matcher syntax valid** - Regex is correct, special chars escaped
 - [ ] **Matcher tested** - Tested with 3+ scenarios (matches when should, doesn't when shouldn't)
 - [ ] **Hook type valid** - "command", "prompt", or "agent"
 - [ ] **Action is specified** - Command path, prompt text, or agent reference
+
+**JSON Structure Format (NON-NEGOTIABLE):**
+```json
+{
+  "hooks": {
+    "EventName": [
+      {
+        "matcher": {...},  // optional for some events
+        "hooks": [         // ← REQUIRED: All hooks must nest here
+          { "type": "command", ... }
+        ]
+      }
+    ]
+  }
+}
+```
+
+❌ **Common mistake:** Direct hook without `"hooks"` wrapper causes settings errors
 
 ### Command Hooks Specific
 - [ ] **Script passes shellcheck** - Run `shellcheck script.sh`, fix all warnings
@@ -90,6 +109,28 @@ Use this when validating existing hooks against best practices.
 - [ ] **Not too narrow** - Matches all intended cases
 - [ ] **Performance acceptable** - No expensive regex patterns
 - [ ] **Documented** - Comments explain what matcher does
+
+### Phase 2.5: JSON Structure (CRITICAL)
+- [ ] **Hooks wrapped in array** - All hooks under `"hooks": [...]` (not direct properties)
+- [ ] **Matcher in correct place** - `"matcher"` is sibling of `"hooks"` array, not inside it
+- [ ] **Valid JSON syntax** - No trailing commas, quotes properly closed
+- [ ] **Correct nesting** - Event → matchers → hooks array (see structure below)
+
+**Correct structure (enforce this):**
+```json
+{
+  "hooks": {
+    "EventName": [           // Event array
+      {
+        "matcher": "pattern", // Matcher at this level
+        "hooks": [            // Required hooks array
+          { "type": "command", ... }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ### Phase 3: Hook Type & Action
 - [ ] **Hook type appropriate** - Command/prompt/agent fits the action
@@ -262,12 +303,48 @@ Use when creating hooks for production or team use.
 
 If a hook isn't working, use this checklist to diagnose:
 
+### Settings JSON Format Error (COMMON - FIX FIRST)
+**Error message:** `hooks: Expected array, but received undefined`
+
+This happens when hooks aren't wrapped in the required `"hooks": [...]` array.
+
+❌ **WRONG** (causes error):
+```json
+{
+  "hooks": {
+    "SessionStart": [{
+      "type": "command",  // ← Missing "hooks" wrapper
+      "command": "..."
+    }]
+  }
+}
+```
+
+✅ **CORRECT** (fix):
+```json
+{
+  "hooks": {
+    "SessionStart": [{
+      "hooks": [{        // ← Add this wrapper
+        "type": "command",
+        "command": "..."
+      }]
+    }]
+  }
+}
+```
+
+**Fix:** Every hook object must have its action nested under a `"hooks": [...]` array.
+
+---
+
 ### Hook Doesn't Trigger
 - [ ] Event correct? - Check against event reference
 - [ ] Matcher syntax valid? - Test regex separately
 - [ ] Matcher too specific? - Overly narrow pattern?
 - [ ] Hook enabled? - Check plugin.json has hook enabled
 - [ ] Event has data? - Check event fires at all
+- [ ] JSON structure correct? - See "Settings JSON Format Error" above
 
 ### Hook Triggers Too Often
 - [ ] Matcher too broad? - Does `.*` match everything?

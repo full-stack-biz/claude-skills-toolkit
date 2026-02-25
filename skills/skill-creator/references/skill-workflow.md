@@ -349,7 +349,7 @@ Use this systematic workflow to validate skills. Follow phases in order.
 - [ ] Includes specific trigger phrases
 - [ ] Formula: `[Action]. Use when [trigger contexts]. [Optional scope].`
 
-**Optional Fields (for team/production):**
+**Optional Fields (for complex skills):**
 - [ ] `version: 1.0.0`
 - [ ] `allowed-tools` declared
 
@@ -404,7 +404,7 @@ For each reference file:
 ### Phase 6: Tool Scoping
 
 **Checklist:**
-- [ ] `allowed-tools` field present (for team/production skills)
+- [ ] `allowed-tools` field present (for complex skills)
 - [ ] Only necessary tools listed
 - [ ] No overly broad permissions (`Bash(*)` avoided)
 - [ ] Bash commands scoped: `Bash(git:*)` not `Bash(*)`
@@ -478,8 +478,8 @@ Test unrelated queries (should NOT trigger):
 
 ### Should-Have (Best Practices)
 
-- [ ] `version` field (for team skills)
-- [ ] `allowed-tools` field (for team skills)
+- [ ] `version` field (for complex skills)
+- [ ] `allowed-tools` field (for complex skills)
 - [ ] Code examples are concrete and runnable
 - [ ] Reference files include TOC (if >100 lines)
 - [ ] Quick Start solves 80% of use cases

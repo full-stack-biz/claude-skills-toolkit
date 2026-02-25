@@ -45,7 +45,7 @@ Then route to the appropriate section below based on their selection.
 
 **Create new skills** - Build from scratch with correct structure, naming, frontmatter, and validation guidance.
 **Convert slash commands** - Migrate existing `~/.claude/commands/` slash commands to project-scoped skills (better context management, subagent support).
-**Team/production skills** - Ensure robustness with error handling, tool scoping, and version tracking.
+**Complex skills** - Ensure robustness with error handling, tool scoping, and version tracking.
 
 ## Mindset
 
@@ -139,65 +139,166 @@ When user mentions a skill by name (e.g., "refine plugin-creator"):
 - Regular project? → Default: `.claude/skills/skill-name/`
 - Ask only if ambiguous
 
-### For New Skills: Requirements Interview First
+### For New Skills: Requirements Interview with Escape Hatch
 
-After routing to "create", **interview the user to gather requirements** using progressive disclosure (AskUserQuestion, one batch at a time). This ensures the skill will activate correctly and Claude will execute it effectively.
+After routing to "create", gather requirements using progressive disclosure (AskUserQuestion, one batch at a time). This ensures the skill will activate correctly and Claude will execute it effectively.
 
-**🔴 BATCH 1: Core Definition** (Use AskUserQuestion with open-form responses):
+**Step 1: Detect Predating Context**
+
+Check conversation history before the skill request:
+- User provided URLs, documentation, or code snippets?
+- User gave detailed explanation of what needs to be built?
+- User asked to "create skill for this" or similar?
+
+**Step 2: Route Based on Context**
+
+**IF NO PREDATING CONTEXT** → Full interview (BATCH 1 + BATCH 2)
+
+**IF PREDATING CONTEXT EXISTS** → Use AskUserQuestion to offer escape hatch:
 
 ```
 questions: [
   {
-    question: "What domain-specific task should Claude execute? What problem does this solve?",
-    header: "Skill Purpose",
-    options: [] // Open-form
-  },
-  {
-    question: "What phrases will Claude see in user requests when this skill should activate?",
-    header: "Trigger Phrases",
-    options: [] // Open-form
-  },
-  {
-    question: "What's IN scope? What's OUT of scope?",
-    header: "Scope & Constraints",
-    options: [] // Open-form
-  },
-  {
-    question: "Which tools will Claude need (file operations, Bash, web access, etc.)?",
-    header: "Tool Needs",
-    options: [] // Open-form
+    question: "I've reviewed the docs/code/context you provided. How would you like to proceed?",
+    header: "Interview Style",
+    options: [
+      {
+        label: "Infer from context",
+        description: "I'll infer purpose, scope, and triggers from what you shared. Just ask about complexity and tools (faster)"
+      },
+      {
+        label: "Define explicitly",
+        description: "I'll ask you to explicitly define purpose, scope, and triggers (full guided interview)"
+      }
+    ],
+    multiSelect: false
   }
 ]
 ```
 
-⏸️ Wait for all 4 responses.
+Then route based on their choice:
+- **"Infer from context"** → Skip BATCH 1, go straight to BATCH 2
+- **"Define explicitly"** → Full interview (BATCH 1 + BATCH 2)
 
-**🟢 BATCH 2: Team & Complexity** (Then use AskUserQuestion with predefined options):
+---
+
+**🔴 BATCH 1: Core Definition** (Prose questions with guidance):
+
+*Skip this batch if user chose "infer" in escape hatch, or if no predating context.*
+
+### Question 1: Skill Purpose
+
+**What domain-specific task should Claude execute? What problem does this skill solve?**
+
+Describe the skill's purpose and what problem it solves.
+
+(Be specific — "Process PDFs with OCR" is better than "Process files")
+
+[User responds with description]
+
+### Question 2: Trigger Phrases
+
+**What phrases will Claude see in user requests that should trigger this skill?**
+
+List the specific trigger phrases Claude will recognize:
+
+Examples:
+- "create skill" (for a skill-creator)
+- "validate code" (for a linter)
+- "convert to plugin" (for converter)
+
+(Include 2-5 key phrases)
+
+[User responds with trigger phrases]
+
+### Question 3: Scope & Constraints
+
+**What's IN scope for this skill versus OUT of scope?**
+
+Define the boundaries:
+
+Examples:
+- IN: "Create new skills, guide best practices"
+- OUT: "Refine existing skills (use skill-refiner instead)"
+
+(Clarify what this skill handles and what it doesn't)
+
+[User responds with scope definition]
+
+⏸️ Wait for all 3 responses.
+
+**🟢 BATCH 2: Complexity & Tools** (Structured + Prose):
+
+### Question 1: Complexity (Structured choice)
+
+Use AskUserQuestion with predefined options (different workflows apply):
 
 ```
 questions: [
   {
-    question: "Will multiple Claude instances use this? Production data involved?",
-    header: "Team & Production",
-    options: [
-      { label: "Personal use only", description: "Single user, no shared data" },
-      { label: "Team or production", description: "Multiple users or production data involved" }
-    ],
-    multiSelect: false
-  },
-  {
-    question: "Will Claude need scripts or reference files? Multiple workflows?",
+    question: "What's the skill's complexity level?",
     header: "Complexity",
     options: [
-      { label: "Simple", description: "Single workflow, SKILL.md only" },
-      { label: "Complex", description: "Multiple workflows, needs scripts or references" }
+      { label: "Simple", description: "Single workflow, SKILL.md only, minimal structure" },
+      { label: "Complex", description: "Multiple workflows, needs reference files and/or scripts" }
     ],
     multiSelect: false
   }
 ]
 ```
 
+[User selects Simple or Complex]
+
+### Question 2: Tool Requirements (Prose guidance)
+
+**Which tools will Claude need to execute this skill?**
+
+List the tools from this set:
+
+- Read, Write (file operations)
+- Bash (shell commands)
+- Glob, Grep (file searching)
+- AskUserQuestion (user input)
+- WebFetch, WebSearch (internet access)
+- Other tools as needed
+
+Examples:
+- "Read, Write, Bash"
+- "Read, Write, AskUserQuestion"
+- "Glob, Grep, Bash"
+
+[User lists tools needed]
+
+⏸️ Wait for both responses.
+
+## Step 3: Create Skill Structure
+
 After gathering ALL responses, use `references/templates.md` to apply requirements to the appropriate skill template.
+
+**CRITICAL: Content-Size Check**
+
+Before creating references/:
+1. Generate full SKILL.md body content
+2. Count total lines of SKILL.md + all reference content
+3. Check size:
+   - **< 500 lines total?** → Keep everything in SKILL.md only, no references/
+   - **≥ 500 lines total?** → Split into SKILL.md + references/
+
+**User Feedback (Required):**
+
+If user selected "Complex" BUT total content < 500 lines, explain:
+
+```
+You selected Complexity: Complex
+Total content generated: [X lines]
+
+Since the total content is [X lines] (under 500 line threshold),
+I'm keeping everything in SKILL.md for now. No separate references needed yet.
+
+As the skill grows beyond 500 lines, we'll split into references/ to maintain token efficiency.
+```
+
+This prevents creating unnecessary files while explaining the decision to the user.
 
 ### For Converting Slash Commands to Skills
 
@@ -292,11 +393,11 @@ Check structure, content, security, activation. See `references/checklist.md` fo
 → Frontmatter (~100 tokens) always loads for discovery. SKILL.md body (~1-5k tokens) loads when skill triggers. References load on-demand (zero penalty until needed).
 → `references/how-skills-work.md` for token loading mechanics and activation internals
 
-### Building Team or Production Skills
+### Building Complex Skills
 
 **Error handling, security, tool scoping:**
-→ Robust patterns: validation scripts, error recovery, security review, team documentation
-→ `references/team-production-patterns.md`
+→ Robust patterns: validation scripts, error recovery, security review, documentation
+→ `references/complex-skills-patterns.md`
 
 **Preventing secret leaks:**
 → Never hardcode API keys, passwords, tokens. Use environment variables, validate at startup, provide clear error messages if missing. Never commit .env files to git.
@@ -310,8 +411,8 @@ Check structure, content, security, activation. See `references/checklist.md` fo
 → Skills should contain everything they need (references, scripts, examples). Avoid external APIs unless core to skill purpose.
 → `references/self-containment-principle.md` for architectural guidance
 
-**Production patterns & specialized skills:**
-→ Common archetypes: validators, transformers, multi-workflow coordinators. Examples of quality production skills.
+**Complex skill patterns & specialized skills:**
+→ Common archetypes: validators, transformers, multi-workflow coordinators. Examples of quality complex skills.
 → `references/advanced-patterns.md` for proven patterns and detailed examples
 
 ### Converting Slash Commands to Skills
@@ -334,8 +435,8 @@ When tool has constraints (maxItems: 4), this pattern is mandatory. Applied in "
 - `description`: Recommended, ≤1024 chars, must include specific trigger phrases Claude recognizes
 - Description is Claude's activation signal (vague descriptions = skill never activates)
 
-**Optional frontmatter (for team/production skills):**
-- `version: 1.0.0` — Track skill evolution for team coordination
+**Optional frontmatter (for complex skills):**
+- `version: 1.0.0` — Track skill evolution for coordination
 - `allowed-tools: Read,Write,Bash(git:*)` — Declare only tools Claude needs. Restrict Bash to specific commands (e.g., `Bash(git:*)`). See `references/allowed-tools.md` for tool scoping validation.
 - Copy tool patterns from `references/templates.md` for reference
 
@@ -355,7 +456,7 @@ When tool has constraints (maxItems: 4), this pattern is mandatory. Applied in "
 
 ❌ **Vague descriptions** (e.g., "Process things") never activate the skill when users need it.
 
-**Team/Production considerations:** For skills used in team environments or with production data, ensure robust error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/team-production-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
+**Complex skill considerations:** For complex skills requiring robust structure, ensure error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/complex-skills-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
 
 **Secrets & credentials:** Skills must never contain hardcoded secrets (API keys, passwords, tokens). Use environment variables instead, validate they're set, and provide clear error messages. Never commit `.env` files or credentials to git. See `references/secrets-and-credentials.md` for complete guidance on detection, handling, git safety, and testing patterns.
 
