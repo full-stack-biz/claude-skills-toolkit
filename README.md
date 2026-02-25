@@ -19,15 +19,6 @@ A plugin for creating and managing Claude Code skills and plugins.
 - [License](#license)
 - [Author](#author)
 
-## Available Skills
-
-- [create-skill](#create-skill) — Create new skills from scratch following best practices
-- [skill-refiner](#skill-refiner) — Improve and validate existing skills
-- [create-plugin](#create-plugin) — Create, convert, and validate plugins
-- [create-hook](#create-hook) — Create and validate hooks
-- [create-subagent](#create-subagent) — Create and validate subagents
-- [ask-user-question](#ask-user-question) — Interactive user input with AskUserQuestion
-
 ### create-skill
 
 **Command:** `/skills-toolkit:create-skill`
@@ -150,8 +141,13 @@ Claude re-read what was built. Found ambiguities. Refined the guidance. Tightene
 
 ## Installation
 
+Add the marketplace:
 ```bash
 /plugin marketplace add full-stack-biz/claude-skills-toolkit
+```
+
+Then install the plugin:
+```bash
 /plugin install skills-toolkit@skills-toolkit-marketplace
 ```
 
