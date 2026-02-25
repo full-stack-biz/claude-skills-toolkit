@@ -2,6 +2,11 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.8.0] - 2026-02-25
+
+### Added
+- **ask-user-question 1.0.0:** New skill for implementing interactive user input with the AskUserQuestion tool. Covers constraints, patterns, response handling, conditional workflows, and production patterns.
+
 ## [2.7.1] - 2026-02-25
 
 ### Fixed

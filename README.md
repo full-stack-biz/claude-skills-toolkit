@@ -2,9 +2,36 @@
 
 A plugin for creating and managing Claude Code skills and plugins.
 
-## What You Get
+## Table of Contents
 
-### `/skills-toolkit:create-skill`
+- [Available Skills](#available-skills)
+  - [create-skill](#create-skill)
+  - [skill-refiner](#skill-refiner)
+  - [create-plugin](#create-plugin)
+  - [create-hook](#create-hook)
+  - [create-subagent](#create-subagent)
+  - [ask-user-question](#ask-user-question)
+- [Quick Start: From Knowledge to Plugin](#quick-start-from-knowledge-to-plugin)
+- [Installation](#installation)
+- [Usage Scenarios](#usage-scenarios)
+- [Design Notes: Architecture & DRY](#design-notes-architecture--dry)
+- [Inspiration](#inspiration)
+- [License](#license)
+- [Author](#author)
+
+## Available Skills
+
+- [create-skill](#create-skill) — Create new skills from scratch following best practices
+- [skill-refiner](#skill-refiner) — Improve and validate existing skills
+- [create-plugin](#create-plugin) — Create, convert, and validate plugins
+- [create-hook](#create-hook) — Create and validate hooks
+- [create-subagent](#create-subagent) — Create and validate subagents
+- [ask-user-question](#ask-user-question) — Interactive user input with AskUserQuestion
+
+### create-skill
+
+**Command:** `/skills-toolkit:create-skill`
+
 Interactive guide for creating new skills from scratch:
 - Name and describe your skill
 - Structure SKILL.md (frontmatter + instructions)
@@ -12,7 +39,10 @@ Interactive guide for creating new skills from scratch:
 - Configure tool permissions
 - Apply best practices during creation
 
-### `/skills-toolkit:skill-refiner`
+### skill-refiner
+
+**Command:** `/skills-toolkit:skill-refiner`
+
 Interactive guide for improving and validating existing skills:
 - Refine skill structure and clarity
 - Validate against best practices
@@ -20,7 +50,10 @@ Interactive guide for improving and validating existing skills:
 - Check production readiness
 - Apply the 80% rule for optimization
 
-### `/skills-toolkit:create-plugin`
+### create-plugin
+
+**Command:** `/skills-toolkit:create-plugin`
+
 Interactive guide for creating and validating plugins:
 - Generate `.claude-plugin/plugin.json` manifest
 - Organize skills, commands, hooks, MCP/LSP servers
@@ -28,7 +61,10 @@ Interactive guide for creating and validating plugins:
 - Configure installation scope (user/project/managed)
 - Validate plugin structure
 
-### `/skills-toolkit:create-hook`
+### create-hook
+
+**Command:** `/skills-toolkit:create-hook`
+
 Interactive guide for creating and validating hooks:
 - Build plugin hooks from scratch (command, prompt, agent types)
 - Validate existing hooks against best practices
@@ -36,12 +72,25 @@ Interactive guide for creating and validating hooks:
 - Configure event matching, matchers, and error handling
 - Test hooks with validation workflows
 
-### `/skills-toolkit:create-subagent`
+### create-subagent
+
+**Command:** `/skills-toolkit:create-subagent`
+
 Interactive guide for creating and validating subagents:
 - Build subagents with clear delegation signals
 - Configure tool access with permission modes
 - Set up hooks for agent coordination
 - Validate against best practices for reliability
+
+### ask-user-question
+
+**Command:** `/skills-toolkit:ask-user-question`
+
+Reference guide for implementing interactive user input in skills:
+- Master AskUserQuestion tool constraints and patterns
+- Build conditional workflows and dynamic questions
+- Handle validation, error recovery, and multi-select
+- Production patterns for robustness and testing
 
 ## Quick Start: From Knowledge to Plugin
 
