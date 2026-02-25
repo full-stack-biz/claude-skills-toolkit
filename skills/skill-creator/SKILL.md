@@ -370,12 +370,12 @@ Every reference link teaches agents what they're looking for, so they decide con
 
 **Template:**
 ```
-[What agents need 80% of the time]. See `references/filename.md` for [what depth/edge cases are there].
+[What agents need 80% of the time]. See `references/<filename.md>` for [what depth/edge cases are there].
 ```
 
 **Example:**
 ```
-**The 80% Rule:** Will Claude execute this 80%+ of activations? → STAYS in SKILL.md. <20% cases? → MOVES to references/. See `references/80-percent-rule.md` for decision trees and edge cases.
+**The 80% Rule:** Will Claude execute this 80%+ of activations? → STAYS in SKILL.md. <20% cases? → MOVES to references/. See `references/<80-percent-rule.md>` for decision trees and edge cases.
 ```
 
 Why? Without context, agents load references out of uncertainty (wastes tokens). With context, they load references *intentionally* when needed. The reference becomes more valuable, not less.
