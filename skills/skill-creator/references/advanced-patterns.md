@@ -11,7 +11,7 @@
 
 These patterns emerge from real-world skill collections and production systems.
 
-### Pattern 1: "THE EXACT PROMPT"
+### "THE EXACT PROMPT"
 
 Encode reproducible prompts in all-caps sections for agent-to-agent handoff:
 
@@ -30,7 +30,7 @@ revisions in terms of better architecture, new features...
 - No ambiguity about phrasing
 - Enables cross-model workflows (GPT Pro → Claude Code)
 
-### Pattern 2: "Why This Exists" Section
+### "Why This Exists" Section
 
 Front-load motivation before instructions:
 
@@ -47,7 +47,7 @@ This skill solves all of this...
 
 Helps Claude understand when to apply the skill contextually.
 
-### Pattern 3: Integration Sections
+### Integration Sections
 
 Complex tools should document ecosystem connections:
 
@@ -61,7 +61,7 @@ Complex tools should document ecosystem connections:
 | **CASS** | Search past sessions |
 ```
 
-### Pattern 4: Risk Tiering Tables
+### Risk Tiering Tables
 
 For safety/security skills, use explicit tier classifications:
 
@@ -74,7 +74,7 @@ For safety/security skills, use explicit tier classifications:
 | **SAFE** | 0 | Immediately | `rm *.log` |
 ```
 
-### Pattern 5: Robot Mode / Machine-Readable Output
+### Robot Mode / Machine-Readable Output
 
 For orchestration tools, document JSON/NDJSON APIs:
 
@@ -92,7 +92,7 @@ Output format:
 ```
 ````
 
-### Pattern 6: Exit Code Standardization
+### Exit Code Standardization
 
 ```markdown
 ## Exit Codes
@@ -107,7 +107,7 @@ Output format:
 | `5` | Timeout |
 ```
 
-### Pattern 7: ASCII State Diagrams
+### ASCII State Diagrams
 
 Visualize complex flows:
 
@@ -131,7 +131,7 @@ Visualize complex flows:
 ```
 ````
 
-### Pattern 8: Hierarchical Configuration Documentation
+### Hierarchical Configuration Documentation
 
 ```markdown
 ## Configuration
@@ -144,7 +144,7 @@ Configuration precedence (lowest to highest):
 5. Command-line flags
 ```
 
-### Pattern 9: Extended Thinking Signals
+### Extended Thinking Signals
 
 For complex prompts, append thinking mode instructions:
 
@@ -155,7 +155,7 @@ each modality. Use ultrathink.
 
 Signals to Claude to use extended thinking for thorough analysis.
 
-### Pattern 10: Iteration Protocols
+### Iteration Protocols
 
 For refinement workflows, specify iteration counts:
 
@@ -165,6 +165,41 @@ For refinement workflows, specify iteration counts:
 - Start fresh conversations for each round
 - After 4-5 rounds, suggestions become very incremental
 ```
+
+### Dynamic Context Injection
+
+Use `!`command"` syntax to run shell commands before skill content reaches Claude. Commands execute immediately, and their output replaces the placeholder—Claude receives actual data, not the command:
+
+```yaml
+---
+name: pr-summary
+description: Summarize changes in a pull request
+context: fork
+agent: Explore
+allowed-tools: Bash(gh *)
+---
+
+## Pull request context
+- PR diff: !`gh pr diff`
+- PR comments: !`gh pr view --comments`
+- Changed files: !`gh pr diff --name-only`
+
+## Your task
+Summarize this pull request...
+```
+
+**How it works:**
+1. Each `!`command"` executes immediately (before Claude sees anything)
+2. The output replaces the placeholder in the skill content
+3. Claude receives the fully-rendered skill with actual live data
+
+**Use cases:**
+- Skills that need live API data (GitHub PRs, environment info, file listings)
+- Preprocessing commands (validate, transform, filter data)
+- Conditional content (only show sections if certain files exist)
+- Fetching documentation or context before Claude executes
+
+**Key point:** This is preprocessing, not something Claude executes. Claude only sees the final result with actual data injected.
 
 ---
 
@@ -265,7 +300,7 @@ For refinement workflows, specify iteration counts:
 
 ## Production Patterns
 
-### Pattern 1: Impact/Priority Tiering
+### Impact/Priority Tiering
 
 Explicitly categorize content by impact level to guide Claude on prioritization:
 
@@ -297,7 +332,7 @@ Micro-optimizations for hot paths.
 - Makes trade-off decisions explicit
 - Signals degrees of freedom per tier
 
-### Pattern 2: Implementation Approach
+### Implementation Approach
 
 For process-oriented and methodology skills, provide a numbered step-by-step approach:
 
@@ -319,7 +354,7 @@ When using this skill:
 - Helps Claude understand the workflow
 - Makes the skill actionable, not just theoretical
 
-### Pattern 3: Outcome Metrics
+### Outcome Metrics
 
 Connect abstract rules to concrete, measurable results:
 
@@ -338,7 +373,7 @@ Connect abstract rules to concrete, measurable results:
 - Enables before/after comparisons
 - Makes abstract principles concrete
 
-### Pattern 4: Version History
+### Version History
 
 Track skill evolution in a footer section:
 
@@ -367,7 +402,7 @@ version: 1.0.0
 ---
 ```
 
-### Pattern 5: Quick Reference Ordering (Emphasis)
+### Quick Reference Ordering (Emphasis)
 
 Always lead with actionable essentials before theory:
 

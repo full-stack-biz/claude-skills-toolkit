@@ -11,11 +11,45 @@ allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 
 # Skill Creator
 
-**Purpose:** Create new Claude Code skills from scratch following best practices.
+**Purpose:** Create new Claude Code skills from scratch following best practices. Use when building skills from scratch or converting existing slash commands to project-scoped skills.
+
+## Mindset
+
+**CRITICAL:** Skills are instructions FOR CLAUDE, not documentation FOR PEOPLE. Always ask: "Will this help Claude execute the task?" not "Will people find this readable?"
 
 ## Quick Start
 
-Use AskUserQuestion with **predefined options**:
+Start at Implementation Approach below.
+
+## Core Use Cases
+
+**Create new skills** - Build from scratch with correct structure, naming, frontmatter, and validation guidance.
+**Convert slash commands** - Migrate existing `~/.claude/commands/` slash commands to project-scoped skills (better context management, subagent support).
+**Complex skills** - Ensure robustness with error handling, tool scoping, and version tracking.
+
+## Core Principles
+
+These principles apply to all skill creation and validation work—the foundational mental model Claude must follow.
+
+**Self-Containment** — Skills must be self-contained. Claude needs everything within the skill directory (references, scripts, examples). Avoid external references or network dependencies unless core to the skill's purpose. When deciding about external dependencies, see `references/self-containment-principle.md` for architectural background.
+
+**Progressive Disclosure** — Essential execution instructions first (Quick Start), detailed guidance second (references/), advanced topics last. Quick reference patterns solve 80% of task variants without loading auxiliary files.
+
+**Token Efficiency** — Every token Claude loads must justify its cost for execution. Keep SKILL.md body <500 lines (non-negotiable). Use code examples before prose, tables instead of lists.
+
+**The 80% Rule:** Core procedural content (used in 80%+ of skill activations) stays in SKILL.md. Example: release-process skill keeps standard workflows (patch/feature/breaking) in SKILL.md since every release uses them. Supplementary content (<20% of cases) moves to references/. Example: advanced monorepo coordination moves to references/ since most releases are single-component. Never delete content to reduce line count if it impairs execution. See `references/skill-workflow.md` for decision rules and preservation gates.
+
+**Token Loading** — Metadata (~100 tokens) always loads. SKILL.md body (~1-5k tokens) loads on trigger. References load on-demand only (zero penalty until needed). For token loading mechanics and activation internals: `references/how-skills-work.md`.
+
+**Activation** — Skills trigger via description text alone. Vague descriptions never activate. Include specific trigger phrases Claude will recognize in user requests (e.g., "create skill", "validate skill", "improve", "refine skill").
+
+## Implementation Approach
+
+**▶️ START HERE - Establish Action & Scope**
+
+**Interview 1: Ask - What do you want to do?**
+
+Use AskUserQuestion with predefined options:
 
 ```
 questions: [
@@ -37,107 +71,52 @@ questions: [
 ]
 ```
 
-Then route to the appropriate section below based on their selection.
+⏸️ **Collect user input** — Wait for response to Interview 1 before proceeding.
 
----
+**Interview 2: Ask - Where should the skill be created?**
 
-## Core Use Cases
+(Unified step for BOTH paths — regardless of whether creating from scratch or converting a slash command, establish the skill's location first. This applies before branching to the specific workflow.)
 
-**Create new skills** - Build from scratch with correct structure, naming, frontmatter, and validation guidance.
-**Convert slash commands** - Migrate existing `~/.claude/commands/` slash commands to project-scoped skills (better context management, subagent support).
-**Complex skills** - Ensure robustness with error handling, tool scoping, and version tracking.
+Use AskUserQuestion with predefined options:
 
-## Mindset
-
-**CRITICAL:** Skills are instructions FOR CLAUDE, not documentation FOR PEOPLE. Always ask: "Will this help Claude execute the task?" not "Will people find this readable?"
-
-## Core Principles
-
-These principles apply to all skill creation and validation work—the foundational mental model Claude must follow.
-
-**Self-Containment** — Skills must be self-contained. Claude needs everything within the skill directory (references, scripts, examples). Avoid external references or network dependencies unless core to the skill's purpose. When deciding about external dependencies, see `references/self-containment-principle.md` for architectural background.
-
-**Progressive Disclosure** — Essential execution instructions first (Quick Start), detailed guidance second (references/), advanced topics last. Quick reference patterns solve 80% of task variants without loading auxiliary files.
-
-**Token Efficiency** — Every token Claude loads must justify its cost for execution. Keep SKILL.md body <500 lines (non-negotiable). Use code examples before prose, tables instead of lists.
-
-**The 80% Rule:** Core procedural content (used in 80%+ of skill activations) stays in SKILL.md. Example: release-process skill keeps standard workflows (patch/feature/breaking) in SKILL.md since every release uses them. Supplementary content (<20% of cases) moves to references/. Example: advanced monorepo coordination moves to references/ since most releases are single-component. Never delete content to reduce line count if it impairs execution. See `references/skill-workflow.md` for decision rules and preservation gates.
-
-**Token Loading** — Metadata (~100 tokens) always loads. SKILL.md body (~1-5k tokens) loads on trigger. References load on-demand only (zero penalty until needed). For token loading mechanics and activation internals: `references/how-skills-work.md`.
-
-**Activation** — Skills trigger via description text alone. Vague descriptions never activate. Include specific trigger phrases Claude will recognize in user requests (e.g., "create skill", "validate skill", "improve", "refine skill").
-
-## Implementation Approach
-
-**▶️ START HERE - Quick Workflow**
-
-1. Ask: What do you want to do? (create / convert slash command)
-2. For create: Gather requirements interview, then route to "New Skills" section
-3. For slash command conversion: Offer conversion support following conversion workflow
-
-**BEFORE ANY OPERATION - Locate the Target Skill:**
-
-When user mentions a skill by name (e.g., "refine plugin-creator"):
-
-1. **Search CURRENT PROJECT first (preferred):**
-   ```
-   skills/skill-name/SKILL.md
-   .claude/skills/skill-name/SKILL.md
-   packages/*/skills/skill-name/SKILL.md
-   ```
-
-2. **If found in project** → Use that path (source confirmed)
-
-3. **If NOT found in project** → Search user-space:
-   ```
-   ~/.claude/skills/skill-name/SKILL.md
-   ```
-
-4. **If found in user-space** → Warn and confirm:
-   > "I found `skill-name` in `~/.claude/skills/` (user-space, affects all projects).
-   > It's not in this project. Do you want to:
-   > - Edit the user-space copy directly?
-   > - Copy it to this project first, then edit?"
-
-5. **If NOT found anywhere** → Ask user:
-   > "I couldn't find `skill-name` in this project or user-space. Where is the source?"
-
-6. **NEVER search or use:**
-   - `~/.claude/plugins/cache/*` (installed copies - read-only)
-   - Skill's own base directory (that's for THIS skill's references only)
-
-**Note:** The "Base directory" shown when this skill loads points to THIS skill's location for accessing its own references. Never use it to locate target skills.
-
----
-
-**Scope Rules: Source Code Only (NO CACHE EDITS)**
-
-✅ **PREFERRED - Project paths (search first):**
-- `skills/skill-name/` in plugin projects
-- `.claude/skills/skill-name/` in any project
-- `packages/*/skills/skill-name/` (monorepo patterns)
-
-⚠️ **CONDITIONAL - User-space (only if not in project):**
-- `~/.claude/skills/skill-name/` - Warn: "Affects all projects"
-- Requires explicit user confirmation before editing
-- Offer to copy to project instead
-
-❌ **FORBIDDEN - Never edit (REFUSE IMMEDIATELY):**
-- `~/.claude/plugins/cache/*` (installed plugins - Claude-managed)
-- Any path containing `/cache/` (always read-only)
-
-**Search Priority:**
 ```
-1. Current project     → Edit directly (preferred)
-2. User-space          → Warn + confirm (conditional)
-3. Cache               → REFUSE (never)
-4. Not found           → Ask user for source path
+questions: [
+  {
+    question: "Where should this skill be created?",
+    header: "Skill Scope",
+    options: [
+      {
+        label: "Project-scoped (.claude/skills/)",
+        description: "Only available in this project via .claude/skills/ directory"
+      },
+      {
+        label: "User-space (~/.claude/skills/)",
+        description: "Available globally across all projects in user's home directory"
+      },
+      {
+        label: "Plugin-scoped (skills/ in plugin)",
+        description: "Only if working in a Claude Code plugin project - skill bundled with plugin"
+      }
+    ],
+    multiSelect: false
+  }
+]
 ```
 
-**For NEW skills (scope detection):**
-- Plugin project? → Default: `skills/skill-name/`
-- Regular project? → Default: `.claude/skills/skill-name/`
-- Ask only if ambiguous
+**Critical guidance for Agent:**
+- ❌ NEVER default to user-space without asking (affects all projects)
+- ❌ NEVER create in plugin/skills/ unless explicitly in a plugin project
+- ✅ Always confirm scope with user first
+- ✅ Default recommendation: Project-scoped (.claude/skills/) for isolated work
+
+⏸️ **Collect user input** — Wait for response to Interview 2 before proceeding.
+
+**Step 3: Route based on action selection**
+
+Use the **action choice** from Interview 1 to route to the appropriate workflow. The **location** from Interview 2 applies to both paths:
+
+- Action: "Create a new skill" → Proceed to "Create New Skill Workflow" section (use location for new skill placement)
+- Action: "Convert a slash command" → Proceed to "Convert Slash Command to Skill" section (use location for converted skill placement)
 
 ### For New Skills: Requirements Interview with Escape Hatch
 
@@ -184,7 +163,7 @@ Then route based on their choice:
 
 **🔴 BATCH 1: Core Definition** (Prose questions with guidance):
 
-*Skip this batch if user chose "infer" in escape hatch, or if no predating context.*
+*Do this batch if: no predating context exists, OR user chose "Define explicitly" in the escape hatch. Skip only if user chose "Infer from context."*
 
 ### Question 1: Skill Purpose
 
@@ -273,59 +252,21 @@ Examples:
 
 ## Step 3: Create Skill Structure
 
-After gathering ALL responses, use `references/templates.md` to apply requirements to the appropriate skill template.
+Execute the skill creation using your gathered requirements (BATCH 1-2 responses).
 
-**CRITICAL: Content-Size Check**
+### Step 3.1: Create skill directory in chosen location
 
-Before creating references/:
-1. Generate full SKILL.md body content
-2. Count total lines of SKILL.md + all reference content
-3. Check size:
-   - **< 500 lines total?** → Keep everything in SKILL.md only, no references/
-   - **≥ 500 lines total?** → Split into SKILL.md + references/
+Use the location from Implementation Approach Interview 2:
+- **Project-scoped:** `mkdir -p .claude/skills/skill-name`
+- **User-space:** `mkdir -p ~/.claude/skills/skill-name`
+- **Plugin-scoped:** `mkdir -p skills/skill-name`
 
-**User Feedback (Required):**
+### Step 3.2: Check if templates needed and use them
 
-If user selected "Complex" BUT total content < 500 lines, explain:
+Refer to `references/templates.md` to apply the template matching your BATCH 1-2 responses (skill purpose, complexity, tools needed). Copy or use template as reference while building.
 
-```
-You selected Complexity: Complex
-Total content generated: [X lines]
+### Step 3.3: Write frontmatter
 
-Since the total content is [X lines] (under 500 line threshold),
-I'm keeping everything in SKILL.md for now. No separate references needed yet.
-
-As the skill grows beyond 500 lines, we'll split into references/ to maintain token efficiency.
-```
-
-This prevents creating unnecessary files while explaining the decision to the user.
-
-### For Converting Slash Commands to Skills
-
-**Shorthand:** Recommend skill migration for complex commands or team/project-scoped automation. Self-convert simple commands (1-10 lines); offer help for complex logic or unclear structure.
-
-**Full conversion workflow:** See `references/slash-command-conversion.md` for detection, mapping, conversion logic, and validation process.
-
-## Outcome Metrics
-
-Measure success by whether Claude will execute the skill effectively:
-
-✅ **Structure** - Claude can execute 80% of cases from Quick Start alone (no references needed)
-✅ **Activation** - Description includes trigger phrases Claude will recognize; skill activates when needed
-✅ **Token efficiency** - SKILL.md body <500 lines; Claude doesn't waste tokens on unnecessary content
-✅ **Clarity** - Instructions are concrete and procedural (Claude knows exactly what to execute)
-✅ **Completeness** - All required frontmatter present (name, description for activation)
-✅ **Tool scoping** - Only necessary tools declared (principle of least privilege for security)
-✅ **Testing** - Validated with both Haiku and Opus; works with real-world example requests
-
-## Quick Start: Creating a New Skill
-
-**Step 1: Create directory structure**
-```bash
-mkdir -p skill-name/references
-```
-
-**Step 2: Write frontmatter**
 Create `SKILL.md` with required metadata. Frontmatter is what Claude reads to discover and activate skills:
 ```yaml
 ---
@@ -339,20 +280,122 @@ Guidelines for Claude's activation:
 - name: lowercase, hyphens, ≤64 chars, no "anthropic"/"claude" (Claude uses this to reference the skill)
 - description: ≤1024 chars, must include trigger phrases Claude will recognize in requests
 
-**Step 3: Write SKILL.md body**
+**For detailed frontmatter patterns, naming conventions, description formulas, and edge cases:** See the Frontmatter section in Key Notes below.
+
+### Step 3.4: Write SKILL.md body
+
 Write instructions Claude will follow to execute the task. Structure: Quick Start → Workflows → Key Notes → Full Reference (optional)
-- Keep <500 lines (Claude reads this body every time skill triggers; token efficiency is mandatory)
+- Target <500 lines (Claude reads this body every time skill triggers; token efficiency is mandatory)
 - Code-first: examples Claude can adapt before abstract explanations
 - Progressive disclosure: essentials Claude needs immediately → advanced topics later
 
-**Step 4: Add references (if needed)**
-Create `references/` subdirectories for:
-- **Comprehensive guides** (>100 lines): include table of contents
-- **Templates or configuration**: structured reference material
-- One level deep only (no nested chains)
+### Step 3.5: Content-Size Check
 
-**Step 5: Validate**
+After writing the body, evaluate what you've created:
+1. Count total lines of SKILL.md body + any planned reference content
+2. Check size:
+   - **< 500 lines total?** → Skip to Step 3.8 (Validate). No references/ directory needed.
+   - **≥ 500 lines total?** → Proceed to Step 3.6 (Create references/). Split content across files.
+
+**User Feedback (if complexity/content mismatch):**
+
+If user selected "Complex" BUT total content < 500 lines:
+
+```
+You selected Complexity: Complex
+Total content generated: [X lines]
+
+Since the total content is [X lines] (under 500 line threshold),
+I'm keeping everything in SKILL.md for now. No separate references needed yet.
+
+As the skill grows beyond 500 lines, we'll split into references/ to maintain token efficiency.
+```
+
+### Step 3.6: Create references/ (conditional)
+
+Only proceed if Step 3.5 indicated ≥500 lines total:
+
+```bash
+mkdir -p skill-name/references
+```
+
+### Step 3.7: Add references (conditional)
+
+Only proceed if Step 3.6 created the references/ directory:
+
+Move supplementary content (<20% of activations) into reference files. Create table of contents for comprehensive guides. Keep one level deep (no nested subdirectories).
+
+### Step 3.8: Validate
+
 Check structure, content, security, activation. See `references/checklist.md` for comprehensive validation across all dimensions before deployment.
+
+## Convert Slash Command to Skill
+
+**Shorthand:** Recommend skill migration for complex commands or team/project-scoped automation. Self-convert simple commands (1-10 lines); offer help for complex logic or unclear structure.
+
+**Full conversion workflow:** See `references/slash-command-conversion.md` for detection, mapping, conversion logic, and validation process.
+
+## Key Notes
+
+**Wizard Pattern (this skill models the pattern it teaches) - CRITICAL EXECUTION RULE:**
+Progressive disclosure ALWAYS means: ask ONE question, wait for response, then ask next. Never combine questions into a single AskUserQuestion call.
+- ❌ WRONG: Ask 2 questions in one AskUserQuestion (looks like a form)
+- ✅ RIGHT: Ask question 1 → wait for response → then ask question 2 (if conditional)
+When tool has constraints (maxItems: 4), this pattern is mandatory. Applied in "For Improvements (Refining)" section's approval workflow. Claude must follow this pattern when implementing guided user interactions in skills.
+
+**Frontmatter (Claude reads this to discover and activate skills):**
+- YAML syntax (use triple dashes: `---`)
+- `name`: Optional (uses directory name if omitted), lowercase-hyphen, ≤64 chars, no "anthropic"/"claude"
+- `description`: Recommended, ≤1024 chars, must include specific trigger phrases Claude recognizes
+- Description is Claude's activation signal (vague descriptions = skill never activates)
+
+**Optional frontmatter (for complex skills):**
+- `version: 1.0.0` — Track skill evolution for coordination
+- `allowed-tools: Read,Write,Bash(git:*)` — Declare only tools Claude needs. Restrict Bash to specific commands (e.g., `Bash(git:*)`). See `references/allowed-tools.md` for tool scoping validation.
+- Copy tool patterns from `references/templates.md` for reference
+
+**Naming conventions:**
+- Hyphen-separated lowercase: `skill-name`, `my-feature-validator`
+- Prefer gerund form: `processing-pdfs`, `analyzing-spreadsheets`
+- Include action/domain: `test-runner`, `skill-creator`, `code-reviewer`
+- Avoid generic: prefer `log-analyzer` over `analyzer`
+
+**Description formula (Claude uses this to decide whether to activate):**
+```
+[Action]. Use when [trigger contexts]. [Scope/constraints].
+```
+**Example:** "Run tests and generate reports. Use when validating code before commit. Supports PHPUnit and Jest."
+
+✅ **Good descriptions** include specific trigger phrases Claude will recognize in user requests (e.g., "create", "validate", "improve", "refine").
+
+❌ **Vague descriptions** (e.g., "Process things") never activate the skill when users need it.
+
+**Complex skill considerations:** For complex skills requiring robust structure, ensure error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/complex-skills-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
+
+**Secrets & credentials:** Skills must never contain hardcoded secrets (API keys, passwords, tokens). Use environment variables instead, validate they're set, and provide clear error messages. Never commit `.env` files or credentials to git. See `references/secrets-and-credentials.md` for complete guidance on detection, handling, git safety, and testing patterns.
+
+**Content distribution rule:** Apply the 80% Rule principle: keep core procedural content in SKILL.md <500 lines total. Supplementary content (<20% of activations) moves to references/. Reference files have zero token penalty until needed. See the Content-Size Check section for sizing logic.
+
+**Reference Linking Pattern (when your skill has references):**
+
+Every reference link teaches agents what they're looking for, so they decide confidently whether to load it:
+
+- ❌ WRONG: `See `references/advanced-patterns.md` for more info.` (Agent: "What's in there? Better load it to be safe.")
+- ✅ RIGHT: `Pattern: [core idea]. See `references/advanced-patterns.md` for [edge cases/advanced scenarios].` (Agent: "I have the pattern. The reference has detailed cases I might need.")
+
+**Template:**
+```
+[What agents need 80% of the time]. See `references/<filename.md>` for [what depth/edge cases are there].
+```
+
+**Example:**
+```
+**The 80% Rule:** Will Claude execute this 80%+ of activations? → STAYS in SKILL.md. <20% cases? → MOVES to references/. See `references/<80-percent-rule.md>` for decision trees and edge cases.
+```
+
+Why? Without context, agents load references out of uncertainty (wastes tokens). With context, they load references *intentionally* when needed. The reference becomes more valuable, not less.
+
+**Base Directory context:** When skill-creator loads, the system shows a "Base directory" path. This points to THIS skill's installed location—use it ONLY for loading skill-creator's own references (`references/templates.md`, etc.). Never use it to locate target skills you're asked to work on. Target skills must be discovered via the "Locate the Target Skill" workflow.
 
 ## Reference Guide
 
@@ -412,73 +455,7 @@ Check structure, content, security, activation. See `references/checklist.md` fo
 → `references/self-containment-principle.md` for architectural guidance
 
 **Complex skill patterns & specialized skills:**
-→ Common archetypes: validators, transformers, multi-workflow coordinators. Examples of quality complex skills.
-→ `references/advanced-patterns.md` for proven patterns and detailed examples
+→ Patterns for robustness: encoding reproducible prompts, front-loading motivation, documenting ecosystem integration, risk tiering for safety, exit code standardization, ASCII flow diagrams, configuration precedence documentation, extended thinking signals, iteration protocols, dynamic context injection (live data preprocessing), impact tiering, and outcome metrics.
+→ Skill archetypes: CLI reference tools, methodology guides, safety/security tools, orchestration systems.
+→ `references/advanced-patterns.md` for full pattern library and detailed examples
 
-### Converting Slash Commands to Skills
-
-**Migration workflow:**
-→ Detect command type → identify entry point → extract logic → map to skill structure → validate
-→ `references/slash-command-conversion.md` for full conversion process with examples
-
-## Key Notes
-
-**Wizard Pattern (this skill models the pattern it teaches) - CRITICAL EXECUTION RULE:**
-Progressive disclosure ALWAYS means: ask ONE question, wait for response, then ask next. Never combine questions into a single AskUserQuestion call.
-- ❌ WRONG: Ask 2 questions in one AskUserQuestion (looks like a form)
-- ✅ RIGHT: Ask question 1 → wait for response → then ask question 2 (if conditional)
-When tool has constraints (maxItems: 4), this pattern is mandatory. Applied in "For Improvements (Refining)" section's approval workflow. Claude must follow this pattern when implementing guided user interactions in skills.
-
-**Frontmatter (Claude reads this to discover and activate skills):**
-- YAML syntax (use triple dashes: `---`)
-- `name`: Optional (uses directory name if omitted), lowercase-hyphen, ≤64 chars, no "anthropic"/"claude"
-- `description`: Recommended, ≤1024 chars, must include specific trigger phrases Claude recognizes
-- Description is Claude's activation signal (vague descriptions = skill never activates)
-
-**Optional frontmatter (for complex skills):**
-- `version: 1.0.0` — Track skill evolution for coordination
-- `allowed-tools: Read,Write,Bash(git:*)` — Declare only tools Claude needs. Restrict Bash to specific commands (e.g., `Bash(git:*)`). See `references/allowed-tools.md` for tool scoping validation.
-- Copy tool patterns from `references/templates.md` for reference
-
-**Naming conventions:**
-- Hyphen-separated lowercase: `skill-name`, `my-feature-validator`
-- Prefer gerund form: `processing-pdfs`, `analyzing-spreadsheets`
-- Include action/domain: `test-runner`, `skill-creator`, `code-reviewer`
-- Avoid generic: prefer `log-analyzer` over `analyzer`
-
-**Description formula (Claude uses this to decide whether to activate):**
-```
-[Action]. Use when [trigger contexts]. [Scope/constraints].
-```
-**Example:** "Run tests and generate reports. Use when validating code before commit. Supports PHPUnit and Jest."
-
-✅ **Good descriptions** include specific trigger phrases Claude will recognize in user requests (e.g., "create", "validate", "improve", "refine").
-
-❌ **Vague descriptions** (e.g., "Process things") never activate the skill when users need it.
-
-**Complex skill considerations:** For complex skills requiring robust structure, ensure error handling, tool scoping, validation scripts, security review, and clear documentation. See `references/complex-skills-patterns.md` for detailed guidance on these patterns, plus `references/advanced-patterns.md` and `references/checklist.md` for additional requirements.
-
-**Secrets & credentials:** Skills must never contain hardcoded secrets (API keys, passwords, tokens). Use environment variables instead, validate they're set, and provide clear error messages. Never commit `.env` files or credentials to git. See `references/secrets-and-credentials.md` for complete guidance on detection, handling, git safety, and testing patterns.
-
-**Content distribution rule:** Keep SKILL.md <500 lines. Add >50 lines? Create reference file instead. Reference files have zero token penalty until needed.
-
-**Reference Linking Pattern (when your skill has references):**
-
-Every reference link teaches agents what they're looking for, so they decide confidently whether to load it:
-
-- ❌ WRONG: `See `references/advanced-patterns.md` for more info.` (Agent: "What's in there? Better load it to be safe.")
-- ✅ RIGHT: `Pattern: [core idea]. See `references/advanced-patterns.md` for [edge cases/advanced scenarios].` (Agent: "I have the pattern. The reference has detailed cases I might need.")
-
-**Template:**
-```
-[What agents need 80% of the time]. See `references/<filename.md>` for [what depth/edge cases are there].
-```
-
-**Example:**
-```
-**The 80% Rule:** Will Claude execute this 80%+ of activations? → STAYS in SKILL.md. <20% cases? → MOVES to references/. See `references/<80-percent-rule.md>` for decision trees and edge cases.
-```
-
-Why? Without context, agents load references out of uncertainty (wastes tokens). With context, they load references *intentionally* when needed. The reference becomes more valuable, not less.
-
-**Base Directory context:** When skill-creator loads, the system shows a "Base directory" path. This points to THIS skill's installed location—use it ONLY for loading skill-creator's own references (`references/templates.md`, etc.). Never use it to locate target skills you're asked to work on. Target skills must be discovered via the "Locate the Target Skill" workflow.
