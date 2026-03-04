@@ -2,6 +2,11 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.13.0] - 2026-03-04
+
+### Changed
+- **subagent-creator 1.4.0:** Added Step 3b "Write reliable delegation prompts" in Reference Guide. New reference file `delegation-patterns.md` documents proven delegation patterns from production implementations (skill-tester parallel agents, skill-creator delegation chains). Includes pattern templates, parallel execution patterns, constraint handling, output specifications, and real working examples. Helps users write reliable subagent prompts with consistent, predictable results.
+
 ## [2.12.0] - 2026-03-04
 
 ### Changed
