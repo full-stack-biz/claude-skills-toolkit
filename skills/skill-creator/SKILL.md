@@ -5,8 +5,8 @@ description: >-
   skills, interviewing for requirements, applying templates, organizing frontmatter and body
   content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
   progressive disclosure, reference organization, and tool scoping.
-version: 2.4.0
-allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
+version: 2.6.0
+allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion,Agent
 ---
 
 # Skill Creator
@@ -328,6 +328,120 @@ Move supplementary content (<20% of activations) into reference files. Create ta
 ### Step 3.8: Validate
 
 Check structure, content, security, activation. See `references/checklist.md` for comprehensive validation across all dimensions before deployment.
+
+### Step 3.9: Optional — Refine Your Skill
+
+**Question:** Would you like to refine the skill before testing it?
+
+Use AskUserQuestion:
+
+```
+questions: [
+  {
+    question: "Would you like to refine this skill before testing?",
+    header: "Next Step",
+    options: [
+      {
+        label: "Yes, refine with skill-refiner",
+        description: "Improve skill clarity, efficiency, structure. Validate against best practices (optional iteration)"
+      },
+      {
+        label: "No, skip refinement",
+        description: "Proceed directly to testing or completion"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+⏸️ **Collect user input.**
+
+**If user chose "Yes, refine now":**
+
+Tell user: "Launching skill-refiner. This will validate and improve your skill's quality."
+
+Then delegate to skill-refiner using Agent tool:
+
+```
+Agent type: general-purpose
+Prompt: "
+The user just finished creating a new skill at <skill_path>.
+They want to refine it using skill-refiner.
+
+Invoke skill-refiner to:
+1. Analyze the skill (structure, clarity, efficiency)
+2. Identify improvement opportunities
+3. Apply refinements (wording, organization, token optimization)
+4. Validate final quality
+
+After refinement completes, tell the user: 'Skill refined. Ready for testing?'
+Then stop and let the original skill-creator workflow offer testing."
+```
+
+**If user chose "No, skip refinement":**
+
+Continue to Step 3.10 (testing step below).
+
+### Step 3.10: Optional — Test Your Skill (Empirical Validation)
+
+**Question:** Would you like to test this skill empirically?
+
+Use AskUserQuestion:
+
+```
+questions: [
+  {
+    question: "Would you like to test this skill empirically?",
+    header: "Testing",
+    options: [
+      {
+        label: "Yes, test now with skill-tester",
+        description: "Run quick validation: design test cases, test your new skill, show pass/fail results (fast feedback)"
+      },
+      {
+        label: "No, done",
+        description: "Skill is complete. You can test anytime with /skills-toolkit:skill-tester"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+⏸️ **Collect user input.**
+
+**If user chose "Yes, test now":**
+
+Tell user: "Launching skill-tester (Quick Workflow). This will create an evals/ workspace, run test cases with the new skill, and show pass/fail results. No baseline comparison—just a sanity check."
+
+Then delegate to skill-tester using Agent tool:
+
+```
+Agent type: general-purpose
+Prompt: "
+The user just finished creating a new skill at <skill_path>.
+They want to quickly test it using skill-tester's QUICK WORKFLOW mode (not full pipeline).
+
+Invoke skill-tester to:
+1. Confirm the skill (Phase 1: Setup)
+2. Interview user for test scenarios (Phase 2: Create Evals)
+3. RUN QUICK WORKFLOW (fast validation):
+   - Test the new skill on the scenarios
+   - Grade if it passes the test criteria
+   - Show simple pass/fail results
+   - Ask: Refine? Run full benchmarking? Done?
+
+QUICK MODE: Just test the skill itself, no comparisons.
+
+The evals/ workspace should live at ./evals/<skill-name>/
+
+Tell the user: 'Quick test complete. Results show if the skill works as intended.'"
+```
+
+**If user chose "No, done":**
+
+Confirm: "Skill created and (optionally refined). You can test it anytime with `/skills-toolkit:skill-tester`."
 
 ## Convert Slash Command to Skill
 

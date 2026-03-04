@@ -2,6 +2,19 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.12.0] - 2026-03-04
+
+### Changed
+- **skill-tester 1.1.0:** Added Quick Workflow mode for fast skill validation (alternative to Full Pipeline). Quick Workflow: only runs with_skill agent (no baseline), excludes timing metrics, no aggregation. Shows simple pass/fail on assertions. Perfect for rapid iteration. Users choose between Quick (fast check) or Full (comprehensive benchmark) in Phase 1. Standardized artifact location to centralized `./evals/<skill-name>/` at project root. Updated eval-schema reference documentation with new structure.
+
+## [2.11.0] - 2026-03-04
+
+### Added
+- **skill-tester 1.0.0:** New skill implementing evaluation-driven development pipeline for Claude Code skills. Enables empirical testing with 7-phase workflow: setup → create evals → run tests (parallel with_skill + baseline) → grade results → aggregate benchmark → review summary → iterate. Includes Ruby aggregation script for computing pass rates, token usage, and timing deltas. Supports multi-iteration testing with workspace structure tracking improvement across iterations.
+
+### Changed
+- **skill-creator 2.6.0:** Integrated complete workflow: create → refine (optional) → test (optional). Added Step 3.9 for optional skill-refiner integration (validate/improve quality), and Step 3.10 for optional skill-tester integration (empirical validation). Both refinement and testing are user-optional, enabling natural progression from creation through validation. Added Agent tool to allowed-tools for delegating to skill-refiner and skill-tester.
+
 ## [2.8.0] - 2026-02-25
 
 ### Added
