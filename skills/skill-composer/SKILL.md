@@ -1,15 +1,15 @@
 ---
-name: skill-creator
+name: skill-composer
 description: >-
   Create NEW Claude Code skills from scratch following best practices. Use when building new
   skills, interviewing for requirements, applying templates, organizing frontmatter and body
   content, or converting slash commands to skills. Guides skill structure, naming, descriptions,
   progressive disclosure, reference organization, and tool scoping.
-version: 2.6.0
+version: 2.8.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion,Agent
 ---
 
-# Skill Creator
+# Skill Composer
 
 **Purpose:** Create new Claude Code skills from scratch following best practices. Use when building skills from scratch or converting existing slash commands to project-scoped skills.
 
@@ -51,25 +51,8 @@ These principles apply to all skill creation and validation work—the foundatio
 
 Use AskUserQuestion with predefined options:
 
-```
-questions: [
-  {
-    question: "What do you want to do?",
-    header: "Action",
-    options: [
-      {
-        label: "Create a new skill",
-        description: "Build a new Claude Code skill from scratch following best practices"
-      },
-      {
-        label: "Convert a slash command",
-        description: "Migrate existing ~/.claude/commands/ slash command to a project-scoped skill"
-      }
-    ],
-    multiSelect: false
-  }
-]
-```
+Ask: "What do you want to do?" (header: "Action")
+Options: "Create a new skill" | "Convert a slash command"
 
 ⏸️ **Collect user input** — Wait for response to Interview 1 before proceeding.
 
@@ -79,29 +62,8 @@ questions: [
 
 Use AskUserQuestion with predefined options:
 
-```
-questions: [
-  {
-    question: "Where should this skill be created?",
-    header: "Skill Scope",
-    options: [
-      {
-        label: "Project-scoped (.claude/skills/)",
-        description: "Only available in this project via .claude/skills/ directory"
-      },
-      {
-        label: "User-space (~/.claude/skills/)",
-        description: "Available globally across all projects in user's home directory"
-      },
-      {
-        label: "Plugin-scoped (skills/ in plugin)",
-        description: "Only if working in a Claude Code plugin project - skill bundled with plugin"
-      }
-    ],
-    multiSelect: false
-  }
-]
-```
+Ask: "Where should this skill be created?" (header: "Skill Scope")
+Options: "Project-scoped (.claude/skills/)" | "User-space (~/.claude/skills/)" | "Plugin-scoped (skills/ in plugin)"
 
 **Critical guidance for Agent:**
 - ❌ NEVER default to user-space without asking (affects all projects)
@@ -135,25 +97,8 @@ Check conversation history before the skill request:
 
 **IF PREDATING CONTEXT EXISTS** → Use AskUserQuestion to offer escape hatch:
 
-```
-questions: [
-  {
-    question: "I've reviewed the docs/code/context you provided. How would you like to proceed?",
-    header: "Interview Style",
-    options: [
-      {
-        label: "Infer from context",
-        description: "I'll infer purpose, scope, and triggers from what you shared. Just ask about complexity and tools (faster)"
-      },
-      {
-        label: "Define explicitly",
-        description: "I'll ask you to explicitly define purpose, scope, and triggers (full guided interview)"
-      }
-    ],
-    multiSelect: false
-  }
-]
-```
+Ask: "I've reviewed the docs/code/context you provided. How would you like to proceed?" (header: "Interview Style")
+Options: "Infer from context" | "Define explicitly"
 
 Then route based on their choice:
 - **"Infer from context"** → Skip BATCH 1, go straight to BATCH 2
@@ -212,19 +157,8 @@ Examples:
 
 Use AskUserQuestion with predefined options (different workflows apply):
 
-```
-questions: [
-  {
-    question: "What's the skill's complexity level?",
-    header: "Complexity",
-    options: [
-      { label: "Simple", description: "Single workflow, SKILL.md only, minimal structure" },
-      { label: "Complex", description: "Multiple workflows, needs reference files and/or scripts" }
-    ],
-    multiSelect: false
-  }
-]
-```
+Ask: "What's the skill's complexity level?" (header: "Complexity")
+Options: "Simple" (SKILL.md only, minimal structure) | "Complex" (multiple workflows, reference files/scripts)
 
 [User selects Simple or Complex]
 
@@ -515,61 +449,31 @@ Why? Without context, agents load references out of uncertainty (wastes tokens).
 
 ### Structuring Your Skill
 
-**Step 1: Choose the right template**
-→ Decision: Simple (SKILL.md only, <300 lines) or Complex (multiple references/scripts)?
-→ Each template shows: frontmatter + Quick Start + core sections + validation
-→ `references/templates.md`
+**Step 1: Choose the right template** → Decision: Simple (SKILL.md only, <300 lines) or Complex (multiple references/scripts)? Each template shows: frontmatter + Quick Start + core sections + validation. `references/templates.md`
 
-**Step 2: Write frontmatter & descriptions**
-→ Pattern: [Action]. Use when [trigger contexts]. [Scope]. Include specific trigger phrases Claude recognizes.
-→ Example: "Create skills. Use when building new Claude Code skills from scratch."
-→ `references/content-guidelines.md` for phrase library and activation examples
+**Step 2: Write frontmatter & descriptions** → Pattern: [Action]. Use when [trigger contexts]. [Scope]. Include specific trigger phrases Claude recognizes. Example: "Create skills. Use when building new Claude Code skills from scratch." `references/content-guidelines.md` for phrase library and activation examples
 
-**Step 3: Organize content using 80% rule**
-→ Core procedural (80%+ of skill activations) → SKILL.md body (<500 lines)
-→ Supplementary (edge cases, <20%) → references/ subdirectory
-→ Progressive disclosure: Quick Start → Workflows → Advanced sections
-→ `references/skill-workflow.md` for detailed content distribution framework
+**Step 3: Organize content using 80% rule** → Core procedural (80%+ of skill activations) → SKILL.md body (<500 lines). Supplementary (edge cases, <20%) → references/ subdirectory. Progressive disclosure: Quick Start → Workflows → Advanced sections. `references/skill-workflow.md` for detailed content distribution framework
 
-**Step 4: Design user interactions**
-→ Rule: Max 4 AskUserQuestion options per question. Progressive disclosure: ask → wait → ask next (never combine into forms).
-→ `references/ask-user-question-patterns.md` for interaction patterns and decision trees
+**Step 4: Design user interactions** → Rule: Max 4 AskUserQuestion options per question. Progressive disclosure: ask → wait → ask next (never combine into forms). `references/ask-user-question-patterns.md` for interaction patterns and decision trees
 
-**Step 5: Validate quality before release**
-→ Checklist: (1) Frontmatter complete, (2) <500 lines, (3) 80% rule applied, (4) All references complete, (5) Tool scoping matches needs, (6) Tested with real trigger phrases
-→ `references/checklist.md` for comprehensive validation across all dimensions
+**Step 5: Validate quality before release** → Checklist: (1) Frontmatter complete, (2) <500 lines, (3) 80% rule applied, (4) All references complete, (5) Tool scoping matches needs, (6) Tested with real trigger phrases. `references/checklist.md` for comprehensive validation across all dimensions
 
-**Step 6: Avoid common mistakes**
-→ 16 patterns: thinking of skills as documentation, orphaned references, vague descriptions, moving content just to reduce lines, etc.
-→ Each mistake has BAD/GOOD example showing what to do instead
-→ `references/anti-patterns.md`
+**Step 6: Avoid common mistakes** → 16 patterns: thinking of skills as documentation, orphaned references, vague descriptions, moving content just to reduce lines, etc. Each mistake has BAD/GOOD example showing what to do instead. `references/anti-patterns.md`
 
 ### Understanding Skill Fundamentals (Optional Deep Dive)
 
-**How skills are loaded and activated:**
-→ Frontmatter (~100 tokens) always loads for discovery. SKILL.md body (~1-5k tokens) loads when skill triggers. References load on-demand (zero penalty until needed).
-→ `references/how-skills-work.md` for token loading mechanics and activation internals
+**How skills are loaded and activated:** → Frontmatter (~100 tokens) always loads for discovery. SKILL.md body (~1-5k tokens) loads when skill triggers. References load on-demand (zero penalty until needed). `references/how-skills-work.md` for token loading mechanics and activation internals
 
 ### Building Complex Skills
 
-**Error handling, security, tool scoping:**
-→ Robust patterns: validation scripts, error recovery, security review, documentation
-→ `references/complex-skills-patterns.md`
+**Error handling, security, tool scoping:** → Robust patterns: validation scripts, error recovery, security review, documentation. `references/complex-skills-patterns.md`
 
-**Preventing secret leaks:**
-→ Never hardcode API keys, passwords, tokens. Use environment variables, validate at startup, provide clear error messages if missing. Never commit .env files to git.
-→ `references/secrets-and-credentials.md` for detection, handling, git safety, and testing patterns
+**Preventing secret leaks:** → Never hardcode API keys, passwords, tokens. Use environment variables, validate at startup, provide clear error messages if missing. Never commit .env files to git. `references/secrets-and-credentials.md` for detection, handling, git safety, and testing patterns
 
-**Tool scoping (principle of least privilege):**
-→ Declare only tools Claude needs. Restrict Bash to specific commands (e.g., `Bash(git:*)`).
-→ `references/allowed-tools.md` for scoping validation and security patterns
+**Tool scoping (principle of least privilege):** → Declare only tools Claude needs. Restrict Bash to specific commands (e.g., `Bash(git:*)`). `references/allowed-tools.md` for scoping validation and security patterns
 
-**External dependencies & self-containment:**
-→ Skills should contain everything they need (references, scripts, examples). Avoid external APIs unless core to skill purpose.
-→ `references/self-containment-principle.md` for architectural guidance
+**External dependencies & self-containment:** → Skills should contain everything they need (references, scripts, examples). Avoid external APIs unless core to skill purpose. `references/self-containment-principle.md` for architectural guidance
 
-**Complex skill patterns & specialized skills:**
-→ Patterns for robustness: encoding reproducible prompts, front-loading motivation, documenting ecosystem integration, risk tiering for safety, exit code standardization, ASCII flow diagrams, configuration precedence documentation, extended thinking signals, iteration protocols, dynamic context injection (live data preprocessing), impact tiering, and outcome metrics.
-→ Skill archetypes: CLI reference tools, methodology guides, safety/security tools, orchestration systems.
-→ `references/advanced-patterns.md` for full pattern library and detailed examples
+**Complex skill patterns & specialized skills:** → Patterns for robustness: encoding reproducible prompts, front-loading motivation, documenting ecosystem integration, risk tiering for safety, exit code standardization, ASCII flow diagrams, configuration precedence documentation, extended thinking signals, iteration protocols, dynamic context injection (live data preprocessing), impact tiering, and outcome metrics. Skill archetypes: CLI reference tools, methodology guides, safety/security tools, orchestration systems. `references/advanced-patterns.md` for full pattern library and detailed examples
 

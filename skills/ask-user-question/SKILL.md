@@ -2,8 +2,8 @@
 name: ask-user-question
 description: >-
   Implement skills using AskUserQuestion tool for interactive user input and decisions. Use when authoring skills that need to gather options, handle free-text answers, process multi-select, or build multi-step workflows. Covers tool mechanics, constraints, wiring into skills, response handling, and dynamic question patterns.
-version: 1.0.0
-allowed-tools: Read, Write, AskUserQuestion
+version: 1.1.0
+allowed-tools: Read, AskUserQuestion
 ---
 
 # Implementing Skills with AskUserQuestion
@@ -284,6 +284,10 @@ If any validation fails:
 
 ### Handling Free-Text Answers
 
+When users select "Other" and type custom input, you need to handle it properly.
+
+**Pattern:** Check if answer is a known option or custom text, then route accordingly.
+
 ```
 If user selected "Other" and typed "custom-framework":
 
@@ -298,6 +302,8 @@ Check if "custom-framework" is in known frameworks:
 Log: "Using custom framework: custom-framework"
 Proceed with generic configuration...
 ```
+
+See `references/free-text-input-patterns.md` for complete patterns for handling custom input including validation, generic fallbacks, and user feedback.
 
 ## When to Use Each Pattern
 
@@ -326,33 +332,13 @@ Step 3: Ask "Which features?" (multi-select options)
 ## Question Design (For Structured Options)
 
 When using predefined options:
+- **Be specific:** "Which database for this project?" (not "Database?")
+- **Provide context:** "Relational, ACID compliant, best for complex queries"
+- **Show trade-offs:** "Fast for reads, slower for writes, good for analytics"
+- **Mutually exclusive:** Options should be distinct (unless multiSelect)
+- **Consistent format:** Same capitalization, length (~1-2 sentences), detail level
 
-### Be Specific
-
-❌ "Database?"
-✅ "Which database for this project?"
-
-### Provide Context in Description
-
-❌ "A good option"
-✅ "Relational, ACID compliant, best for complex queries"
-
-### Show Trade-Offs
-
-❌ "Option A is best"
-✅ "Fast for reads, slower for writes, good for analytics"
-
-### Mutually Exclusive (Unless multiSelect)
-
-❌ "PostgreSQL" and "Also supports MongoDB"
-✅ "PostgreSQL" (relational) or "MongoDB" (document) - pick one
-
-### Consistent Formatting
-
-All options same style:
-- Same capitalization
-- Same description length (~1-2 sentences)
-- Same level of detail
+See `references/skill-patterns.md` for complete question design examples.
 
 ## Dynamic Questions Pattern
 
@@ -499,21 +485,11 @@ See `references/robust-skills.md` for testing validation patterns and common tes
 
 ❌ **Don't:** Combine multiple questions, use >4 options, include "Other" in options
 
-## Plan Mode: When & When NOT to Use
+See `references/common-mistakes.md` for detailed anti-patterns and how to avoid them.
 
-In plan mode, use AskUserQuestion to **clarify requirements before finalizing plan**.
+## Plan Mode: Clarifying Decisions vs. Meta-Questions
 
-❌ **DON'T use for meta-questions:**
-- "Is my plan ready?"
-- "Does the plan look good?"
-- "Should I proceed with this plan?"
-
-✅ **USE for actual decisions:**
-- "Which database?" (real implementation choice)
-- "How many environments?" (preference for setup)
-- "Enable monitoring?" (actual configuration decision)
-
-For plan approval, use proper plan approval tool instead.
+Use AskUserQuestion in plan mode to **clarify real implementation decisions** (database choice, monitoring config), not meta-questions ("Is my plan ready?"). For plan approval, use the plan approval tool instead. See `references/advanced-patterns.md` for detailed guidance.
 
 ---
 

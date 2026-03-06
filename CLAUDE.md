@@ -54,11 +54,12 @@ allowed-tools: Read,Write,Bash(*)   # Optional: principle of least privilege
 ### Agent Skills (in `skills/`)
 Skills are discoverable and invocable via both auto-activation and direct `/` commands:
 
-- **skill-creator** - Create NEW Claude Code skills from scratch following best practices. Claude auto-activates when detecting skill creation tasks; users can invoke directly with `/skills-toolkit:create-skill`.
+- **skill-composer** - Create NEW Claude Code skills from scratch following best practices. Claude auto-activates when detecting skill creation tasks; users can invoke directly with `/skills-toolkit:skill-composer`.
 - **skill-refiner** - Improve and validate EXISTING Claude Code skills for clarity, efficiency, and production readiness. Claude auto-activates when detecting skill refinement/validation tasks; users can invoke directly with `/skills-toolkit:skill-refiner`.
-- **plugin-creator** - Create, convert, and validate Claude Code plugins. Claude auto-activates when detecting plugin-related tasks; users can invoke directly with `/skills-toolkit:create-plugin`.
-- **subagent-creator** - Create, validate, and refine Claude Code subagents. Claude auto-activates for subagent delegation tasks; users can invoke with `/skills-toolkit:create-subagent`.
-- **hook-creator** - Create, validate, and refine hooks for automating workflows. Claude auto-activates for hook-related work; users can invoke with `/skills-toolkit:create-hook`.
+- **skill-tester** - Empirically test and benchmark skills using evaluation-driven development. Two modes: Quick Workflow (fast pass/fail) or Full Pipeline (baseline comparison, metrics, iteration tracking). Users can invoke with `/skills-toolkit:skill-tester`.
+- **plugin-creator** - Create, convert, and validate Claude Code plugins. Claude auto-activates when detecting plugin-related tasks; users can invoke directly with `/skills-toolkit:plugin-creator`.
+- **subagent-creator** - Create, validate, and refine Claude Code subagents. Claude auto-activates for subagent delegation tasks; users can invoke with `/skills-toolkit:subagent-creator`.
+- **hook-creator** - Create, validate, and refine hooks for automating workflows. Claude auto-activates for hook-related work; users can invoke with `/skills-toolkit:hook-creator`.
 
 No separate command files are needed—skills use frontmatter to control invocation behavior.
 
@@ -69,8 +70,8 @@ No separate command files are needed—skills use frontmatter to control invocat
 This toolkit has intentional **knowledge duplication** that respects Claude's official architecture:
 
 - `plugin-creator` includes summaries of skill/subagent/hook knowledge in `references/`
-- These overlap with the full guidance in `skill-creator/`, `subagent-creator/`, and `hook-creator/`
-- This duplication follows the **Bounded Scope Principle** (see `skills/skill-creator/references/self-containment-principle.md`)
+- These overlap with the full guidance in `skill-composer/`, `subagent-creator/`, and `hook-creator/`
+- This duplication follows the **Bounded Scope Principle** (see `skills/skill-composer/references/self-containment-principle.md`)
 
 **Why?** Claude's official architecture does not support skill-to-skill delegation as a first-class feature. Each skill must be completely self-contained within its directory structure. This is documented in [Claude Code Skills documentation](https://code.claude.com/docs/en/skills).
 
@@ -94,7 +95,7 @@ agent: general-purpose
 This will enable:
 - Reduced duplication in `plugin-creator/references/`
 - True Single Responsibility Principle (SRP)
-- Knowledge owned by one specialist (skill-creator owns skill knowledge)
+- Knowledge owned by one specialist (skill-composer owns skill knowledge)
 - `plugin-creator` focuses solely on plugin structure
 
 ### What This Means
@@ -116,7 +117,7 @@ This will enable:
 
 ### References
 
-- Official principle: [Bounded Scope Principle for Skills](skills/skill-creator/references/self-containment-principle.md)
+- Official principle: [Bounded Scope Principle for Skills](skills/skill-composer/references/self-containment-principle.md)
 - Claude docs: [Extend Claude with skills](https://code.claude.com/docs/en/skills)
 - Tracking: [GitHub issue for context: fork support](https://github.com/anthropics/claude-code/issues/17283)
 
@@ -129,6 +130,28 @@ This will enable:
 3. Add `scripts/` if the skill includes reusable code
 4. Add `references/` if instructions are lengthy (keep one level deep)
 5. Add `assets/` only if outputting files users will interact with
+
+### Testing Skills (Empirical Validation)
+
+After creating a skill, test it empirically using **skill-tester**:
+
+**Quick Workflow** (fast validation):
+```bash
+/skills-toolkit:skill-tester
+# Select skill → Choose "Quick Workflow" → Create test cases → View pass/fail
+```
+Time: ~2-5 minutes. No baseline, just verify skill works.
+
+**Full Pipeline** (comprehensive benchmarking):
+```bash
+/skills-toolkit:skill-tester
+# Select skill → Choose "Full Pipeline" → Create test cases → See metrics
+```
+Time: ~5-15 minutes. Includes baseline comparison, token usage, timing deltas.
+
+**Workflow**: Create → Test (Quick) → Refine → Test (Full) → Package
+
+Results stored in `./evals/<skill-name>/workspace/iteration-N/` with `benchmark.json` for side-by-side comparison.
 
 ### Best Practices Reference
 
@@ -257,12 +280,13 @@ Example:
 
 Each skill maintains its own independent semantic version (in `SKILL.md` frontmatter):
 
-- **skill-creator**: 2.4.0
+- **skill-composer**: 2.7.0
 - **skill-refiner**: 1.4.0
+- **skill-tester**: 1.1.0
 - **plugin-creator**: 1.7.0
-- **subagent-creator**: 1.3.0
+- **subagent-creator**: 1.4.0
 - **hook-creator**: 2.4.0
-- **Plugin**: 2.7.0
+- **Plugin**: 2.14.0
 
 These are independent tracking systems, NOT a hierarchy.
 
@@ -277,13 +301,13 @@ These are independent tracking systems, NOT a hierarchy.
 - MAJOR: Any skill gets MAJOR bump + plugin receives it (or breaking plugin structure changes)
 
 **Example workflow (correct):**
-1. skill-creator changes detected → MINOR bump (2.4.0 → 2.5.0)
-2. Plugin receives MINOR bump (2.7.0 → 2.8.0)
-3. ✅ CORRECT: Plugin 2.8.0 reflects "one of my skills had a minor change"
+1. skill-composer changes detected → MINOR bump (2.6.0 → 2.7.0)
+2. Plugin receives MINOR bump (2.13.0 → 2.14.0)
+3. ✅ CORRECT: Plugin 2.14.0 reflects "one of my skills had a minor change"
 
 **Example workflow (WRONG - never do this):**
-1. skill-creator 1.6.0, hook-creator 2.2.1
-2. "Plugin is 1.8.0 which is LESS than hook-creator's 2.2.1, so bump plugin"
+1. skill-composer 2.7.0, hook-creator 2.4.0
+2. "Plugin is 2.14.0 which is LESS than skill-composer's 2.7.0, so bump plugin to 2.7.0"
 3. ❌ WRONG: Comparing version numbers across independent systems creates nonsense
 
 ### CHANGELOG Location Rule
@@ -304,9 +328,26 @@ Skills support frontmatter fields to control invocation behavior:
 - **`user-invocable: false`** - Only Claude can invoke. Use for background knowledge skills that shouldn't be directly actionable (e.g., a `legacy-system-context` skill that teaches Claude about old systems).
 - **(default)** - Both you and Claude can invoke. Skill description always in context; Claude loads full skill when relevant.
 
+## Auto-Memory (Persists Across Sessions)
+
+This project uses Claude Code's auto-memory feature. Memory is stored in:
+```
+/Users/sergeymoiseev/.claude/projects/-Users-sergeymoiseev-full-stack-biz-claude-skills-toolkit/memory/
+```
+
+**MEMORY.md** contains:
+- Critical workflows and patterns confirmed across multiple sessions
+- User preferences (no commits without explicit request, etc.)
+- Important architectural decisions
+- Solutions to recurring problems
+
+Check MEMORY.md at start of session for context that carries over.
+
 ## Notes for Future Development
 
 - Plugin architecture established; follow `.claude-plugin/` conventions
 - Skills are organized within plugin; use `skills/` directory for new additions
 - Legacy `commands/` directory can be deprecated; use skill frontmatter instead
-- No automated workflows (validation, etc.) implemented yet
+- Bounded scope design is intentional (knowledge duplication in components) — do not try to eliminate it
+- All skills have independent versioning; never compare skill versions to plugin version
+- Always update root CHANGELOG.md only; never create skill-level changelogs

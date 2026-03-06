@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Skill(skill-creator)",
+      "Skill(skill-composer)",
       "Bash(cat:*)",
       "Bash(wc:*)",
       "Bash(python3:*)"
