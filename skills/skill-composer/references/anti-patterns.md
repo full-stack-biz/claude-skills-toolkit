@@ -177,7 +177,7 @@ For more information, see `references/docs.md`.
 ✅ **GOOD:**
 ```markdown
 For error handling patterns specific to this skill, see `references/error-handling.md`.
-For production deployment guidelines, see `references/team-production-patterns.md`.
+For complex skill guidelines, see `references/complex-skills-patterns.md`.
 ```
 
 ---

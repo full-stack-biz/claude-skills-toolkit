@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "ensure-claude-md",
+            "description": "Load CLAUDE.md and output critical mindset at session start",
+            "command": "./.claude/hooks/ensure-claude-md.sh",
+            "timeout": 3000,
+            "onError": "warn",
+            "async": false
+          }
+        ]
+      }
+    ]
+  }
+}

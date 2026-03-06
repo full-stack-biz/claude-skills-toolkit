@@ -22,7 +22,42 @@ Systematically improve and validate Claude Code skills while preserving function
 
 ## Quick Start
 
-**Step 1:** Use AskUserQuestion to ask: **"What skill do you want to work on?"** (free-form text input)
+**Step 0: Detect Predating Context (Escape Hatch)**
+
+Check conversation history:
+- User already provided the skill file or shared code?
+- User already described the problem/issue?
+- User is actively discussing a skill's problems?
+
+**IF PREDATING CONTEXT EXISTS** → Offer escape hatch immediately:
+
+```
+questions: [
+  {
+    question: "I've reviewed the skill and context you provided. How would you like to proceed?",
+    header: "Interview Style",
+    options: [
+      {
+        label: "Infer from context",
+        description: "I'll infer refinement needs from what you shared. Skip detailed interview (faster)"
+      },
+      {
+        label: "Define explicitly",
+        description: "I'll ask you to explicitly define improvement areas and goals (full interview)"
+      }
+    ],
+    multiSelect: false
+  }
+]
+```
+
+Then route:
+- **"Infer from context"** → Skip to BATCH 2 with context-tailored prompts
+- **"Define explicitly"** → Full BATCH 1 + BATCH 2
+
+**IF NO PREDATING CONTEXT** → Continue to Step 1
+
+**Step 1:** Use AskUserQuestion to ask: **"What skill do you want to work on?"** (open-form text input)
 
 **Step 2:** Use AskUserQuestion with **predefined options** to ask:
 
@@ -66,7 +101,9 @@ questions: [
 
 After locating the skill, **interview to gather what they want improved** using AskUserQuestion with proper options.
 
-**🔴 BATCH 1: Refinement Focus** (Use predefined options for Q1; open-form for Q2-4):
+**🔴 BATCH 1: Refinement Focus** (Progressive AskUserQuestion - ask one at a time):
+
+#### Question 1: What aspects need improvement?
 
 ```
 questions: [
@@ -80,28 +117,57 @@ questions: [
       { label: "User Interaction UX", description: "Convert free-form interactions to AskUserQuestion patterns, improve workflows" }
     ],
     multiSelect: true
-  },
-  {
-    question: "What specific problems are you seeing?",
-    header: "Key Issues",
-    options: [] // Open-form
-  },
-  {
-    question: "What would success look like?",
-    header: "Success Metric",
-    options: [] // Open-form
-  },
-  {
-    question: "Any areas to exclude or preserve as-is?",
-    header: "Scope Limits",
-    options: [] // Open-form
   }
 ]
 ```
 
-⏸️ Wait for all 4 responses.
+#### Question 2: What specific problems are you seeing?
 
-**🟢 BATCH 2: Implementation Details** (Then use AskUserQuestion with predefined options):
+```
+questions: [
+  {
+    question: "What specific problems are you seeing?",
+    header: "Key Issues"
+  }
+]
+```
+
+(Examples: "Instructions are hard to follow", "References scattered and redundant", "Too many nested sections")
+
+#### Question 3: What would success look like?
+
+```
+questions: [
+  {
+    question: "What would success look like?",
+    header: "Success Metric"
+  }
+]
+```
+
+(Examples: "Clearer workflow", "Fewer token costs", "Production-ready with error handling")
+
+#### Question 4: Any areas to exclude or preserve as-is?
+
+```
+questions: [
+  {
+    question: "Any areas to exclude or preserve as-is?",
+    header: "Scope Limits"
+  }
+]
+```
+
+(Examples: "Keep the validation gates", "Don't change tool scoping")
+
+After gathering ALL responses, document approved scope and proceed to BATCH 2.
+
+**🟢 BATCH 2: Implementation Details** (Use AskUserQuestion with predefined options)
+
+**ROUTING NOTE:**
+- If user chose **"Infer from context"** in escape hatch → Skip BATCH 1, come straight here
+- If user chose **"Define explicitly"** → Proceed after BATCH 1 responses
+- **Context-Aware Prompts:** When inferring from context, tailor questions to specific issues mentioned (e.g., "I saw token usage issues in references. Consolidate them?" vs generic "Should we consolidate?")
 
 ```
 questions: [
@@ -206,6 +272,21 @@ SEQUENCE (never violate order):
 3. DELETE old source (only after links verified and tested)
 
 NEVER: DELETE → LINK → CREATE (creates broken links and lost content)
+```
+
+**Visual flow:**
+
+```
+    ❌ WRONG                              ✅ CORRECT
+
+    DELETE old source                     CREATE destination
+            │                                     │
+            ▼                                     ▼
+    LINK to new location                  LINK pointers
+            │                                     │
+            ▼                                     ▼
+    CREATE destination                    DELETE old source
+    (broken links!)                       (safe, links verified)
 ```
 
 ### Preservation Gates (Four Gates, In Order)

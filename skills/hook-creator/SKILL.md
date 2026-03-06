@@ -6,7 +6,7 @@ description: >-
   or improving hook quality. Supports command hooks (shell scripts), prompt hooks (LLM decisions),
   event matching, decision schemas, and production safety validation. Claude auto-activates when
   you ask to build a hook, check hook reliability, improve hook configurations, or validate hooks for production.
-version: 2.4.0
+version: 2.4.1
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -132,9 +132,65 @@ If your hooks aren't firing, check the file location first.
 ### Create New Hooks
 1. Interview user (hook purpose, event type, matcher, action type, error handling)
 2. Load `references/templates.md` — pick appropriate template (command vs prompt)
-3. Build hook: event → matcher → action → error handling → timeout + onError
+3. Build hook with **correct JSON structure** (see step 3b below)
 4. Validate against `references/checklist.md` (syntax, event correctness, matcher precision)
-5. Complete and deploy
+5. Write to correct file location and test
+
+**Step 3b: Correct JSON Structure (CRITICAL)**
+
+All hooks must use this structure:
+```json
+{
+  "hooks": {
+    "EventName": [
+      {
+        "matcher": {...},  // or omit for SessionStart/SessionEnd/UserPromptSubmit
+        "hooks": [         // ← REQUIRED: This nesting is mandatory
+          {
+            "type": "command",
+            "command": "...",
+            "timeout": 5000,
+            "onError": "warn"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**⚠️ CRITICAL MISTAKE TO AVOID:**
+❌ WRONG (missing nested hooks array):
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",  // ← ERROR: No "hooks" wrapper
+        "command": "..."
+      }
+    ]
+  }
+}
+```
+
+✅ CORRECT (with hooks wrapper):
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [        // ← REQUIRED wrapper
+          {
+            "type": "command",
+            "command": "..."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ### Validate Existing Hooks
 1. Verify hook path is project-scoped:
@@ -227,13 +283,19 @@ Measure success by whether the hook will execute reliably and safely:
 
 ## Key Reference Points
 
-**Hook JSON structure:**
+**⚠️ CRITICAL: Hook JSON Structure**
+
+**The #1 mistake that breaks hooks:** Forgetting the nested `"hooks": [...]` array.
+
+**This causes:** `"hooks: Expected array, but received undefined"` settings error.
+
+✅ **CORRECT structure (REQUIRED for all hooks):**
 ```json
 {
   "hooks": {
     "EventName": [{
       "matcher": "regex-pattern",  // Optional for some events
-      "hooks": [{
+      "hooks": [{                   // ← DO NOT FORGET THIS WRAPPER
         "type": "command",
         "command": "${CLAUDE_PLUGIN_ROOT}/scripts/script.sh",
         "timeout": 5000,
@@ -243,6 +305,20 @@ Measure success by whether the hook will execute reliably and safely:
   }
 }
 ```
+
+❌ **WRONG (breaks settings):**
+```json
+{
+  "hooks": {
+    "EventName": [{
+      "type": "command",  // ← ERROR: Missing "hooks" array wrapper
+      "command": "..."
+    }]
+  }
+}
+```
+
+Every hook action (command, prompt, agent) MUST be inside a `"hooks": [...]` array. This is non-negotiable.
 
 **Event selection decision tree:**
 - **Before execution?** → PreToolUse

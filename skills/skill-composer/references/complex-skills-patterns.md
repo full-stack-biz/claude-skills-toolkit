@@ -1,6 +1,6 @@
-# Team & Production Skill Patterns
+# Complex Skill Patterns
 
-When creating skills for team environments or production systems, ensure Claude will execute them robustly. This guide covers patterns for error handling, tool scoping, validation, security, and documentation that apply to ~25% of skill uses.
+When creating complex skills requiring auxiliary files, error handling, or robust validation, ensure Claude will execute them effectively. This guide covers patterns for error handling, tool scoping, validation, security, and documentation that apply to ~25% of skill uses.
 
 ## Error Handling
 
@@ -79,7 +79,7 @@ Peer review catches edge cases and security assumptions.
 
 ## Clear Documentation
 
-Team members (and Claude in future sessions) need context to use skills effectively.
+Claude in future sessions needs context to use skills effectively.
 
 **What to document:**
 - Integration points: Where does this skill fit in your workflow?
@@ -90,7 +90,7 @@ Team members (and Claude in future sessions) need context to use skills effectiv
 
 **Example documentation section:**
 ```markdown
-## Production Readiness Checklist
+## Complex Skill Readiness Checklist
 
 - Requires: Kubernetes cluster with kubectl access
 - Assumes: Deployment configuration in `k8s/` directory
@@ -102,4 +102,4 @@ Team members (and Claude in future sessions) need context to use skills effectiv
 
 ## For Common Patterns
 
-See `templates.md` → Workflow Pattern Examples and Optional Frontmatter Fields for team/production patterns in skill structure and execution.
+See `templates.md` → Workflow Pattern Examples and Optional Frontmatter Fields for complex skill patterns in skill structure and execution.

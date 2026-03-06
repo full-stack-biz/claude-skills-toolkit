@@ -1,5 +1,31 @@
 # Templates for Skill Creation
 
+## Content-Size Decision Tree
+
+**Before creating skill files, check total content:**
+
+```
+Generate complete SKILL.md + reference content
+Count total lines
+
+IF total_lines < 500:
+  ✅ Create SKILL.md only (no references/)
+  📢 Explain to user: "Total content is [X] lines.
+     Keeping in SKILL.md for efficiency.
+     When it exceeds 500 lines, we'll split into references."
+
+IF total_lines >= 500:
+  ✅ Create SKILL.md + references/
+  📢 Explain to user: "Total content is [X] lines.
+     Splitting into SKILL.md + references/
+     for token efficiency (80% rule)."
+```
+
+This ensures:
+- No unnecessary files created
+- User understands the structure decision
+- Content stays efficient (< 500 line threshold)
+
 ## Table of Contents
 - [SKILL.md Template](#skillmd-template)
 - [Reference File Template](#reference-file-template)
@@ -48,18 +74,18 @@ command example here
 For detailed configuration, see `references/complete-guide.md`
 ````
 
-### Production/Team Skills Template
+### Complex Skills Template
 
-For Skills used by teams or in production, add optional fields.
+For complex skills requiring robust structure, add optional fields.
 
 **Frontmatter:**
 
 ```yaml
 ---
-name: team-skill-name
+name: complex-skill-name
 description: >-
   What the skill does. Use when [specific trigger contexts].
-  Designed for team use with robust error handling.
+  Designed for complex skill use with robust error handling.
 version: 1.0.0
 allowed-tools: Read,Write,Bash(python:*)
 ---
@@ -93,7 +119,7 @@ Run the validation script to test the skill:
 
 ```bash
 bash scripts/validate-env.sh  # Verify environment setup
-bash validate-team-skill.sh    # Full skill validation
+bash scripts/validate.sh      # Full skill validation
 ```
 
 ## Error Handling
@@ -314,9 +340,9 @@ name: code-analyzer
 allowed-tools: Read,Bash(grep:*,ls:*)
 ---
 
-# Example 4: Team skill (limited network, file ops only)
+# Example 4: Skill with external dependencies (limited network, file ops only)
 ---
-name: team-doc-generator
+name: markdown-doc-generator
 version: 1.0.0
 allowed-tools: Read,Write,Bash(python:*,curl:*)
 ---

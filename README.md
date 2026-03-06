@@ -2,9 +2,57 @@
 
 A plugin for creating and managing Claude Code skills and plugins.
 
-## What You Get
+## About skill-composer vs Claude's skill-creator
 
-### `/skills-toolkit:create-skill`
+This toolkit includes **skill-composer**, which differs significantly from Claude's built-in skill-creator:
+
+| Aspect | skill-composer | Claude's skill-creator |
+|--------|---|---|
+| **Philosophy** | Convention enforcement upfront | Evaluation-driven iteration |
+| **Approach** | Opinionated, enforced best practices from start | Learn via test feedback loops |
+| **Interviews** | Multi-stage requirements gathering (purpose, scope, complexity, tools) | Minimal upfront requirements |
+| **Best Practices** | Enforces from the start (frontmatter, 80% rule, references, token efficiency) | Discovered through empirical testing |
+| **Workflow** | Design → Structure → Build → [Optional: Refine → Test] | Build → Test → Improve based on results |
+| **Output** | Fully structured skill (SKILL.md, references/, scripts/ as needed) | Working skill you iterate on |
+| **Use When** | Building skills with conventions you want enforced consistently | Building skills you'll test and improve empirically |
+| **Ecosystem** | Part of full toolkit (refiner, tester, plugin-creator) | Standalone, integrates with evaluation |
+
+**TL;DR:** skill-composer enforces **conventions upfront**. Claude's skill-creator improves **via evaluation loops**.
+
+Use **skill-composer** if:
+- You want conventions enforced from the ground up
+- You're building consistent, production-ready skills
+- You value structured SKILL.md, references, and tool scoping upfront
+- You want to avoid common skill-building mistakes by design
+
+Use **Claude's skill-creator** if:
+- You want to build and improve skills through empirical testing
+- You prefer iterative refinement based on evaluation results
+- You're comfortable discovering best practices via feedback loops
+- You want to measure skill effectiveness with benchmarks
+
+## Table of Contents
+
+- [Available Skills](#available-skills)
+  - [skill-composer](#skill-composer)
+  - [skill-refiner](#skill-refiner)
+  - [skill-tester](#skill-tester)
+  - [plugin-creator](#plugin-creator)
+  - [hook-creator](#hook-creator)
+  - [subagent-creator](#subagent-creator)
+  - [ask-user-question](#ask-user-question)
+- [Quick Start: From Knowledge to Plugin](#quick-start-from-knowledge-to-plugin)
+- [Installation](#installation)
+- [Usage Scenarios](#usage-scenarios)
+- [Design Notes: Architecture & DRY](#design-notes-architecture--dry)
+- [Inspiration](#inspiration)
+- [License](#license)
+- [Author](#author)
+
+### skill-composer
+
+**Command:** `/skills-toolkit:skill-composer`
+
 Interactive guide for creating new skills from scratch:
 - Name and describe your skill
 - Structure SKILL.md (frontmatter + instructions)
@@ -12,7 +60,10 @@ Interactive guide for creating new skills from scratch:
 - Configure tool permissions
 - Apply best practices during creation
 
-### `/skills-toolkit:skill-refiner`
+### skill-refiner
+
+**Command:** `/skills-toolkit:skill-refiner`
+
 Interactive guide for improving and validating existing skills:
 - Refine skill structure and clarity
 - Validate against best practices
@@ -20,7 +71,21 @@ Interactive guide for improving and validating existing skills:
 - Check production readiness
 - Apply the 80% rule for optimization
 
-### `/skills-toolkit:create-plugin`
+### skill-tester
+
+**Command:** `/skills-toolkit:skill-tester`
+
+Empirically test and benchmark Claude Code skills:
+- Quick Workflow: Fast pass/fail validation of new skills
+- Full Pipeline: Comprehensive benchmarking with baseline comparison
+- Measure impact: Pass rates, token usage, timing metrics
+- Iteration tracking: Compare skill performance across refinement cycles
+- Data-driven improvements: Prove skills help with empirical evidence
+
+### plugin-creator
+
+**Command:** `/skills-toolkit:plugin-creator`
+
 Interactive guide for creating and validating plugins:
 - Generate `.claude-plugin/plugin.json` manifest
 - Organize skills, commands, hooks, MCP/LSP servers
@@ -28,7 +93,10 @@ Interactive guide for creating and validating plugins:
 - Configure installation scope (user/project/managed)
 - Validate plugin structure
 
-### `/skills-toolkit:create-hook`
+### hook-creator
+
+**Command:** `/skills-toolkit:hook-creator`
+
 Interactive guide for creating and validating hooks:
 - Build plugin hooks from scratch (command, prompt, agent types)
 - Validate existing hooks against best practices
@@ -36,12 +104,25 @@ Interactive guide for creating and validating hooks:
 - Configure event matching, matchers, and error handling
 - Test hooks with validation workflows
 
-### `/skills-toolkit:create-subagent`
+### subagent-creator
+
+**Command:** `/skills-toolkit:subagent-creator`
+
 Interactive guide for creating and validating subagents:
 - Build subagents with clear delegation signals
 - Configure tool access with permission modes
 - Set up hooks for agent coordination
 - Validate against best practices for reliability
+
+### ask-user-question
+
+**Command:** `/skills-toolkit:ask-user-question`
+
+Reference guide for implementing interactive user input in skills:
+- Master AskUserQuestion tool constraints and patterns
+- Build conditional workflows and dynamic questions
+- Handle validation, error recovery, and multi-select
+- Production patterns for robustness and testing
 
 ## Quick Start: From Knowledge to Plugin
 
@@ -56,10 +137,11 @@ Instead of documentation sitting idle, turn it into a skill—interactive guidan
 ### How It Works
 
 1. **Start with what you know** - You have documentation, a process guide, or expertise
-2. **Turn it into a skill** - Use `/skills-toolkit:create-skill` to formalize it into instructions Claude follows
-3. **Refine for quality** - Use `/skills-toolkit:skill-refiner` to optimize clarity, efficiency, and production readiness
-4. **Package for your team** - Use `/skills-toolkit:create-plugin` to make it installable
-5. **Share and evolve** - Team members install once, Claude guides the process every time
+2. **Turn it into a skill** - Use `/skills-toolkit:skill-composer` to formalize it into instructions Claude follows
+3. **Test empirically** - Use `/skills-toolkit:skill-tester` to validate the skill works and measure its impact
+4. **Refine for quality** - Use `/skills-toolkit:skill-refiner` to optimize clarity, efficiency, and production readiness
+5. **Package for your team** - Use `/skills-toolkit:plugin-creator` to make it installable
+6. **Share and evolve** - Team members install once, Claude guides the process every time
 
 ### Real Example: Release Process to Plugin
 
@@ -73,24 +155,35 @@ Claude asked clarifying questions:
 
 Claude built it. Created the skill with a detailed workflow. Extracted supporting material into reference guides. Added proper frontmatter, scoped the tools, made it activatable.
 
-**User:** Now package this into a plugin so I can share it.
+**User:** Let's test this before packaging. Does it actually help?
 
-Claude asked:
-- What would you like to do?
-- What should the plugin be named?
+Claude launched skill-tester with Full Pipeline:
+- Created test scenarios: simple release, hotfix, major version bump
+- Measured: with skill vs. without skill
+- Results: 100% pass rate with skill, 60% without. Skill works.
 
-**User:** Convert this project. Call it dev-flow.
+**User:** Great. Now refine it, then package.
 
-Claude created the plugin manifest, README, changelog, added the skill, made it installable.
+Claude used skill-refiner:
+- Tightened descriptions for better activation
+- Optimized token usage
+- Validated against best practices
 
-**User:** Do a fresh review. Make sure everything is solid.
+Then re-tested: Results improved to 100% with clearer instructions and less token usage.
 
-Claude asked (using skill-refiner):
-- Which refinement areas matter most for your team?
+**User:** Perfect. Now package this into a plugin so I can share it.
 
-**User:** Activation & trigger phrases, token efficiency, quick start strengthening, error prevention guardrails.
+Claude created the plugin:
+- Generated `.claude-plugin/plugin.json`
+- Added the release-process skill
+- Created README and changelog
+- Made it installable
 
-Claude re-read what was built. Found ambiguities. Refined the guidance. Tightened the wording. Caught its own mistakes.
+**User:** Install it for the team.
+
+Team members installed once with: `claude plugin install dev-flow`
+
+Now every time someone mentions "release process", Claude activates the skill and guides the workflow.
 
 ### Why This Pattern Works
 
@@ -101,8 +194,13 @@ Claude re-read what was built. Found ambiguities. Refined the guidance. Tightene
 
 ## Installation
 
+Add the marketplace:
 ```bash
 /plugin marketplace add full-stack-biz/claude-skills-toolkit
+```
+
+Then install the plugin:
+```bash
 /plugin install skills-toolkit@skills-toolkit-marketplace
 ```
 
@@ -135,18 +233,33 @@ Organize all components into one installable plugin with a single manifest. Team
 
 Result: Shareable plugin your team can install and keep up to date.
 
-### Scenario 3: Refine an Existing Skill
-You have a skill that mostly works but want to ensure Claude understands it correctly and it's optimized.
+### Scenario 3: Test a Skill Empirically
+You've created a new skill but want to prove it actually helps Claude before deploying it.
 
 ```
-I need to refine an existing skill against best practices.
+I need to validate my new skill with empirical testing.
 ```
 
-Use skill-refiner to validate structure, trigger phrases, token efficiency, tool permissions, and production readiness.
+Use skill-tester to:
+- Create test cases that measure skill effectiveness
+- Compare performance WITH skill vs. baseline (without skill)
+- Get metrics: pass rates, token usage, timing
+- Track improvements across refinement iterations
 
-Result: Confidence your skill works reliably, loads efficiently, and meets quality standards.
+Result: Data-driven evidence that your skill works, with measurable impact metrics.
 
-### Scenario 4: Convert a Project to a Plugin
+### Scenario 4: Refine and Re-test
+You have a skill in production, but want to improve it and verify the improvement worked.
+
+```
+I need to refine an existing skill and measure the improvement.
+```
+
+Use skill-refiner to improve the skill, then use skill-tester to compare iteration-1 vs. iteration-2 performance. See exactly how much your refinements helped.
+
+Result: Confidence your improvements work, backed by side-by-side test results.
+
+### Scenario 5: Convert a Project to a Plugin
 You have an existing project with helper scripts, documentation, and utilities. You want to make it installable as a Claude plugin.
 
 ```
@@ -157,7 +270,7 @@ The guide generates the proper manifest structure, organizes your files, and val
 
 Result: Your project becomes an installable plugin others can discover and use.
 
-### Scenario 5: Set Up Team Distribution
+### Scenario 6: Set Up Team Distribution
 You've created several skills and want your organization to access them through a central marketplace.
 
 ```
@@ -168,15 +281,52 @@ Create a marketplace plugin that bundles your skills. Push it to GitHub. Team me
 
 Result: Centralized distribution with version control and easy updates.
 
+## Complete Workflows
+
+### Workflow 1: Create → Test → Refine → Package (New Skill)
+
+```
+1. skill-composer    Create new skill from scratch
+2. skill-tester      Quick test: Does it work?
+3. skill-refiner     Optimize clarity & efficiency
+4. skill-tester      Full benchmark: Measure improvement
+5. plugin-creator    Package for team installation
+```
+
+**Time:** ~30 mins from idea to installable plugin
+
+### Workflow 2: Improve Existing Skill with Evidence
+
+```
+1. skill-tester      Benchmark current (iteration-1)
+2. skill-refiner     Improve the skill
+3. skill-tester      Re-benchmark (iteration-2)
+4. Compare results   See exact improvement metrics
+```
+
+**Time:** ~15 mins per iteration
+
+### Workflow 3: Build a Complete Plugin
+
+```
+1. skill-composer    Create skill 1, 2, 3...
+2. skill-tester      Test each skill
+3. hook-creator      Add automation hooks
+4. plugin-creator    Bundle all together
+5. Publish           Share with team/marketplace
+```
+
+**Time:** Depends on component count
+
 ## Design Notes: Architecture & DRY
 
 This toolkit follows **Claude's Bounded Scope Principle** for skills, which creates some intentional knowledge duplication:
 
 - **plugin-creator** includes summaries of skill/subagent/hook concepts for users getting started with plugins
-- **skill-creator**, **skill-refiner**, **subagent-creator**, and **hook-creator** provide authoritative, detailed knowledge
+- **skill-composer**, **skill-refiner**, **subagent-creator**, and **hook-creator** provide authoritative, detailed knowledge
 - These overlap because Claude's skill architecture doesn't support skill-to-skill delegation yet
 
-**Why this design?** Each skill must be completely self-contained within its directory—this ensures skills work reliably across any deployment context (local, project, user, marketplace). For details, see [Bounded Scope Principle](skills/skill-creator/references/self-containment-principle.md).
+**Why this design?** Each skill must be completely self-contained within its directory—this ensures skills work reliably across any deployment context (local, project, user, marketplace). For details, see [Bounded Scope Principle](skills/skill-composer/references/self-containment-principle.md).
 
 **When will this improve?** Claude is actively developing support for full skill delegation via `context: fork`. Once stable, we can reorganize for better Single Responsibility Principle separation.
 

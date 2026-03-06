@@ -78,16 +78,17 @@ Plugins extend Claude Code with custom functionality shared across projects and 
 - **name**: Unique identifier (plugin namespace)
 - **description**: Tells Claude when to suggest or use the plugin
 
-**Plugin structure:**
+**Plugin structure (at project root):**
 ```
-my-plugin/
+.
 ├── .claude-plugin/
 │   └── plugin.json                    # Required: metadata manifest
 ├── skills/                            # Optional: Agent Skills (recommended)
 │   └── code-review/
-│       └── SKILL.md
+│       ├── SKILL.md
+│       └── references/
 ├── agents/                            # Optional: subagents
-│   ├── code-reviewer.md               # Subagent (use subagent-creator skill)
+│   ├── code-reviewer.md
 │   └── security-auditor.md
 ├── hooks.json                         # Optional: event handlers
 ├── .mcp.json                          # Optional: MCP servers
@@ -107,6 +108,12 @@ my-plugin/
 - **Naming conventions** are critical (plugin name becomes skill namespace in plugins)
 - **Directory structure** must be exact (Claude Code uses path conventions to discover components)
 - **Component metadata** must be clear (descriptions tell Claude what each command/agent/skill does)
+
+---
+
+## Quick Start: Create a Plugin in an Empty Project
+
+Copy-paste templates for creating a plugin structure from scratch: manifest, skills, agents, and testing. See `references/quick-start-guide.md` for complete bash commands and examples.
 
 ## Choose Your Workflow
 

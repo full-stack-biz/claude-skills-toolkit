@@ -2,6 +2,54 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.16.0] - 2026-03-06
+
+### Changed
+- **skill-composer 2.8.0:** Reduced SKILL.md from 575→479 lines (under 500 target). Converted 4 interview JSON blocks to compact prose (Interview 1, Interview 2, escape hatch, BATCH 2 Q1). Condensed Reference Guide from 4-5 lines per step to 1 line per step while preserving all content and agent decision-making context. All functionality and reference details intact; JSON structure detail remains in `references/ask-user-question-patterns.md`.
+
+## [2.15.0] - 2026-03-06
+
+### Changed
+- **ask-user-question 1.1.0:** Refined for production: reduced SKILL.md from 522→498 lines (under 500 target), linked 2 orphaned references (common-mistakes.md, free-text-input-patterns.md) so all 5 reference files are now discoverable, fixed tool scoping (removed unused Write), improved question design guidance with consolidation, simplified plan mode content. All 80% rule applied correctly; core patterns in SKILL.md, edge cases in references.
+
+## [2.14.0] - 2026-03-06
+
+### Changed
+- **skill-composer 2.7.0:** Renamed from `skill-creator` to `skill-composer` to avoid shadowing Claude's native skill-creator skill. All functionality preserved; invocation via `/skills-toolkit:skill-composer`. Updated frontmatter, all references in documentation, and plugin metadata.
+
+## [2.13.0] - 2026-03-04
+
+### Changed
+- **subagent-creator 1.4.0:** Added Step 3b "Write reliable delegation prompts" in Reference Guide. New reference file `delegation-patterns.md` documents proven delegation patterns from production implementations (skill-tester parallel agents, skill-creator delegation chains). Includes pattern templates, parallel execution patterns, constraint handling, output specifications, and real working examples. Helps users write reliable subagent prompts with consistent, predictable results.
+
+## [2.12.0] - 2026-03-04
+
+### Changed
+- **skill-tester 1.1.0:** Added Quick Workflow mode for fast skill validation (alternative to Full Pipeline). Quick Workflow: only runs with_skill agent (no baseline), excludes timing metrics, no aggregation. Shows simple pass/fail on assertions. Perfect for rapid iteration. Users choose between Quick (fast check) or Full (comprehensive benchmark) in Phase 1. Standardized artifact location to centralized `./evals/<skill-name>/` at project root. Updated eval-schema reference documentation with new structure.
+
+## [2.11.0] - 2026-03-04
+
+### Added
+- **skill-tester 1.0.0:** New skill implementing evaluation-driven development pipeline for Claude Code skills. Enables empirical testing with 7-phase workflow: setup → create evals → run tests (parallel with_skill + baseline) → grade results → aggregate benchmark → review summary → iterate. Includes Ruby aggregation script for computing pass rates, token usage, and timing deltas. Supports multi-iteration testing with workspace structure tracking improvement across iterations.
+
+### Changed
+- **skill-creator 2.6.0:** Integrated complete workflow: create → refine (optional) → test (optional). Added Step 3.9 for optional skill-refiner integration (validate/improve quality), and Step 3.10 for optional skill-tester integration (empirical validation). Both refinement and testing are user-optional, enabling natural progression from creation through validation. Added Agent tool to allowed-tools for delegating to skill-refiner and skill-tester.
+
+## [2.8.0] - 2026-02-25
+
+### Added
+- **ask-user-question 1.0.0:** New skill for implementing interactive user input with the AskUserQuestion tool. Covers constraints, patterns, response handling, conditional workflows, and production patterns.
+
+## [2.7.1] - 2026-02-25
+
+### Fixed
+- **hook-creator 2.4.1:**
+  - CRITICAL: Added explicit JSON structure validation to prevent "hooks: Expected array" settings errors
+  - Added "Step 3b: Correct JSON Structure" with clear BAD/GOOD examples showing nested hooks array requirement
+  - Enhanced checklist with JSON structure validation and troubleshooting section for common settings errors
+  - Added prominent warning in Key Reference Points about the #1 mistake (missing hooks wrapper)
+  - Clarified that EVERY hook action must be nested under `"hooks": [...]` array
+
 ## [2.7.0] - 2026-02-11
 
 ### Added

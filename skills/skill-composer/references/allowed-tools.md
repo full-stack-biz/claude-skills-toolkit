@@ -103,21 +103,21 @@ Use when: Fetching remote content and analyzing local files.
 - Example: `Read,Write,Edit` for file-only skills
 - Example: `Bash(git:*)` for git workflows
 
-## Team Skills
+## Complex Skills
 
-For skills shared with team members:
+For complex skills requiring tool restrictions:
 - Always declare `allowed-tools`
 - Include explanation in documentation
-- Test on multiple machines
+- Test with real workflows
 - Document any prerequisites (Python, Node.js, etc.)
 
-Example team skill:
+Example skill with tool restrictions:
 ```yaml
 ---
-name: team-pdf-processor
+name: pdf-processor
 version: 1.0.0
 allowed-tools: Read,Write,Bash(python:*)
 description: >-
-  Process PDF files as a team. Requires Python 3.8+.
+  Process PDF files with robust error handling. Requires Python 3.8+.
 ---
 ```

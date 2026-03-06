@@ -5,7 +5,7 @@ description: >-
   Use when building new subagents, validating existing ones, improving quality,
   scoping tool access, configuring permission modes, or setting up hook
   validation. For personal, team, or production environments.
-version: 1.3.0
+version: 1.4.0
 allowed-tools: Read,Write,Edit,Glob,Grep,AskUserQuestion
 ---
 
@@ -269,6 +269,10 @@ Have the user review the checklist in `references/checklist.md` before deploymen
 **Step 3: Write clear delegation signals**
 → Descriptions trigger Claude's delegation. Include specific trigger phrases; vague descriptions = poor reliability.
 → `references/delegation-signals.md` for writing descriptions that trigger delegation
+
+**Step 3b: Write reliable delegation prompts**
+→ Pattern: role statement → task → context → explicit outputs → constraints. Based on production implementations (skill-tester, skill-creator).
+→ `references/delegation-patterns.md` for proven delegation patterns with real examples
 
 **Step 4: Configure tools & permissions**
 → Grant only necessary tools (principle of least privilege). Permission modes: foreground/interactive, background/concurrent, plan/read-only
