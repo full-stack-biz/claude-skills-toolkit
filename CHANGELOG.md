@@ -2,6 +2,11 @@
 
 All notable changes to the skills-toolkit plugin are documented here.
 
+## [2.16.1] - 2026-07-30
+
+### Fixed
+- **skill-refiner 1.4.1:** Removed broken `PreToolUse` hook that attempted to enforce Movement Pattern on Write/Edit calls but caused failures in practice.
+
 ## [2.16.0] - 2026-03-06
 
 ### Changed
