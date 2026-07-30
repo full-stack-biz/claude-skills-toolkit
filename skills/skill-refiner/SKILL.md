@@ -5,15 +5,8 @@ description: >-
   Use when: refining skills, improving skill structure, validating against best practices, reducing
   token usage, consolidating references, checking production readiness, or applying the 80% rule.
   Takes imperfect existing skills and elevates them to quality standards.
-version: 1.4.0
+version: 1.4.1
 allowed-tools: Read,Edit,Write,Glob,Task(*),AskUserQuestion
-hooks:
-  PreToolUse:
-    - matcher: "^(Write|Edit)$"
-      hooks:
-        - type: prompt
-          prompt: "You are validating changes to a Claude Code skill during refinement. Enforce the Movement Pattern.\n\nFile being modified: $ARGUMENTS\n\n**MOVEMENT PATTERN (Enforce strictly for ANY content relocation):**\nWhen content is removed, it must appear in a destination (same file reorganized, or moved to another file).\nSequence: CREATE → LINK → DELETE (never DELETE → LINK → CREATE).\n\nWhen content is being REMOVED:\n- REJECT if: Deleted with no corresponding content appearing in destination\n- REJECT if: Destination unclear (where did it go?)\n- ACCEPT only if: Content clearly relocated to another location in same session\n\nRespond with JSON (no markdown, no extra text): {\"ok\": true, \"reason\": \"content is clearly relocated\"} if valid, or {\"ok\": false, \"reason\": \"specific reason why pattern violated\"} if invalid.\n\nDefault: false if content fate is unclear or movement pattern broken."
-          timeout: 30
 ---
 
 # Skill Refiner
